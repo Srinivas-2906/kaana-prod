@@ -1,0 +1,83 @@
+.industry-filmstrip-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.industry-filmstrip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.industry-filmstrip-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.industry-filmstrip-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.industry-filmstrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 12px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-border) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.industry-filmstrip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.industry-filmstrip::-webkit-scrollbar-thumb {
+  background: var(--accent-border);
+  border-radius: 4px;
+}
+
+.industry-film-chip {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.industry-film-chip:hover {
+  border-color: var(--accent-border);
+  color: var(--text);
+}
+
+.industry-film-chip.active {
+  border-color: var(--accent-bright);
+  background: var(--accent-fill);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--accent-border), 0 0 24px var(--accent-glow);
+}
+
+.industry-film-chip.active svg {
+  color: var(--accent-bright);
+}

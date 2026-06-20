@@ -1,0 +1,248 @@
+/**
+ * Kaana design tokens — Tech Ecosystem dual-tone
+ * Emerald = WhatsApp / chat / CTAs · Indigo = CRM / data / platform
+ * Dark base #0B0F19 · Light oatmeal neutrals
+ */
+
+:root {
+  /* ── Emerald — WhatsApp & conversion ── */
+  --green-400: #34d399;
+  --green-500: #10b981;
+  --green-600: #059669;
+  --green-700: #047857;
+  --green-800: #065f46;
+
+  /* ── Indigo — CRM, data, security ── */
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --indigo-700: #4338ca;
+
+  /* Cool midnight slate */
+  --ink-950: #0b0f19;
+  --ink-900: #0f1419;
+  --ink-850: #131a24;
+  --ink-800: #171f2c;
+  --ink-750: #1c2533;
+
+  /* Light mode neutrals — clean white with subtle green-gray tint */
+  --oat-50: #f6f8f7;
+  --oat-100: #eef2f0;
+  --oat-150: #e4eae7;
+  --oat-200: #d9e1dd;
+  --oat-250: #c8d2cc;
+  --oat-300: #b8c4bc;
+
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-tile: var(--radius-xl);
+  --radius-pill: 999px;
+
+  /* 8px base spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --gutter: 12px;
+  --section-y: clamp(40px, 5vw, 64px);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 0.2s;
+  --duration-normal: 0.35s;
+
+  --wa: var(--green-500);
+  --wa-dark: var(--green-700);
+  --wa-light: #dcf8c6;
+}
+
+/* ── Dark “mood mode” ── */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surfaces — lightness = elevation */
+  --bg: var(--ink-950);
+  --bg-subtle: var(--ink-900);
+  --bg-elevated: var(--ink-850);
+  --surface-1: var(--ink-900);
+  --surface-2: var(--ink-850);
+  --surface-3: var(--ink-800);
+  --surface-raised: var(--ink-750);
+
+  --panel-bg: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  --panel-bg-strong: var(--surface-2);
+  --panel-border: rgba(255, 255, 255, 0.088);
+  --panel-border-hover: rgba(255, 255, 255, 0.14);
+
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --section-border: var(--border);
+
+  /* Text hierarchy — crisp cool off-white headings, slate body steps */
+  --text: #f3f4f6;
+  --text-heading: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --text-on-dark: var(--text);
+  --text-muted-dark: var(--text-muted);
+
+  /* Accent — emerald (WhatsApp, CTAs, live chat) */
+  --accent: var(--green-500);
+  --accent-bright: var(--green-400);
+  --accent-dark: var(--green-500);
+  --accent-darker: var(--green-600);
+  --accent-light: rgba(16, 185, 129, 0.12);
+  --accent-soft: rgba(16, 185, 129, 0.14);
+  --accent-fill: rgba(16, 185, 129, 0.1);
+  --accent-border: rgba(16, 185, 129, 0.34);
+  --accent-glow: rgba(16, 185, 129, 0.22);
+
+  /* Secondary — indigo (CRM, pipeline, platform data) */
+  --accent-secondary: var(--indigo-500);
+  --accent-secondary-bright: var(--indigo-400);
+  --accent-secondary-dark: var(--indigo-600);
+  --accent-secondary-soft: rgba(99, 102, 241, 0.14);
+  --accent-secondary-fill: rgba(99, 102, 241, 0.1);
+  --accent-secondary-border: rgba(99, 102, 241, 0.34);
+  --accent-secondary-glow: rgba(99, 102, 241, 0.22);
+
+  --cta-gradient: linear-gradient(180deg, #34d399 0%, var(--green-500) 48%, var(--green-600) 100%);
+  --text-gradient: linear-gradient(120deg, #6ee7b7 0%, var(--green-500) 46%, var(--green-600) 100%);
+  --text-gradient-secondary: linear-gradient(120deg, #a5b4fc 0%, var(--indigo-500) 46%, var(--indigo-600) 100%);
+
+  --focus-ring: 0 0 0 3px rgba(16, 185, 129, 0.38);
+  --focus-ring-offset: 0 0 0 1px var(--ink-950);
+
+  /* Glass aliases (legacy components) */
+  --glass-bg: rgba(255, 255, 255, 0.045);
+  --glass-bg-strong: rgba(255, 255, 255, 0.07);
+  --glass-bg-hover: rgba(255, 255, 255, 0.1);
+  --glass-border: var(--panel-border);
+  --glass-border-strong: var(--panel-border-hover);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --glass-blur: blur(18px) saturate(130%);
+  --glass-blur-heavy: blur(24px) saturate(140%);
+
+  --bg-white: var(--surface-2);
+  --bg-card: var(--surface-3);
+  --bg-dark: var(--ink-950);
+  --bg-dark-card: var(--surface-1);
+
+  --nav-bg: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  --input-bg: var(--surface-1);
+
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+  --shadow-lg: 0 20px 56px rgba(0, 0, 0, 0.48);
+  --shadow-glass: 0 6px 24px rgba(0, 0, 0, 0.32), var(--glass-highlight);
+
+  --elev-sm: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 4px 16px rgba(0, 0, 0, 0.2);
+  --elev-md: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 12px 36px rgba(0, 0, 0, 0.28);
+  --elev-lg: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 56px rgba(0, 0, 0, 0.36);
+
+  /* Ambient — cinematic but restrained */
+  --spot-opacity: 0.2;
+  --mesh-opacity: 0.22;
+  --mesh-noise-opacity: 0.018;
+  --ambient-1: rgba(16, 185, 129, 0.18);
+  --ambient-2: rgba(99, 102, 241, 0.14);
+  --mesh-1: radial-gradient(circle, var(--ambient-1) 0%, transparent 70%);
+  --mesh-2: radial-gradient(circle, var(--ambient-2) 0%, transparent 70%);
+  --mesh-3: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, transparent 70%);
+  --mesh-4: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  --mesh-5: radial-gradient(circle, rgba(45, 212, 191, 0.1) 0%, transparent 70%);
+}
+
+/* ── Light — clean white + subtle green-tinted neutrals ── */
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: var(--oat-50);
+  --bg-subtle: var(--oat-100);
+  --bg-elevated: #ffffff;
+  --surface-1: #ffffff;
+  --surface-2: var(--oat-100);
+  --surface-3: var(--oat-150);
+  --surface-raised: var(--oat-200);
+
+  --panel-bg: rgba(255, 255, 255, 0.94);
+  --panel-bg-strong: #ffffff;
+  --panel-border: #c5cfc8;
+  --panel-border-hover: #adb9b1;
+
+  --border: #c5cfc8;
+  --border-strong: #a8b5ac;
+  --section-border: #adb9b1;
+
+  --text: rgba(15, 20, 18, 0.91);
+  --text-heading: #111827;
+  --text-secondary: rgba(15, 20, 18, 0.58);
+  --text-muted: rgba(15, 20, 18, 0.42);
+  --text-on-dark: var(--text);
+  --text-muted-dark: var(--text-muted);
+
+  --accent: var(--green-600);
+  --accent-bright: #059669;
+  --accent-dark: var(--green-700);
+  --accent-darker: var(--green-800);
+  --accent-light: rgba(5, 150, 105, 0.1);
+  --accent-soft: rgba(5, 150, 105, 0.12);
+  --accent-fill: rgba(5, 150, 105, 0.08);
+  --accent-border: rgba(5, 150, 105, 0.38);
+  --accent-glow: rgba(5, 150, 105, 0.16);
+
+  --accent-secondary: var(--indigo-600);
+  --accent-secondary-bright: var(--indigo-500);
+  --accent-secondary-dark: var(--indigo-700);
+  --accent-secondary-soft: rgba(79, 70, 229, 0.12);
+  --accent-secondary-fill: rgba(79, 70, 229, 0.08);
+  --accent-secondary-border: rgba(79, 70, 229, 0.32);
+  --accent-secondary-glow: rgba(79, 70, 229, 0.16);
+
+  --cta-gradient: linear-gradient(180deg, #34d399 0%, var(--green-500) 50%, var(--green-600) 100%);
+  --text-gradient: linear-gradient(120deg, #059669 0%, var(--green-500) 50%, var(--green-700) 100%);
+  --text-gradient-secondary: linear-gradient(120deg, #4f46e5 0%, var(--indigo-500) 50%, var(--indigo-700) 100%);
+
+  --focus-ring: 0 0 0 3px rgba(5, 150, 105, 0.32);
+  --focus-ring-offset: 0 0 0 1px #ffffff;
+
+  --glass-bg: rgba(255, 255, 255, 0.92);
+  --glass-bg-strong: #ffffff;
+  --glass-bg-hover: #ffffff;
+  --glass-border: var(--panel-border);
+  --glass-border-strong: var(--border-strong);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 1);
+  --glass-blur: blur(20px) saturate(130%);
+  --glass-blur-heavy: blur(28px) saturate(140%);
+
+  --bg-white: #ffffff;
+  --bg-card: var(--surface-2);
+  --bg-dark: var(--oat-150);
+  --bg-dark-card: var(--surface-1);
+
+  --nav-bg: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  --input-bg: #ffffff;
+
+  --shadow: 0 2px 12px rgba(15, 20, 18, 0.08);
+  --shadow-lg: 0 16px 40px rgba(15, 20, 18, 0.12);
+  --shadow-glass: 0 4px 20px rgba(15, 20, 18, 0.07), var(--glass-highlight);
+
+  --elev-sm: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 0 0 1px var(--panel-border), 0 2px 8px rgba(15, 20, 18, 0.06);
+  --elev-md: 0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 0 0 1px var(--panel-border), 0 8px 24px rgba(15, 20, 18, 0.08);
+  --elev-lg: 0 1px 0 rgba(255, 255, 255, 1) inset, 0 0 0 1px var(--border-strong), 0 16px 40px rgba(15, 20, 18, 0.1);
+
+  --spot-opacity: 0.18;
+  --mesh-opacity: 0.14;
+  --mesh-noise-opacity: 0.012;
+  --ambient-1: rgba(16, 185, 129, 0.1);
+  --ambient-2: rgba(99, 102, 241, 0.08);
+  --mesh-1: radial-gradient(circle, var(--ambient-1) 0%, transparent 70%);
+  --mesh-2: radial-gradient(circle, var(--ambient-2) 0%, transparent 70%);
+  --mesh-3: radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, transparent 70%);
+  --mesh-4: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  --mesh-5: radial-gradient(circle, rgba(45, 212, 191, 0.08) 0%, transparent 70%);
+}

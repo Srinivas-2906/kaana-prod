@@ -1,0 +1,74 @@
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  will-change: transform;
+  opacity: var(--mesh-opacity, 0.55);
+}
+
+.mesh-orb-1 {
+  width: min(70vw, 560px);
+  height: min(70vw, 560px);
+  top: -15%;
+  left: -10%;
+  background: var(--mesh-1);
+  transform: translateY(calc(var(--scroll-y, 0px) * 0.06));
+}
+
+.mesh-orb-2 {
+  width: min(55vw, 440px);
+  height: min(55vw, 440px);
+  top: 20%;
+  right: -5%;
+  background: var(--mesh-2);
+  transform: translate(
+    calc(var(--scroll-p, 0) * 8vw),
+    calc(var(--scroll-y, 0px) * -0.04)
+  );
+}
+
+.mesh-orb-3 {
+  width: min(50vw, 400px);
+  height: min(50vw, 400px);
+  bottom: 10%;
+  left: 25%;
+  background: var(--mesh-3);
+  transform: translate(
+    calc(var(--scroll-p, 0) * 12vw),
+    calc(var(--scroll-y, 0px) * -0.05)
+  );
+}
+
+.mesh-orb-4 {
+  width: min(40vw, 320px);
+  height: min(40vw, 320px);
+  top: 55%;
+  right: 20%;
+  background: var(--mesh-4);
+  transform: translateY(calc(var(--scroll-y, 0px) * 0.02));
+}
+
+.mesh-orb-5 {
+  width: min(35vw, 280px);
+  height: min(35vw, 280px);
+  bottom: -5%;
+  right: 5%;
+  background: var(--mesh-5);
+  opacity: calc(var(--mesh-opacity, 0.55) * 0.7);
+  transform: translateY(calc(var(--scroll-y, 0px) * 0.08));
+}
+
+.mesh-noise {
+  position: absolute;
+  inset: 0;
+  opacity: var(--mesh-noise-opacity, 0.03);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
