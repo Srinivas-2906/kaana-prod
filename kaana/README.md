@@ -46,14 +46,14 @@ legacy/
 
 ## Deployment
 
-Works on Vercel, Render, or any Node host:
+Hosted on **GCP Cloud Run** via Cloud Build (push to `main` auto-deploys).
 
 ```bash
-npm run build
-npm run start
+# From repo root
+gcloud builds submit --config cloudbuild.yaml .
 ```
 
-Set `PORT` if your host requires it.
+See [../DEPLOY.md](../DEPLOY.md) for full setup.
 
 ## Regenerating from legacy HTML
 
