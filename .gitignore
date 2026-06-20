@@ -36,8 +36,6 @@ firebase-debug.log
 # Docker local
 docker-compose.override.yml
 
-# Unrelated demo projects (not part of Kaana prod stack)
-inventory-wms/
-ui-review/
-kaana/
-*.html
+# Demo HTML at repo root only (not app entrypoints)
+/kaana_*.html
+/*_demo.html

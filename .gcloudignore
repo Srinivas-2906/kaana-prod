@@ -13,5 +13,5 @@
 inventory-wms/
 ui-review/
 kaana/
-*.html
+/kaana_*.html
 .firebase/
