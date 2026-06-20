@@ -1,109 +1,48 @@
 steps:
-  # ── API: build & push Docker image ──────────────────────────────────────
-  - id: build-api
+  - id: build-kaana
     name: gcr.io/cloud-builders/docker
     args:
       - build
       - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$SHORT_SHA
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:$SHORT_SHA
       - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:latest
-      - ./botiq-whatsapp-server
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:latest
+      - ./kaana
 
-  - id: push-api
+  - id: push-kaana
     name: gcr.io/cloud-builders/docker
     args:
       - push
       - --all-tags
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana
 
-  - id: deploy-api
+  - id: deploy-kaana
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: bash
     args:
       - -c
       - |
         set -euo pipefail
-        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$SHORT_SHA"
-        gcloud run deploy ${_API_SERVICE} \
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:$SHORT_SHA"
+        gcloud run deploy ${_SERVICE} \
           --image "$$IMAGE" \
           --region ${_REGION} \
           --platform managed \
           --allow-unauthenticated \
-          --port 3002 \
-          --min-instances 1 \
+          --port 8080 \
+          --min-instances 0 \
           --max-instances 3 \
           --memory 512Mi \
-          --cpu 1 \
-          --service-account ${_RUN_SERVICE_ACCOUNT}@$PROJECT_ID.iam.gserviceaccount.com \
-          --set-env-vars "^@^NODE_ENV=production@PORT=3002@DATABASE_PATH=/data/kaana.db@WHATSAPP_PROVIDER=meta@META_API_VERSION=v21.0@KAANA_SELF_SERVE=false@KAANA_CONCIERGE_SPOTS=10@JWT_EXPIRES=7d@TYPING_DELAY_MS=350@LITESTREAM_BUCKET=${_DB_BUCKET}@PUBLIC_URL=${_PUBLIC_URL}@LISTINGS_BASE_URL=${_LISTINGS_BASE_URL}@KAANA_PLATFORM_URL=${_KAANA_PLATFORM_URL}@KAANA_BOTIQ_URL=${_KAANA_BOTIQ_URL}" \
-          --set-secrets "JWT_SECRET=${_SECRET_JWT}:latest,WHATSAPP_ACCESS_TOKEN=${_SECRET_WHATSAPP_TOKEN}:latest,WHATSAPP_PHONE_NUMBER_ID=${_SECRET_WHATSAPP_PHONE}:latest,WHATSAPP_VERIFY_TOKEN=${_SECRET_WHATSAPP_VERIFY}:latest,PLATFORM_ADMIN_EMAIL=${_SECRET_ADMIN_EMAIL}:latest,PLATFORM_ADMIN_PASSWORD=${_SECRET_ADMIN_PASSWORD}:latest,RAZORPAY_KEY_ID=${_SECRET_RAZORPAY_ID}:latest,RAZORPAY_KEY_SECRET=${_SECRET_RAZORPAY_SECRET}:latest,RESEND_API_KEY=${_SECRET_RESEND_KEY}:latest,RESEND_FROM=${_SECRET_RESEND_FROM}:latest,KAANA_NOTIFY_EMAIL=${_SECRET_NOTIFY_EMAIL}:latest"
-
-  # ── Frontends: build static sites ───────────────────────────────────────
-  - id: build-frontends
-    name: node:20
-    entrypoint: bash
-    env:
-      - VITE_API_URL=${_VITE_API_URL}
-      - VITE_BILLING_URL=${_VITE_BILLING_URL}
-      - VITE_BOTIQ_URL=${_VITE_BOTIQ_URL}
-      - VITE_CRM_URL=${_VITE_CRM_URL}
-      - VITE_LISTINGS_URL=${_VITE_LISTINGS_URL}
-      - VITE_WHATSAPP_LINK=${_VITE_WHATSAPP_LINK}
-      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
-      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
-    args:
-      - scripts/build-frontends.sh
-
-  # ── Frontends: deploy to Firebase Hosting ───────────────────────────────
-  - id: deploy-hosting
-    name: us-docker.pkg.dev/firebase-cli-us/firebase/tools:latest
-    args:
-      - deploy
-      - --only
-      - hosting
-      - --project
-      - $PROJECT_ID
-      - --non-interactive
+          --cpu 1
 
 substitutions:
   _REGION: asia-south1
   _ARTIFACT_REPO: kaana
-  _API_SERVICE: kaana-api
-  _DB_BUCKET: kaana-prod-db
-  _RUN_SERVICE_ACCOUNT: kaana-api-runner
-
-  # Public URLs — update these when custom domains are wired
-  _PUBLIC_URL: https://kaana-api-xxxxx.asia-south1.run.app
-  _LISTINGS_BASE_URL: https://kaana-api-xxxxx.asia-south1.run.app/listings
-  _KAANA_PLATFORM_URL: https://kaana-prod-marketing.web.app
-  _KAANA_BOTIQ_URL: https://kaana-prod-inbox.web.app
-
-  _VITE_API_URL: https://kaana-api-xxxxx.asia-south1.run.app/api/platform
-  _VITE_BILLING_URL: https://kaana-api-xxxxx.asia-south1.run.app/api/billing
-  _VITE_BOTIQ_URL: https://kaana-prod-inbox.web.app
-  _VITE_CRM_URL: https://kaana-prod-crm.web.app
-  _VITE_LISTINGS_URL: https://kaana-api-xxxxx.asia-south1.run.app/listings
-  _VITE_WHATSAPP_LINK: https://wa.me/91XXXXXXXXXX
-  _VITE_WHATSAPP_API: https://kaana-api-xxxxx.asia-south1.run.app/api
-  _VITE_PLATFORM_URL: https://kaana-prod-marketing.web.app
-
-  _SECRET_JWT: kaana-jwt-secret
-  _SECRET_WHATSAPP_TOKEN: kaana-whatsapp-access-token
-  _SECRET_WHATSAPP_PHONE: kaana-whatsapp-phone-id
-  _SECRET_WHATSAPP_VERIFY: kaana-whatsapp-verify-token
-  _SECRET_ADMIN_EMAIL: kaana-admin-email
-  _SECRET_ADMIN_PASSWORD: kaana-admin-password
-  _SECRET_RAZORPAY_ID: kaana-razorpay-key-id
-  _SECRET_RAZORPAY_SECRET: kaana-razorpay-key-secret
-  _SECRET_RESEND_KEY: kaana-resend-api-key
-  _SECRET_RESEND_FROM: kaana-resend-from
-  _SECRET_NOTIFY_EMAIL: kaana-notify-email
+  _SERVICE: kaana-web
 
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: E2_HIGHCPU_8
 
 images:
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$SHORT_SHA
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:latest

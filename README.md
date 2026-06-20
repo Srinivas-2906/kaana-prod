@@ -1,16 +1,29 @@
 # Kaana Production
 
-WhatsApp business platform: marketing site, API, inbox, and CRM.
+Next.js marketing site for [kaana.in](https://kaana.in).
 
-## Apps
+## App
 
-- `kaana-platform/` — Marketing website (React + Vite)
-- `botiq-whatsapp-server/` — Node.js API, WhatsApp webhooks, SQLite
-- `botiq/` — Team inbox dashboard
-- `propcrm/` — Lead CRM
+- `kaana/` — Next.js 16 site (App Router, contact API)
+
+## Local dev
+
+```bash
+cd kaana
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy
 
-See **[DEPLOY.md](./DEPLOY.md)** for GCP setup (Cloud Build auto-deploy on push to `main`).
+Every push to `main` deploys via **Cloud Build → Cloud Run**.
 
-Quick start locally: **[GO_LIVE.md](./GO_LIVE.md)**
+See **[DEPLOY.md](./DEPLOY.md)** for one-time GCP setup.
+
+Manual deploy:
+
+```bash
+gcloud builds submit --config cloudbuild.yaml .
+```

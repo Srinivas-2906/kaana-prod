@@ -1,0 +1,3546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kāna | Digital Solutions</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/split-type@0.3.3/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          display: ['Poppins', 'sans-serif'],
+        },
+        colors: {
+          dark: '#050B2E',
+          light: '#F5F5F5',
+          accent: '#00D4FF',
+          'accent-light': '#33DFFF',
+          'accent-dark': '#00A8CC',
+          'accent-secondary': '#9D4EDD',
+          neutral: {
+            100: '#F5F5F5',
+            200: '#E5E5E5',
+            300: '#D4D4D4',
+            400: '#A3A3A3',
+            500: '#737373',
+            600: '#525252',
+            700: '#404040',
+            800: '#262626',
+            900: '#171717',
+            950: '#0A0A0A',
+          },
+        },
+        animation: {
+          'float': 'float 6s ease-in-out infinite',
+          'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          'spin-slow': 'spin 8s linear infinite',
+          'morph': 'morph 8s ease-in-out infinite',
+        },
+        keyframes: {
+          float: {
+            '0%, 100%': { transform: 'translateY(0)' },
+            '50%': { transform: 'translateY(-20px)' },
+          },
+          morph: {
+            '0%, 100%': { borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%' },
+            '25%': { borderRadius: '30% 60% 70% 40% / 50% 60% 30% 60%' },
+            '50%': { borderRadius: '50% 60% 50% 70% / 40% 40% 60% 50%' },
+            '75%': { borderRadius: '40% 60% 70% 30% / 60% 30% 70% 40%' },
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    overflow-x: hidden;
+    background-color: #050B2E;
+    color: #F5F5F5;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Cursor */
+  .custom-cursor {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #00D4FF;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+
+  .cursor-follower {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s, border 0.3s;
+  }
+
+  .custom-cursor.active {
+    width: 24px;
+    height: 24px;
+    background-color: transparent;
+    border: 2px solid #00D4FF;
+  }
+
+  .cursor-follower.active {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  /* Scroll Progress */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #00D4FF;
+    transform-origin: left;
+    z-index: 100;
+  }
+
+  /* Smooth Reveal */
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .reveal-up.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Staggered Reveal */
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .stagger-item.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Hover Line Effect */
+  .hover-line {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hover-line::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background-color: #00D4FF;
+    transition: width 0.3s ease;
+  }
+
+  .hover-line:hover::after {
+    width: 100%;
+  }
+
+  /* Button Styles */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    z-index: 1;
+  }
+
+  .btn-primary {
+    background-color: #00D4FF;
+    color: #050B2E;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background-color: #00A8CC;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(245, 245, 245, 0.2);
+    color: #F5F5F5;
+  }
+
+  .btn-outline:hover {
+    border-color: #00D4FF;
+    color: #00D4FF;
+  }
+
+  .btn-icon {
+    margin-left: 0.75rem;
+    transition: transform 0.3s ease;
+  }
+
+  .btn:hover .btn-icon {
+    transform: translateX(5px);
+  }
+
+  /* Card Hover */
+  .card-hover {
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-5px);
+    border-color: #00D4FF;
+  }
+
+  /* Marquee Animation */
+  .marquee {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-content {
+    display: inline-block;
+    animation: marquee 20s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Grid Lines */
+  .grid-lines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .grid-line {
+    position: absolute;
+    background-color: rgba(245, 245, 245, 0.03);
+  }
+
+  .grid-line-horizontal {
+    width: 100%;
+    height: 1px;
+  }
+
+  .grid-line-vertical {
+    width: 1px;
+    height: 100%;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .custom-cursor, .cursor-follower {
+      display: none;
+    }
+  }
+
+  /* Horizontal Scroll Section */
+  .horizontal-scroll {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .horizontal-scroll-content {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .horizontal-scroll-item {
+    flex: 0 0 100vw;
+  }
+
+  /* Image Hover Effect */
+  .image-hover {
+    overflow: hidden;
+  }
+
+  .image-hover img {
+    transition: transform 0.7s ease;
+  }
+
+  .image-hover:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Text Split Animation */
+  .split-text .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: transform 0.5s, opacity 0.5s;
+  }
+
+  .split-text.active .char {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Noise Overlay */
+  .noise {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    z-index: 1000;
+    pointer-events: none;
+  }
+
+  /* Scroll Indicator */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(245, 245, 245, 0.5);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, rgba(0, 212, 255, 0), rgba(0, 212, 255, 1));
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollLine {
+    0% {
+      transform: scaleY(0);
+      transform-origin: top center;
+    }
+    50% {
+      transform: scaleY(1);
+      transform-origin: top center;
+    }
+    50.1% {
+      transform-origin: bottom center;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom center;
+    }
+  }
+
+  /* Minimal Slider */
+  .minimal-slider {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .minimal-slider-track {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .minimal-slider-item {
+    flex: 0 0 100%;
+  }
+
+  .minimal-slider-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .minimal-slider-dot {
+    width: 2rem;
+    height: 2px;
+    background-color: rgba(245, 245, 245, 0.2);
+    transition: background-color 0.3s ease, width 0.3s ease;
+    cursor: pointer;
+  }
+
+  .minimal-slider-dot.active {
+    background-color: #00D4FF;
+    width: 3rem;
+  }
+
+  /* Particles Canvas */
+  #particles-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+
+  /* Process Timeline */
+  .process-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .process-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.8), rgba(0, 212, 255, 0.2));
+  }
+
+  .process-step {
+    position: relative;
+    padding-bottom: 4rem;
+  }
+
+  .process-step:last-child {
+    padding-bottom: 0;
+  }
+
+  .process-step::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -2rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: #050B2E;
+    border: 2px solid #00D4FF;
+    z-index: 1;
+  }
+
+  .process-step.active::before {
+    background-color: #00D4FF;
+  }
+
+  /* Parallax Effect */
+  .parallax {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .parallax-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+  }
+
+  /* Floating Elements */
+  .floating {
+    animation: floating 6s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Text Gradient */
+  .text-gradient {
+    background: linear-gradient(90deg, #00D4FF, #9D4EDD);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glow Effect */
+  .glow {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+
+  /* Magnetic Button */
+  .magnetic-wrap {
+    display: inline-block;
+    position: relative;
+  }
+
+  .magnetic-area {
+    position: relative;
+    display: inline-block;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    z-index: 2;
+  }
+
+  /* Reveal Animation */
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .reveal-left.active {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .reveal-right.active {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Scale Animation */
+  .scale-in {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .scale-in.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Rotate Animation */
+  .rotate-in {
+    opacity: 0;
+    transform: rotate(-5deg);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+
+  .rotate-in.active {
+    opacity: 1;
+    transform: rotate(0);
+  }
+
+  /* Blur Animation */
+  .blur-in {
+    opacity: 0;
+    filter: blur(10px);
+    transition: opacity 1s ease, filter 1s ease;
+  }
+
+  .blur-in.active {
+    opacity: 1;
+    filter: blur(0);
+  }
+
+  /* Clip Path Animation */
+  .clip-reveal {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+    transition: clip-path 1s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+
+  .clip-reveal.active {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  /* 3D Card Effect */
+  .card-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .card-3d-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+
+  .card-3d:hover .card-3d-inner {
+    transform: rotateY(10deg) rotateX(5deg);
+  }
+
+  /* Gradient Border */
+  .gradient-border {
+    position: relative;
+    border-radius: 0.25rem;
+    padding: 1px;
+    background: linear-gradient(90deg, #00D4FF, #9D4EDD);
+  }
+
+  .gradient-border-inner {
+    background: #050B2E;
+    border-radius: 0.25rem;
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Scroll Snap */
+  .scroll-snap-container {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100vh;
+  }
+
+  .scroll-snap-section {
+    scroll-snap-align: start;
+    height: 100vh;
+  }
+
+  /* Animated Background */
+  .animated-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .animated-bg-shape {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, rgba(0, 212, 255, 0) 70%);
+    animation: pulse 8s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0.1;
+    }
+  }
+
+  /* Typing Animation */
+  .typing {
+    border-right: 2px solid #00D4FF;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+  }
+
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #00D4FF }
+  }
+
+  /* Scroll Down Arrow */
+  .scroll-down-arrow {
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+
+  /* Hover Lift */
+  .hover-lift {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-5px);
+  }
+
+  /* Hover Glow */
+  .hover-glow {
+    transition: box-shadow 0.3s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+  }
+
+  /* Hover Scale */
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+
+  /* Hover Rotate */
+  .hover-rotate {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-rotate:hover {
+    transform: rotate(5deg);
+  }
+
+  /* Hover Color */
+  .hover-color {
+    transition: color 0.3s ease;
+  }
+
+  .hover-color:hover {
+    color: #00D4FF;
+  }
+
+  /* Hover Background */
+  .hover-bg {
+    transition: background-color 0.3s ease;
+  }
+
+  .hover-bg:hover {
+    background-color: rgba(0, 212, 255, 0.1);
+  }
+
+  /* Hover Border */
+  .hover-border {
+    transition: border-color 0.3s ease;
+  }
+
+  .hover-border:hover {
+    border-color: #00D4FF;
+  }
+
+  /* Hover Shadow */
+  .hover-shadow {
+    transition: box-shadow 0.3s ease;
+  }
+
+  .hover-shadow:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Hover Opacity */
+  .hover-opacity {
+    transition: opacity 0.3s ease;
+  }
+
+  .hover-opacity:hover {
+    opacity: 0.8;
+  }
+
+  /* Hover Blur */
+  .hover-blur {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-blur:hover {
+    filter: blur(2px);
+  }
+
+  /* Hover Grayscale */
+  .hover-grayscale {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-grayscale:hover {
+    filter: grayscale(100%);
+  }
+
+  /* Hover Sepia */
+  .hover-sepia {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-sepia:hover {
+    filter: sepia(100%);
+  }
+
+  /* Hover Invert */
+  .hover-invert {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-invert:hover {
+    filter: invert(100%);
+  }
+
+  /* Hover Saturate */
+  .hover-saturate {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-saturate:hover {
+    filter: saturate(200%);
+  }
+
+  /* Hover Contrast */
+  .hover-contrast {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-contrast:hover {
+    filter: contrast(200%);
+  }
+
+  /* Hover Brightness */
+  .hover-brightness {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-brightness:hover {
+    filter: brightness(150%);
+  }
+
+  /* Hover Hue Rotate */
+  .hover-hue-rotate {
+    transition: filter 0.3s ease;
+  }
+
+  .hover-hue-rotate:hover {
+    filter: hue-rotate(90deg);
+  }
+
+  /* AI Chat Widget */
+  .ai-chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+
+  .ai-chat-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00D4FF, #9D4EDD);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .ai-chat-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
+  }
+
+  .ai-chat-panel {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 350px;
+    height: 450px;
+    background-color: #0A0A0A;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    transform-origin: bottom right;
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .ai-chat-panel.active {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .ai-chat-header {
+    padding: 15px;
+    background: linear-gradient(135deg, #00D4FF, #9D4EDD);
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ai-chat-close {
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .ai-chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-message {
+    max-width: 80%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    line-height: 1.4;
+    font-size: 14px;
+    position: relative;
+  }
+
+  .ai-message-bot {
+    align-self: flex-start;
+    background-color: #1E1E1E;
+    border-bottom-left-radius: 4px;
+  }
+
+  .ai-message-user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #00D4FF, #9D4EDD);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .ai-chat-input {
+    padding: 15px;
+    border-top: 1px solid #1E1E1E;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ai-chat-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: none;
+    background-color: #1E1E1E;
+    color: white;
+    outline: none;
+  }
+
+  .ai-chat-input button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #00D4FF, #9D4EDD);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* AI Typing Indicator */
+  .ai-typing {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 15px;
+    background-color: #1E1E1E;
+    border-radius: 18px;
+    max-width: 80px;
+    align-self: flex-start;
+  }
+
+  .ai-typing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #00D4FF;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: typing-dot 1.4s infinite ease-in-out both;
+  }
+
+  .ai-typing-dot:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  .ai-typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .ai-typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typing-dot {
+    0%, 80%, 100% {
+      transform: scale(0.6);
+    }
+    40% {
+      transform: scale(1);
+    }
+  }
+
+  /* AI Features Section */
+  .ai-feature-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    transition: all 0.3s ease;
+    background-color: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+  }
+
+  .ai-feature-card:hover {
+    border-color: #00D4FF;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    transform: translateY(-5px);
+  }
+
+  .ai-feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(157, 78, 221, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  /* Neural Network Animation */
+  .neural-network {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.1;
+  }
+
+  /* Link Click Animation */
+  .link-click-ripple {
+    position: fixed;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(0, 212, 255, 0.4);
+    z-index: 9997;
+    pointer-events: none;
+  }
+
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  /* Page Transition */
+  .page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050B2E;
+    z-index: 9999;
+    transform: translateY(100%);
+    pointer-events: none;
+  }
+
+  .page-transition.active {
+    animation: page-transition 1s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  }
+
+  @keyframes page-transition {
+    0% {
+      transform: translateY(100%);
+    }
+    100% {
+      transform: translateY(0%);
+    }
+  }
+
+  /* Careers Modal */
+  #careersModal {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  #careersModal.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #careersModal.active .careers-job-card {
+    animation: careersCardReveal 0.6s ease forwards;
+  }
+
+  #careersModal.active .careers-job-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  #careersModal.active .careers-job-card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  #careersModal.active .careers-job-card:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  @keyframes careersCardReveal {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .careers-close-btn {
+    background: rgba(5, 11, 46, 0.8);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .careers-close-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    transform: scale(1.05);
+  }
+
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  /* AI Blob Animation */
+  .ai-blob {
+    position: absolute;
+    background: linear-gradient(45deg, rgba(0, 212, 255, 0.3), rgba(157, 78, 221, 0.3));
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    filter: blur(40px);
+    z-index: -1;
+    animation: morph 10s ease-in-out infinite;
+  }
+
+  /* AI Demo Section */
+  .ai-demo-container {
+    position: relative;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(10px);
+  }
+
+  .ai-demo-header {
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(157, 78, 221, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ai-demo-content {
+    padding: 20px;
+  }
+
+  .ai-demo-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .ai-demo-input input {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    background-color: rgba(30, 30, 30, 0.5);
+    color: white;
+    outline: none;
+  }
+
+  .ai-demo-input button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #00D4FF, #9D4EDD);
+    color: white;
+    cursor: pointer;
+  }
+
+  .ai-demo-output {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: rgba(30, 30, 30, 0.5);
+    min-height: 100px;
+  }
+
+  /* Hero Swiper */
+  .hero-swiper {
+    width: 100%;
+    height: 100%;
+    margin-top: 20px;
+  }
+
+  .hero-swiper .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .hero-swiper-pagination {
+    position: relative;
+    margin-top: 20px;
+  }
+
+  .hero-swiper-pagination .swiper-pagination-bullet {
+    width: 10px;
+    height: 10px;
+    background-color: rgba(0, 212, 255, 0.2);
+    opacity: 1;
+  }
+
+  .hero-swiper-pagination .swiper-pagination-bullet-active {
+    background-color: #00D4FF;
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 640px) {
+    .hero-content {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    
+    .hero-grid {
+      grid-gap: 1rem;
+    }
+    
+    .ai-chat-panel {
+      width: calc(100vw - 40px);
+      height: 400px;
+    }
+
+    .hero-swiper {
+      height: 200px;
+    }
+    
+    h1.text-4xl {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+    
+    .process-timeline {
+      padding-left: 1.5rem;
+    }
+    
+    .process-step::before {
+      left: -1.5rem;
+    }
+    
+    .ai-feature-card {
+      padding: 1.25rem !important;
+    }
+    
+    .ai-demo-input {
+      flex-direction: column;
+    }
+    
+    .ai-demo-input button {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body class="bg-dark text-light">
+  <!-- Page Transition -->
+  <div class="page-transition" id="pageTransition"></div>
+
+  <!-- Custom Cursor -->
+  <div class="custom-cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursorFollower"></div>
+
+  <!-- Noise Overlay -->
+  <div class="noise"></div>
+
+  <!-- Grid Lines -->
+  <div class="grid-lines" id="gridLines"></div>
+
+  <!-- Scroll Progress -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 w-full py-6 z-50 transition-all duration-300" id="header">
+    <div class="container mx-auto px-6">
+      <div class="flex items-center justify-between">
+        <a href="#" class="text-xl font-display font-bold tracking-normal link-trigger">
+          Kāna
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="#home" class="text-base hover-line nav-link link-trigger">Home</a>
+          <a href="#solutions" class="text-base hover-line nav-link link-trigger">Solutions</a>
+          <a href="#ai-demo" class="text-base hover-line nav-link link-trigger">AI Demo</a>
+          <a href="#process" class="text-base hover-line nav-link link-trigger">Process</a>
+          <a href="#work" class="text-base hover-line nav-link link-trigger">Work</a>
+          <a href="#about" class="text-base hover-line nav-link link-trigger">About</a>
+          <a href="#" class="text-base hover-line nav-link link-trigger careers-trigger">Careers</a>
+          <a href="#contact" class="text-base hover-line nav-link link-trigger">Contact</a>
+        </nav>
+
+        <div class="flex items-center gap-4">
+          <a href="#contact" class="hidden md:inline-flex btn btn-outline text-sm link-trigger">
+            Get in touch
+          </a>
+
+          <button class="menu-button md:hidden w-10 h-10 flex flex-col justify-center items-center gap-1.5" id="menuButton">
+            <span class="w-6 h-px bg-light transition-all duration-300"></span>
+            <span class="w-6 h-px bg-light transition-all duration-300"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="fixed inset-0 bg-dark z-40 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" id="mobileMenu">
+    <nav class="flex flex-col items-center gap-8">
+      <a href="#home" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">Home</a>
+      <a href="#solutions" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">Solutions</a>
+      <a href="#ai-demo" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">AI Demo</a>
+      <a href="#process" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">Process</a>
+      <a href="#work" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">Work</a>
+      <a href="#about" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">About</a>
+      <a href="#" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger careers-trigger">Careers</a>
+      <a href="#contact" class="text-3xl font-display font-medium hover:text-accent transition-colors mobile-nav-link link-trigger">Contact</a>
+    </nav>
+  </div>
+
+  <!-- Careers Modal Overlay -->
+  <div class="fixed inset-0 bg-dark/95 backdrop-blur-md z-50 opacity-0 pointer-events-none transition-opacity duration-500 overflow-y-auto" id="careersModal">
+    <div class="min-h-screen py-12 md:py-20 px-6">
+      <div class="container mx-auto max-w-6xl">
+        <!-- Close Button -->
+        <button class="fixed top-6 right-6 md:top-12 md:right-12 w-12 h-12 flex items-center justify-center border border-neutral-800 rounded-sm hover:border-accent hover:text-accent transition-colors z-50 careers-close-btn" id="careersCloseBtn">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+
+        <!-- Header -->
+        <div class="text-center mb-12 md:mb-16">
+          <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block">Join Our Team</span>
+          <h2 class="text-3xl text-neutral-100 md:text-5xl font-display font-medium mb-4">
+            Career Opportunities
+          </h2>
+          <p class="text-neutral-400 max-w-2xl mx-auto">
+            We're looking for talented individuals who share our passion for creating exceptional digital experiences.
+          </p>
+        </div>
+
+        <!-- Job Listings Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <!-- Job Opening 1: React Frontend Internship -->
+          <div class="border border-neutral-800 rounded-sm p-6 md:p-8 card-hover careers-job-card" style="opacity: 0; transform: translateY(30px);">
+            <div class="flex items-start justify-between mb-6">
+              <div>
+                <span class="text-xs uppercase tracking-widest text-accent mb-2 block font-medium">Internship</span>
+                <h3 class="text-xl md:text-2xl text-neutral-100 font-display font-medium mb-2">React Frontend Developer</h3>
+                <p class="text-neutral-400 text-sm mb-4">Remote / Visakhapatnam</p>
+              </div>
+              <div class="w-12 h-12 flex items-center justify-center bg-neutral-900 rounded-sm border border-neutral-800">
+                <i class="fas fa-code text-accent text-xl"></i>
+              </div>
+            </div>
+            
+            <p class="text-neutral-400 mb-6 text-sm">
+              Join our team as a React Frontend Developer Intern and gain hands-on experience building modern web applications. Work on real projects and learn from experienced developers.
+            </p>
+            
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-neutral-100 mb-3">What you'll learn:</h4>
+              <ul class="space-y-2 text-sm text-neutral-400">
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>React.js fundamentals and best practices</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Modern JavaScript (ES6+) and TypeScript</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>State management and hooks</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Responsive design and CSS frameworks</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Git workflow and collaboration</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">React</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">JavaScript</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">CSS3</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">Git</span>
+            </div>
+            
+            <a href="#contact" class="btn btn-primary w-full text-center link-trigger careers-apply-btn">
+              Apply Now
+              <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+            </a>
+          </div>
+          
+          <!-- Job Opening 2: React Frontend Internship (Second Position) -->
+          <div class="border border-neutral-800 rounded-sm p-6 md:p-8 card-hover careers-job-card" style="opacity: 0; transform: translateY(30px);">
+            <div class="flex items-start justify-between mb-6">
+              <div>
+                <span class="text-xs uppercase tracking-widest text-accent mb-2 block font-medium">Internship</span>
+                <h3 class="text-xl md:text-2xl text-neutral-100 font-display font-medium mb-2">React Frontend Developer</h3>
+                <p class="text-neutral-400 text-sm mb-4">Remote / Visakhapatnam</p>
+              </div>
+              <div class="w-12 h-12 flex items-center justify-center bg-neutral-900 rounded-sm border border-neutral-800">
+                <i class="fas fa-code text-accent text-xl"></i>
+              </div>
+            </div>
+            
+            <p class="text-neutral-400 mb-6 text-sm">
+              Perfect opportunity for aspiring React developers. Work on cutting-edge projects, collaborate with a talented team, and build your portfolio while making a real impact.
+            </p>
+            
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-neutral-100 mb-3">Requirements:</h4>
+              <ul class="space-y-2 text-sm text-neutral-400">
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Basic knowledge of HTML, CSS, and JavaScript</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Familiarity with React basics (or willingness to learn)</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Strong problem-solving skills</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Good communication and teamwork</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Passion for web development</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">React</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">JavaScript</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">HTML5</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">CSS3</span>
+            </div>
+            
+            <a href="#contact" class="btn btn-primary w-full text-center link-trigger careers-apply-btn">
+              Apply Now
+              <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+            </a>
+          </div>
+          
+          <!-- Job Opening 3: Database Developer -->
+          <div class="border border-neutral-800 rounded-sm p-6 md:p-8 card-hover careers-job-card" style="opacity: 0; transform: translateY(30px);">
+            <div class="flex items-start justify-between mb-6">
+              <div>
+                <span class="text-xs uppercase tracking-widest text-accent mb-2 block font-medium">Internship</span>
+                <h3 class="text-xl md:text-2xl text-neutral-100 font-display font-medium mb-2">Database Developer</h3>
+                <p class="text-neutral-400 text-sm mb-4">Remote / Visakhapatnam</p>
+              </div>
+              <div class="w-12 h-12 flex items-center justify-center bg-neutral-900 rounded-sm border border-neutral-800">
+                <i class="fas fa-database text-accent text-xl"></i>
+              </div>
+            </div>
+            
+            <p class="text-neutral-400 mb-6 text-sm">
+              Join us as a Database Developer Intern and work with modern database technologies. Learn Prisma, database design, and backend development while contributing to real-world projects.
+            </p>
+            
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-neutral-100 mb-3">What you'll work with:</h4>
+              <ul class="space-y-2 text-sm text-neutral-400">
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Prisma ORM and database migrations</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>SQL and NoSQL databases</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Database schema design and optimization</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>API development and integration</span>
+                </li>
+                <li class="flex items-start">
+                  <i class="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                  <span>Backend development with Node.js</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">Prisma</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">SQL</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">Node.js</span>
+              <span class="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-sm text-xs text-neutral-400">PostgreSQL</span>
+            </div>
+            
+            <a href="#contact" class="btn btn-primary w-full text-center link-trigger careers-apply-btn">
+              Apply Now
+              <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen flex items-center pt-20">
+      <!-- Particles Canvas -->
+      <canvas id="particles-canvas"></canvas>
+      
+      <!-- Neural Network Animation -->
+      <canvas id="neural-network" class="neural-network"></canvas>
+      
+      <!-- Animated Background Shapes -->
+      <div class="animated-bg">
+        <div class="animated-bg-shape" style="width: 600px; height: 600px; top: -10%; left: -10%;"></div>
+        <div class="animated-bg-shape" style="width: 500px; height: 500px; bottom: -10%; right: -10%; animation-delay: 2s;"></div>
+      </div>
+
+      <!-- AI Blobs -->
+      <div class="ai-blob" style="width: 300px; height: 300px; top: 20%; left: 10%;"></div>
+      <div class="ai-blob" style="width: 250px; height: 250px; bottom: 10%; right: 15%; animation-delay: 3s;"></div>
+
+      <div class="container mx-auto px-6 py-10 md:py-20">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="overflow-hidden mb-4">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl text-neutral-100 font-display font-medium leading-tight reveal-up" id="heroTitle" style="transition-delay: 0.05s">
+              Digital <span class="text-gradient">Solutions</span> for Tomorrow
+            </h1>
+          </div>
+          <p class="text-lg md:text-xl text-neutral-100 mb-8 max-w-2xl mx-auto reveal-up" style="transition-delay: 0.2s">
+            Creating cutting-edge digital experiences and technology solutions for forward-thinking businesses
+          </p>
+          <div class="flex flex-wrap justify-center gap-4 reveal-up" style="transition-delay: 0.4s">
+            <div class="magnetic-wrap">
+              <a href="#solutions" class="magnetic-area btn btn-primary link-trigger">
+                Explore Solutions
+                <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+              </a>
+            </div>
+            <div class="magnetic-wrap">
+              <a href="#ai-demo" class="magnetic-area btn btn-outline link-trigger">
+                Try AI Demo
+              </a>
+            </div>
+          </div>
+          
+          <!-- Hero Swiper -->
+          <div class="swiper hero-swiper mt-10 reveal-up" style="transition-delay: 0.6s">
+            <div class="swiper-wrapper">
+              <!-- Slide 1 -->
+              <div class="swiper-slide">
+                <div class="card-3d w-full max-w-md">
+                  <div class="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
+                    <div class="text-accent text-3xl mb-4">
+                      <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">Web Design</h3>
+                   <p class="text-neutral-400">Responsive, SEO-ready websites with clean UI/UX, fast performance, accessibility best practices, and easy CMS integration—designed to convert visitors into customers across all devices.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Slide 2 -->
+               <div class="swiper-slide">
+                <div class="card-3d w-full max-w-md">
+                  <div class="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
+                    <div class="text-accent text-3xl mb-4">
+                      <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">Print & Digital Marketing</h3>
+                   <p class="text-neutral-400">Instagram boosts, Google Ads, Facebook Ads, YouTube promotions, strategic SEO, content marketing, social media management, PPC, and email campaigns.</p>
+                  </div>
+                </div>
+              </div>
+            
+              
+              
+              <!-- Slide 3 -->
+              <div class="swiper-slide">
+                <div class="card-3d w-full max-w-md">
+                  <div class="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
+                    <div class="text-accent text-3xl mb-4">
+                      <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">Chatbot Solutions</h3>
+                   <p class="text-neutral-400">AI-powered chatbots with natural language understanding for 24/7 support, lead capture, FAQs, bookings, and order status—integrated with your website, WhatsApp, and CRM to reduce response time and support costs.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Slide 4 -->
+              <div class="swiper-slide">
+                <div class="card-3d w-full max-w-md">
+                  <div class="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
+                    <div class="text-accent text-3xl mb-4">
+                      <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">E-commerce</h3>
+                   <p class="text-neutral-400">Conversion-focused storefronts with secure payments, intuitive product catalogs, inventory and shipping automation, abandoned cart recovery, and analytics for data-driven growth.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Slide 5 -->
+              <div class="swiper-slide">
+                <div class="card-3d w-full max-w-md">
+                  <div class="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
+                    <div class="text-accent text-3xl mb-4">
+                      <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">App Development</h3>
+                   <p class="text-neutral-400">High-performance native and cross-platform apps for iOS and Android with intuitive UX, offline support, push notifications, and scalable backends for long-term growth.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Pagination -->
+            <div class="hero-swiper-pagination mt-6"></div>
+          </div>
+
+          <!-- AI Assistant Demo -->
+          <div class="mt-10 max-w-lg mx-auto border border-neutral-800 rounded-sm p-4 bg-dark/50 backdrop-blur-md reveal-up" style="transition-delay: 0.8s">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
+                <i class="fas fa-robot text-dark text-xs"></i>
+              </div>
+              <div class="text-sm font-medium">Kāna AI Assistant</div>
+            </div>
+            <div class="typing text-left text-sm text-neutral-300 overflow-hidden whitespace-nowrap" id="aiTyping">
+              How can I help transform your business with digital solutions today?
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll-indicator">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- Solutions Section -->
+    <section id="solutions" class="py-20 md:py-32">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl">
+          <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">Our Solutions</span>
+          <h2 class="text-3xl md:text-5xl text-neutral-100 font-display font-medium mb-12 reveal-up" style="transition-delay: 0.1s">
+            Digital solutions<br>for modern challenges
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Solution 1 -->
+          <div class="ai-feature-card p-8 card-hover stagger-item">
+            <div class="ai-feature-icon mb-6">
+              <i class="fas fa-laptop-code text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-3">Web Design</h3>
+            <p class="text-neutral-400 mb-6">
+              Create stunning, responsive websites that captivate your audience and drive conversions with our expert design team.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              Learn more
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Solution 2 -->
+          <div class="ai-feature-card p-8 card-hover stagger-item">
+            <div class="ai-feature-icon mb-6">
+              <i class="fas fa-mobile-alt text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-3">App Development</h3>
+            <p class="text-neutral-400 mb-6">
+              Build powerful, intuitive mobile applications for iOS and Android that enhance user engagement and satisfaction.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              Learn more
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Solution 3 -->
+          <div class="ai-feature-card p-8 card-hover stagger-item">
+            <div class="ai-feature-icon mb-6">
+              <i class="fas fa-robot text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-3">Chatbot Solutions</h3>
+            <p class="text-neutral-400 mb-6">
+              Implement intelligent chatbots that enhance customer service, answer queries 24/7, and streamline operations.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              Learn more
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Solution 4 -->
+          <div class="ai-feature-card p-8 card-hover stagger-item">
+            <div class="ai-feature-icon mb-6">
+              <i class="fas fa-shopping-cart text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-3">E-commerce</h3>
+            <p class="text-neutral-400 mb-6">
+              Create powerful online stores with seamless checkout experiences, inventory management, and payment processing.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              Learn more
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Solution 5 -->
+          <div class="ai-feature-card p-8 card-hover stagger-item">
+            <div class="ai-feature-icon mb-6">
+              <i class="fas fa-bullhorn text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-3">Digital & Print Marketing</h3>
+            <p class="text-neutral-400 mb-6">
+              Multimedia(photo & video) advertising, graphic design, drive growth through strategic SEO, content marketing, social media campaigns, and paid advertising strategies.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              Learn more
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Solution 6 -->
+          <div class="ai-feature-card p-8 card-hover stagger-item">
+            <div class="ai-feature-icon mb-6">
+              <i class="fas fa-chart-line text-2xl text-accent"></i>
+            </div>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-3">Analytics & Insights</h3>
+            <p class="text-neutral-400 mb-6">
+              Gain valuable insights from your data with advanced analytics solutions that help you make informed business decisions.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              Learn more
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Demo Section -->
+    <section id="ai-demo" class="py-20 md:py-32 bg-dark/80">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl mb-16">
+          <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">Interactive AI</span>
+          <h2 class="text-3xl md:text-5xl text-neutral-100 font-display font-medium mb-6 reveal-up" style="transition-delay: 0.1s">
+            Try our AI in action
+          </h2>
+          <p class="text-neutral-400 max-w-2xl reveal-up" style="transition-delay: 0.2s">
+            Experience the power of our AI solutions with these interactive demos
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+          <!-- AI Text Generator Demo -->
+          <div class="ai-demo-container reveal-up" style="transition-delay: 0.3s">
+            <div class="ai-demo-header">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
+                  <i class="fas fa-robot text-dark text-xs"></i>
+                </div>
+                <div class="font-medium">AI Text Generator</div>
+              </div>
+            </div>
+            <div class="ai-demo-content">
+              <p class="text-neutral-400 mb-4">Enter a topic or prompt, and our AI will generate content for you.</p>
+              <div class="ai-demo-input">
+                <input type="text" id="textGeneratorInput" placeholder="Enter a topic (e.g., 'Benefits of responsive web design')">
+                <button id="textGeneratorButton">Generate</button>
+              </div>
+              <div class="ai-demo-output" id="textGeneratorOutput">
+                <p class="text-neutral-400 text-sm">Your AI-generated content will appear here...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Chatbot Demo -->
+          <div class="ai-demo-container reveal-up" style="transition-delay: 0.4s">
+            <div class="ai-demo-header">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
+                  <i class="fas fa-comments text-dark text-xs"></i>
+                </div>
+                <div class="font-medium">AI Chatbot Demo</div>
+              </div>
+            </div>
+            <div class="ai-demo-content">
+              <p class="text-neutral-400 mb-4">Ask our chatbot about our services and see how it can help your customers.</p>
+              <div class="ai-chat-messages p-4 border border-neutral-800 rounded-sm bg-dark/30 h-40 overflow-y-auto mb-4" id="demoChatMessages">
+                <div class="ai-message ai-message-bot">
+                  Hello! I'm the Kāna demo chatbot. How can I help you today?
+                </div>
+              </div>
+              <div class="ai-demo-input">
+                <input type="text" id="demoChatInput" placeholder="Ask about our web design services...">
+                <button id="demoChatSend">Send</button>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2" id="demoQuickReplies"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Process Section -->
+    <section id="process" class="py-20 md:py-32">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl mb-16">
+          <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">How We Work</span>
+          <h2 class="text-3xl md:text-5xl text-neutral-100 font-display font-medium mb-6 reveal-up" style="transition-delay: 0.1s">
+            Our development process
+          </h2>
+          <p class="text-neutral-400 max-w-2xl reveal-up" style="transition-delay: 0.2s">
+            We follow a structured yet flexible approach to deliver exceptional results for every project
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <!-- Process Timeline -->
+          <div class="process-timeline">
+            <!-- Step 1 -->
+            <div class="process-step active" data-step="1">
+              <span class="text-xs uppercase tracking-widest text-accent mb-2 block">Step 01</span>
+              <h3 class="text-2xl text-neutral-100 font-display font-medium mb-3">Discovery & Research</h3>
+              <p class="text-neutral-400 mb-6">
+                We begin by deeply understanding your business, goals, challenges, and vision through collaborative workshops and research.
+              </p>
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Discovery" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="font-medium">Collaborative Workshops</div>
+                  <div class="text-sm text-neutral-400">Stakeholder Interviews</div>
+                </div>
+              </div>
+              <div class="border border-neutral-800 rounded-sm p-4 bg-dark/50">
+                <div class="text-sm text-neutral-400">
+                  <i class="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                  The discovery phase sets the foundation for success by aligning our understanding with your vision.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="process-step" data-step="2">
+              <span class="text-xs uppercase tracking-widest text-accent mb-2 block">Step 02</span>
+              <h3 class="text-2xl text-neutral-100 font-display font-medium mb-3">Strategy & Planning</h3>
+              <p class="text-neutral-400 mb-6">
+                We develop a comprehensive roadmap that outlines the technical approach, timeline, and resources needed for success.
+              </p>
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Strategy" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="font-medium">Strategic Planning</div>
+                  <div class="text-sm text-neutral-400">Roadmap Development</div>
+                </div>
+              </div>
+              <div class="border border-neutral-800 rounded-sm p-4 bg-dark/50">
+                <div class="text-sm text-neutral-400">
+                  <i class="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                  A well-defined strategy ensures efficient execution and alignment with business objectives.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="process-step" data-step="3">
+              <span class="text-xs uppercase tracking-widest text-accent mb-2 block">Step 03</span>
+              <h3 class="text-2xl text-neutral-100 font-display font-medium mb-3">Design & Prototyping</h3>
+              <p class="text-neutral-400 mb-6">
+                Our designers create intuitive, visually stunning interfaces that align with your brand and enhance user engagement.
+              </p>
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Design" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="font-medium">UX/UI Design</div>
+                  <div class="text-sm text-neutral-400">Prototyping & Testing</div>
+                </div>
+              </div>
+              <div class="border border-neutral-800 rounded-sm p-4 bg-dark/50">
+                <div class="text-sm text-neutral-400">
+                  <i class="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                  Design is not just how it looks, but how it works. We focus on both aesthetics and functionality.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div class="process-step" data-step="4">
+              <span class="text-xs uppercase tracking-widest text-accent mb-2 block">Step 04</span>
+              <h3 class="text-2xl text-neutral-100 font-display font-medium mb-3">Development</h3>
+              <p class="text-neutral-400 mb-6">
+                Our expert developers bring the designs to life using cutting-edge technologies and best coding practices.
+              </p>
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Development" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="font-medium">Agile Development</div>
+                  <div class="text-sm text-neutral-400">Iterative Implementation</div>
+                </div>
+              </div>
+              <div class="border border-neutral-800 rounded-sm p-4 bg-dark/50">
+                <div class="text-sm text-neutral-400">
+                  <i class="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                  We build with scalability, performance, and maintainability in mind for long-term success.
+                </div>
+              </div>
+            </div>
+            
+            <!-- Step 5 -->
+            <div class="process-step" data-step="5">
+              <span class="text-xs uppercase tracking-widest text-accent mb-2 block">Step 05</span>
+              <h3 class="text-2xl text-neutral-100 font-display font-medium mb-3">Launch & Optimization</h3>
+              <p class="text-neutral-400 mb-6">
+                We rigorously test, deploy, and continuously optimize your solution to ensure ongoing success and improvement.
+              </p>
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Launch" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="font-medium">Deployment & Testing</div>
+                  <div class="text-sm text-neutral-400">Continuous Improvement</div>
+                </div>
+              </div>
+              <div class="border border-neutral-800 rounded-sm p-4 bg-dark/50">
+                <div class="text-sm text-neutral-400">
+                  <i class="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                  Launch is just the beginning. We continuously optimize for peak performance and user satisfaction.
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Process Visualization -->
+          <div class="relative">
+            <div class="sticky top-32">
+              <div class="border border-neutral-800 rounded-sm overflow-hidden">
+                <div class="relative aspect-square">
+                  <img id="processImage" src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Discovery Phase" class="w-full h-full object-cover transition-opacity duration-500">
+                  <div class="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-70"></div>
+                  <div class="absolute bottom-0 left-0 p-6">
+                    <span id="processStepLabel" class="inline-block text-xs uppercase tracking-widest text-accent mb-2">Step 01</span>
+                    <h3 id="processStepTitle" class="text-2xl text-neutral-100 font-display font-medium">Discovery & Research</h3>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Process Navigation -->
+              <div class="flex justify-between mt-6">
+                <div class="flex gap-2">
+                  <button class="process-nav-btn w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent transition-colors" data-direction="prev">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                  </button>
+                  <button class="process-nav-btn w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent transition-colors" data-direction="next">
+                    <i class="fas fa-arrow-right text-sm"></i>
+                  </button>
+                </div>
+                
+                <div class="flex gap-2">
+                  <button class="process-dot-btn w-3 h-3 rounded-full bg-neutral-800 hover:bg-accent transition-colors active" data-step="1"></button>
+                  <button class="process-dot-btn w-3 h-3 rounded-full bg-neutral-800 hover:bg-accent transition-colors" data-step="2"></button>
+                  <button class="process-dot-btn w-3 h-3 rounded-full bg-neutral-800 hover:bg-accent transition-colors" data-step="3"></button>
+                  <button class="process-dot-btn w-3 h-3 rounded-full bg-neutral-800 hover:bg-accent transition-colors" data-step="4"></button>
+                  <button class="process-dot-btn w-3 h-3 rounded-full bg-neutral-800 hover:bg-accent transition-colors" data-step="5"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Work Section -->
+    <section id="work" class="py-20 md:py-32 bg-dark/80">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl mb-16">
+          <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">Our Work</span>
+          <h2 class="text-3xl text-neutral-100 md:text-5xl font-display font-medium mb-6 reveal-up" style="transition-delay: 0.1s">
+            Featured projects
+          </h2>
+          <p class="text-neutral-400 max-w-2xl reveal-up" style="transition-delay: 0.2s">
+            Explore our portfolio of innovative digital solutions that have transformed businesses across various industries.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
+          <!-- Project 1 -->
+          <div class="reveal-up" style="transition-delay: 0.3s">
+            <div class="image-hover rounded-sm overflow-hidden mb-6">
+              <img src="https://kaana.in/wp-content/uploads/2025/04/Rythumela-04-04-2025_11_36_AM.webp" alt="E-commerce Platform" class="w-full aspect-[4/3] object-cover">
+            </div>
+            <span class="text-xs uppercase tracking-widest text-neutral-400 mb-2 block">E-commerce</span>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">Farmers e-market multi-vendor Platform</h3>
+            <p class="text-neutral-400 mb-4">
+              A premium e-commerce platform with advanced product filtering, secure checkout, and inventory management.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              View case study
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Project 2 -->
+          <div class="reveal-up" style="transition-delay: 0.4s">
+            <div class="image-hover rounded-sm overflow-hidden mb-6">
+              <img src="https://kaana.in/wp-content/uploads/2025/04/145902eb-8f54-4173-9c6b-3ff645ee9d8a.webp" alt="Mobile Banking App" class="w-full aspect-[4/3] object-cover">
+            </div>
+            <span class="text-xs uppercase tracking-widest text-neutral-400 mb-2 block">Mobile App</span>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">GCSE UK course platform</h3>
+            <p class="text-neutral-400 mb-4">
+              A secure, intuitive mobile solution that redefines digital learning experiences.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              View case study
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Project 3 -->
+          <div class="reveal-up" style="transition-delay: 0.5s">
+            <div class="image-hover rounded-sm overflow-hidden mb-6">
+              <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=600&q=80" alt="Customer Support Chatbot" class="w-full aspect-[4/3] object-cover">
+            </div>
+            <span class="text-xs uppercase tracking-widest text-neutral-400 mb-2 block">Chatbot Solution</span>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">Developed as a study project</h3>
+            <p class="text-neutral-400 mb-4">
+              An intelligent chatbot that handles studentslanguage learning skills, reducing support costs by 45%.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              View case study
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          
+          <!-- Project 4 -->
+          <div class="reveal-up" style="transition-delay: 0.6s">
+            <div class="image-hover rounded-sm overflow-hidden mb-6">
+              <video 
+        class="w-full max-w-4xl rounded-2xl shadow-xl" 
+        autoplay 
+        muted 
+        loop 
+        playsinline
+    >
+        <source src="https://kaana.in/wp-content/uploads/2025/04/Elegance-Interiors-_-Luxury-Interior-Design-Studio.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+            </div>
+            <span class="text-xs uppercase tracking-widest text-neutral-400 mb-2 block">Web Design</span>
+            <h3 class="text-xl text-neutral-100 font-display font-medium mb-2">Elegance interiors Mobile App & WEb App</h3>
+            <p class="text-neutral-400 mb-4">
+              A responsive corporate app with interactive elements that increased lead generation by 60%.
+            </p>
+            <a href="#" class="text-sm text-accent flex items-center link-trigger">
+              View case study
+              <i class="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div class="mt-16 text-center reveal-up" style="transition-delay: 0.7s">
+          <a href="#" class="btn btn-outline link-trigger">
+            View all projects
+            <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 md:py-32">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">About Us</span>
+            <h2 class="text-3xl text-neutral-100 md:text-5xl font-display font-medium mb-6 reveal-up" style="transition-delay: 0.1s">
+              We build digital solutions for tomorrow
+            </h2>
+            <p class="text-neutral-400 mb-6 reveal-up" style="transition-delay: 0.2s">
+              Kāna is a technology solutions company focused on creating minimalist, cutting-edge digital experiences that solve complex business challenges.
+            </p>
+            <p class="text-neutral-400 mb-8 reveal-up" style="transition-delay: 0.3s">
+              Our team of experts combines technical excellence with design thinking to deliver solutions that are not only functional but also aesthetically refined and future-proof.
+            </p>
+            
+            <div class="grid grid-cols-2 gap-8 mb-8">
+              <div class="reveal-up" style="transition-delay: 0.4s">
+                <div class="text-3xl font-display font-medium mb-2 text-accent">5+</div>
+                <p class="text-neutral-400">Years of experience</p>
+              </div>
+              <div class="reveal-up" style="transition-delay: 0.5s">
+                <div class="text-3xl font-display font-medium mb-2 text-accent">20+</div>
+                <p class="text-neutral-400">Projects delivered</p>
+              </div>
+              <div class="reveal-up" style="transition-delay: 0.6s">
+                <div class="text-3xl font-display font-medium mb-2 text-accent">10+</div>
+                <p class="text-neutral-400">Team members</p>
+              </div>
+              <div class="reveal-up" style="transition-delay: 0.7s">
+                <div class="text-3xl font-display font-medium mb-2 text-accent">80%</div>
+                <p class="text-neutral-400">Industry score</p>
+              </div>
+            </div>
+            
+            <div class="reveal-up" style="transition-delay: 0.8s">
+              <a href="#" class="btn btn-primary link-trigger">
+                Learn more about us
+                <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+              </a>
+            </div>
+          </div>
+          
+          <div class="relative reveal-up" style="transition-delay: 0.4s">
+            <div class="border border-neutral-800 rounded-sm overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1000&q=80" alt="Our Team" class="w-full aspect-[4/5] object-cover">
+            </div>
+            
+            <!-- Floating Element -->
+            <div class="absolute -bottom-8 -left-8 md:-bottom-12 md:-left-12 bg-dark border border-neutral-800 rounded-sm p-6 max-w-xs">
+              <p class="text-neutral-300 italic mb-4">
+                "Our mission is to create digital solutions that are as elegant in their simplicity as they are powerful in their functionality."
+              </p>
+              <div class="flex items-center">
+                <div>
+                  <div class="font-medium">Navya Teja</div>
+                  <div class="text-sm text-neutral-400">Founder & CEO</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 md:py-32 bg-dark/80">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+          <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">Testimonials</span>
+          <h2 class="text-3xl text-neutral-100 md:text-5xl font-display font-medium mb-6 reveal-up" style="transition-delay: 0.1s">
+            What our clients say
+          </h2>
+        </div>
+        
+        <div class="minimal-slider" id="testimonialSlider">
+          <div class="minimal-slider-track">
+            <!-- Testimonial 1: Raithumela (E-commerce) -->
+            <div class="minimal-slider-item px-4">
+              <div class="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
+                <div class="text-accent mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <blockquote class="text-xl md:text-2xl font-display mb-8">
+                  Kāna rebuilt our e‑commerce store end‑to‑end and optimized checkout. Within 90 days, our GMV grew 38% and cart abandonment dropped by 26%. The stack is fast, reliable, and easy for our team to manage.
+                </blockquote>
+                <div class="flex items-center">
+                  <div>
+                    <div class="font-medium">Ashok Guri</div>
+                    <div class="text-sm text-neutral-400">Founder, Raithumela</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Testimonial 2: Majestic Developers (Real Estate) -->
+            <div class="minimal-slider-item px-4">
+              <div class="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
+                <div class="text-accent mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <blockquote class="text-xl md:text-2xl font-display mb-8">
+                  Kāna delivered a high‑converting site with lead capture and CRM integration. Qualified inquiries for our projects increased 2.1× in the first quarter after launch.
+                </blockquote>
+                <div class="flex items-center">
+                  <div>
+                    <div class="font-medium">Best Trevor</div>
+                    <div class="text-sm text-neutral-400">Managing Director, Majestic Developers</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Testimonial 3: Instagram Promotions -->
+            <div class="minimal-slider-item px-4">
+              <div class="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
+                <div class="text-accent mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <blockquote class="text-xl md:text-2xl font-display mb-8">
+                  Kāna set up our Instagram promotions strategy, creatives, and tracking. We grew followers by 62% and tripled post engagement in two months with measurable ROI.
+                </blockquote>
+                <div class="flex items-center">
+                  <div>
+                    <div class="font-medium">Amogh Vippili</div>
+                    <div class="text-sm text-neutral-400">Instagram Promotions</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Testimonial 4: Ananya Events (Website & Promotion) -->
+            <div class="minimal-slider-item px-4">
+              <div class="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
+                <div class="text-accent mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <blockquote class="text-xl md:text-2xl font-display mb-8">
+                  From branding to a fast website and targeted promos, Kāna helped us launch and scale. Inquiries and event bookings increased 47% within the first quarter.
+                </blockquote>
+                <div class="flex items-center">
+                  <div>
+                    <div class="font-medium">Santosh</div>
+                    <div class="text-sm text-neutral-400">Ananya Events</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="minimal-slider-nav flex justify-center mt-8">
+            <div class="minimal-slider-dot active" data-index="0"></div>
+            <div class="minimal-slider-dot" data-index="1"></div>
+            <div class="minimal-slider-dot" data-index="2"></div>
+            <div class="minimal-slider-dot" data-index="3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 md:py-32">
+      <div class="container mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div>
+            <span class="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">Contact Us</span>
+            <h2 class="text-3xl text-neutral-100 md:text-5xl font-display font-medium mb-6 reveal-up" style="transition-delay: 0.1s">
+              Let's start a project together
+            </h2>
+            <p class="text-neutral-400 mb-8 reveal-up" style="transition-delay: 0.2s">
+              Reach out to discuss how our minimalist, cutting-edge solutions can transform your business.
+            </p>
+            
+            <div class="space-y-8 mb-12">
+              <div class="flex items-start reveal-up" style="transition-delay: 0.3s">
+                <div class="w-12 h-12 flex items-center justify-center mr-4">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 22C16 18 20 14.4183 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 14.4183 8 18 12 22Z" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-100 mb-1">Location</h3>
+                  <p class="text-neutral-400"> Balaji plaza, 39-8-77/7, near Haritha Park, Muralinagar, Madhavadhara, Visakhapatnam, Andhra Pradesh 530007</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start reveal-up" style="transition-delay: 0.4s">
+                <div class="w-12 h-12 flex items-center justify-center mr-4">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-100 mb-1">Email</h3>
+                  <p class="text-neutral-400">kaana.srinivas@gmail.com</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start reveal-up" style="transition-delay: 0.5s">
+                <div class="w-12 h-12 flex items-center justify-center mr-4">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 5.5C3 14.0604 9.93959 21 18.5 21C18.8862 21 19.2691 20.9859 19.6483 20.9581C20.0359 20.9296 20.3999 20.7347 20.6219 20.4281L22.4 17.8C22.6424 17.4622 22.608 17.0191 22.3126 16.7236L19.2222 13.6332C18.9268 13.3378 18.4837 13.3034 18.146 13.5459L16.0282 15.0634C14.6752 14.4813 13.4096 13.4722 12.3419 12.1634C11.2742 10.8545 10.5239 9.40371 10.1466 7.97125L12.0126 6.10526C12.3504 5.76749 12.3848 5.32441 12.0894 5.02901L8.99894 1.93852C8.70355 1.64312 8.26046 1.60867 7.9227 1.95105L5.57175 3.94737C5.2396 4.23809 5.0518 4.66289 5.04201 5.10668C5.01424 5.56727 5 6.03015 5 6.5" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium text-neutral-100 mb-1">Phone</h3>
+                  <p class="text-neutral-400">+91 9008747926</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="reveal-up" style="transition-delay: 0.6s">
+              <h3 class="font-medium text-neutral-100 mb-4">Follow Us</h3>
+              <div class="flex gap-4">
+                <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+                  <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+                  <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+                  <i class="fab fa-github"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="reveal-up" style="transition-delay: 0.4s">
+            <form id="contactForm" class="border border-neutral-800 rounded-sm p-8">
+              <h3 class="text-xl text-neutral-100 font-display font-medium mb-6">Send us a message</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label for="name" class="block text-sm mb-2">Your Name</label>
+                  <input type="text" id="name" class="w-full bg-transparent border border-neutral-800 rounded-sm p-3 focus:border-accent focus:outline-none transition-colors" placeholder="Enter your name">
+                </div>
+                <div>
+                  <label for="email" class="block text-sm mb-2">Email Address</label>
+                  <input type="email" id="email" class="w-full bg-transparent border border-neutral-800 rounded-sm p-3 focus:border-accent focus:outline-none transition-colors" placeholder="Enter your email">
+                </div>
+              </div>
+              
+              <div class="mb-6">
+                <label for="subject" class="block text-sm mb-2">Subject</label>
+                <input type="text" id="subject" class="w-full bg-transparent border border-neutral-800 rounded-sm p-3 focus:border-accent focus:outline-none transition-colors" placeholder="Enter subject">
+              </div>
+              
+              <div class="mb-6">
+                <label for="message" class="block text-sm mb-2">Message</label>
+                <textarea id="message" class="w-full bg-transparent border border-neutral-800 rounded-sm p-3 h-32 focus:border-accent focus:outline-none transition-colors" placeholder="Enter your message"></textarea>
+              </div>
+              
+              <button type="submit" class="btn btn-primary w-full">
+                Send Message
+                <i class="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-neutral-800">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <div class="md:col-span-2">
+          <a href="#" class="text-xl font-display font-medium mb-4 inline-block link-trigger">
+            Kāna<span class="text-accent">.</span>
+          </a>
+          <p class="text-neutral-400 mb-6 max-w-md">
+            We create minimalist, cutting-edge digital solutions that transform businesses and elevate user experiences in the digital landscape.
+          </p>
+          <div class="flex gap-4">
+            <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
+              <i class="fab fa-github"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg text-neutral-100 font-medium mb-4">Solutions</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Web Design</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">App Development</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">E-commerce</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Chatbots</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Print & Digital Marketing</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Analytics</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg text-neutral-100 font-medium mb-4">Company</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">About Us</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Our Team</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger careers-trigger">Careers</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Blog</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="pt-8 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-neutral-400 mb-4 md:mb-0">© 2023 Kāna. All rights reserved.</p>
+        <div class="flex gap-6">
+          <a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Privacy Policy</a>
+          <a href="#" class="text-neutral-400 hover:text-accent transition-colors link-trigger">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <button class="fixed bottom-8 right-8 w-10 h-10 bg-accent rounded-sm flex items-center justify-center text-dark opacity-0 pointer-events-none transition-all duration-300" id="backToTop">
+    <i class="fas fa-arrow-up text-xs"></i>
+  </button>
+
+  <!-- AI Chat Widget -->
+  <div class="ai-chat-widget">
+    <div class="ai-chat-button" id="aiChatButton">
+      <i class="fas fa-robot text-xl"></i>
+    </div>
+    <div class="ai-chat-panel" id="aiChatPanel">
+      <div class="ai-chat-header">
+        <div>Kāna AI Assistant</div>
+        <div class="ai-chat-close" id="aiChatClose">×</div>
+      </div>
+      <div class="ai-chat-messages" id="aiChatMessages">
+        <div class="ai-message ai-message-bot">
+          Hello! I'm Kāna's AI assistant. How can I help you today?
+        </div>
+      </div>
+      <div class="ai-chat-input">
+        <input type="text" placeholder="Type your message..." id="aiChatInput">
+        <button id="aiChatSend">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const cursor = document.getElementById('cursor');
+    const cursorFollower = document.getElementById('cursorFollower');
+    const header = document.getElementById('header');
+    const menuButton = document.getElementById('menuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    const scrollProgress = document.getElementById('scrollProgress');
+    const backToTop = document.getElementById('backToTop');
+    const contactForm = document.getElementById('contactForm');
+    const staggerItems = document.querySelectorAll('.stagger-item');
+    const revealUpElements = document.querySelectorAll('.reveal-up');
+    const revealLeftElements = document.querySelectorAll('.reveal-left');
+    const revealRightElements = document.querySelectorAll('.reveal-right');
+    const scaleInElements = document.querySelectorAll('.scale-in');
+    const rotateInElements = document.querySelectorAll('.rotate-in');
+    const blurInElements = document.querySelectorAll('.blur-in');
+    const clipRevealElements = document.querySelectorAll('.clip-reveal');
+    const processSteps = document.querySelectorAll('.process-step');
+    const processNavBtns = document.querySelectorAll('.process-nav-btn');
+    const processDotBtns = document.querySelectorAll('.process-dot-btn');
+    const processImage = document.getElementById('processImage');
+    const processStepLabel = document.getElementById('processStepLabel');
+    const processStepTitle = document.getElementById('processStepTitle');
+    const heroTitle = document.getElementById('heroTitle');
+    const linkTriggers = document.querySelectorAll('.link-trigger');
+    const pageTransition = document.getElementById('pageTransition');
+    const aiChatButton = document.getElementById('aiChatButton');
+    const aiChatPanel = document.getElementById('aiChatPanel');
+    const aiChatClose = document.getElementById('aiChatClose');
+    const aiChatMessages = document.getElementById('aiChatMessages');
+    const aiChatInput = document.getElementById('aiChatInput');
+    const aiChatSend = document.getElementById('aiChatSend');
+    const aiTyping = document.getElementById('aiTyping');
+    const textGeneratorInput = document.getElementById('textGeneratorInput');
+    const textGeneratorButton = document.getElementById('textGeneratorButton');
+    const textGeneratorOutput = document.getElementById('textGeneratorOutput');
+    const demoChatInput = document.getElementById('demoChatInput');
+    const demoChatSend = document.getElementById('demoChatSend');
+    const demoChatMessages = document.getElementById('demoChatMessages');
+
+    // Process Images
+    const processImages = [
+      'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+    ];
+
+    // Process Step Titles
+    const processStepTitles = [
+      'Discovery & Research',
+      'Strategy & Planning',
+      'Design & Prototyping',
+      'Development',
+      'Launch & Optimization'
+    ];
+
+    // AI Chat Responses
+    const aiResponses = [
+      "I can help you implement digital solutions for your business. What specific challenges are you facing?",
+      "Our web design services can help you create a stunning online presence. Would you like to learn more?",
+      "Kāna's chatbot solutions can automate customer service tasks. Shall I explain how?",
+      "We specialize in creating custom e-commerce platforms tailored to your industry. What sector are you in?",
+      "Our Print & Digital Marketing strategies can help increase your online visibility. Would you like a demonstration?",
+      "I'd be happy to schedule a consultation with our specialists. When would work best for you?"
+    ];
+
+    // Demo Chat Responses
+    const demoChatResponses = {
+      "web design": "Our web design services create responsive, user-friendly websites that look great on all devices. We focus on creating intuitive navigation, fast loading times, and designs that convert visitors into customers. Would you like to see some examples of our recent work?",
+      "app": "Our app development team creates native and cross-platform mobile applications for iOS and Android. We handle everything from UI/UX design to development, testing, and deployment. Our apps are built with scalability and performance in mind. What type of app are you interested in developing?",
+      "chatbot": "Our chatbot solutions use advanced natural language processing to provide 24/7 customer support, answer FAQs, and even process orders or bookings. They can be integrated with your website, social media platforms, or messaging apps. Would you like to know more about implementation?",
+      "e-commerce": "Our e-commerce solutions include custom online stores with secure payment processing, inventory management, and marketing tools. We can build on platforms like Shopify or WooCommerce, or create custom solutions for unique requirements. What products do you sell online?",
+      "marketing": "Our Print & Digital Marketing services include Instagram boosts, Google Ads, Facebook Ads, YouTube promotions, SEO, content marketing, social media management, PPC advertising, and email campaigns. We create data-driven strategies that increase your online visibility and drive conversions. Which marketing channels are you currently using?",
+      
+      "contact": "You can reach our team at kaana.srinivas@gmail.com or call us at +91 90087 47926. Alternatively, you can fill out the contact form on our website, and we'll get back to you within 24 hours. Would you like me to connect you with a project manager now?"
+    };
+
+    // AI Text Generator Responses
+    const textGeneratorResponses = {
+      "web design": "Responsive web design is essential in today's multi-device world. It ensures your website provides an optimal viewing experience across a wide range of devices, from desktop computers to smartphones. Benefits include improved user experience, better SEO rankings, easier maintenance, increased conversion rates, and broader reach. By implementing responsive design principles, businesses can ensure their digital presence remains effective regardless of how users access their content.",
+      "app development": "Mobile app development creates powerful opportunities for businesses to engage customers and streamline operations. Well-designed apps can enhance brand loyalty, provide valuable user data, enable direct marketing channels, and create new revenue streams. The development process typically includes discovery, planning, UI/UX design, development, testing, and deployment phases. Choosing between native, hybrid, or web apps depends on your specific business needs, target audience, and functionality requirements.",
+      "e-commerce": "E-commerce platforms enable businesses to sell products and services online, reaching customers globally without geographical limitations. Key benefits include lower operational costs, 24/7 sales capability, personalized shopping experiences, and valuable customer insights through data analytics. Successful e-commerce implementations require secure payment processing, intuitive product navigation, mobile optimization, and seamless checkout experiences. Strategic inventory management and marketing automation further enhance the effectiveness of online stores.",
+      "chatbot": "Chatbots transform customer service by providing instant, 24/7 support without human intervention. These AI-powered assistants can handle multiple inquiries simultaneously, reducing wait times and improving customer satisfaction. Beyond answering FAQs, advanced chatbots can process orders, make recommendations, and collect valuable customer data. Implementation requires careful planning of conversation flows, integration with existing systems, and continuous training to improve accuracy. The return on investment typically comes from reduced support costs and increased customer engagement.",
+      "Print & Digital Marketing": "Print & Digital Marketing encompasses various online strategies to promote brands and connect with potential customers. Effective campaigns typically combine SEO, content marketing, social media, email marketing, and paid advertising. The advantages include precise audience targeting, real-time campaign optimization, measurable results, and cost-effectiveness compared to traditional marketing. Success requires understanding your audience, creating valuable content, optimizing for search engines, engaging on social platforms, and analyzing performance data to continuously refine your approach. Channels include Instagram boosts, Google Ads, Facebook Ads, YouTube promotions, PPC, SEO, content marketing, social media management, and email campaigns.",
+      "analytics": "Data analytics transforms raw information into actionable business insights. By implementing robust analytics solutions, companies can identify trends, understand customer behavior, optimize operations, and make data-driven decisions. The process typically involves data collection, cleaning, analysis, visualization, and interpretation. Modern analytics platforms offer real-time dashboards, predictive modeling, and machine learning capabilities to extract maximum value from your data. This strategic approach leads to improved efficiency, reduced costs, and competitive advantages in the marketplace."
+    };
+
+    // Initialize Grid Lines
+    function initGridLines() {
+      const gridLines = document.getElementById('gridLines');
+      
+      // Create horizontal lines
+      for (let i = 0; i < 10; i++) {
+        const line = document.createElement('div');
+        line.classList.add('grid-line', 'grid-line-horizontal');
+        line.style.top = `${(i + 1) * 10}%`;
+        gridLines.appendChild(line);
+      }
+      
+      // Create vertical lines
+      for (let i = 0; i < 10; i++) {
+        const line = document.createElement('div');
+        line.classList.add('grid-line', 'grid-line-vertical');
+        line.style.left = `${(i + 1) * 10}%`;
+        gridLines.appendChild(line);
+      }
+    }
+
+    // Initialize Particles
+    function initParticles() {
+      const canvas = document.getElementById('particles-canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas size
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Particle class
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5;
+          this.speedX = Math.random() * 0.5 - 0.25;
+          this.speedY = Math.random() * 0.5 - 0.25;
+          this.color = '#00D4FF';
+          this.opacity = Math.random() * 0.5 + 0.1;
+        }
+        
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          
+          if (this.x < 0 || this.x > canvas.width) {
+            this.speedX = -this.speedX;
+          }
+          
+          if (this.y < 0 || this.y > canvas.height) {
+            this.speedY = -this.speedY;
+          }
+        }
+        
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = this.opacity;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      // Create particles
+      const particles = [];
+      const particleCount = 100;
+      
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+      
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+        }
+        
+        // Draw connections
+        ctx.globalAlpha = 0.1;
+        ctx.strokeStyle = '#00D4FF';
+        ctx.lineWidth = 0.5;
+        
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 100) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    }
+
+    // Initialize Neural Network
+    function initNeuralNetwork() {
+      const canvas = document.getElementById('neural-network');
+      const ctx = canvas.getContext('2d');
+      
+      // Set canvas size
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Node class
+      class Node {
+        constructor(x, y, layer) {
+          this.x = x;
+          this.y = y;
+          this.radius = 3;
+          this.layer = layer;
+          this.connections = [];
+          this.color = '#00D4FF';
+        }
+        
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        connect(node) {
+          this.connections.push(node);
+        }
+        
+        drawConnections() {
+          ctx.strokeStyle = this.color;
+          ctx.lineWidth = 0.2;
+          ctx.globalAlpha = 0.2;
+          
+          for (let i = 0; i < this.connections.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.connections[i].x, this.connections[i].y);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      // Create neural network
+      const layers = 4;
+      const nodesPerLayer = [10, 14, 14, 8];
+      const nodes = [];
+      
+      // Create nodes
+      for (let layer = 0; layer < layers; layer++) {
+        for (let i = 0; i < nodesPerLayer[layer]; i++) {
+          const x = (layer + 1) * canvas.width / (layers + 1);
+          const y = (i + 1) * canvas.height / (nodesPerLayer[layer] + 1);
+          nodes.push(new Node(x, y, layer));
+        }
+      }
+      
+      // Create connections
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        
+        if (node.layer < layers - 1) {
+          const nextLayer = nodes.filter(n => n.layer === node.layer + 1);
+          
+          for (let j = 0; j < nextLayer.length; j++) {
+            node.connect(nextLayer[j]);
+          }
+        }
+      }
+      
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw connections
+        for (let i = 0; i < nodes.length; i++) {
+          nodes[i].drawConnections();
+        }
+        
+        // Draw nodes
+        for (let i = 0; i < nodes.length; i++) {
+          nodes[i].draw();
+        }
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    }
+
+    // Initialize Hero Swiper
+    function initHeroSwiper() {
+      new Swiper('.hero-swiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+        },
+        pagination: {
+          el: '.hero-swiper-pagination',
+          clickable: true,
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 1,
+          },
+          768: {
+            slidesPerView: 1,
+          },
+          1024: {
+            slidesPerView: 1,
+          },
+        }
+      });
+    }
+
+    // Custom Cursor
+    function initCustomCursor() {
+      if (window.innerWidth > 768) {
+        document.addEventListener('mousemove', (e) => {
+          cursor.style.left = e.clientX + 'px';
+          cursor.style.top = e.clientY + 'px';
+          
+          setTimeout(() => {
+            cursorFollower.style.left = e.clientX + 'px';
+            cursorFollower.style.top = e.clientY + 'px';
+          }, 100);
+        });
+
+        document.addEventListener('mousedown', () => {
+          cursor.classList.add('active');
+          cursorFollower.classList.add('active');
+        });
+
+        document.addEventListener('mouseup', () => {
+          cursor.classList.remove('active');
+          cursorFollower.classList.remove('active');
+        });
+
+        const links = document.querySelectorAll('a, button');
+        links.forEach(link => {
+          link.addEventListener('mouseenter', () => {
+            cursor.classList.add('active');
+            cursorFollower.classList.add('active');
+          });
+          
+          link.addEventListener('mouseleave', () => {
+            cursor.classList.remove('active');
+            cursorFollower.classList.remove('active');
+          });
+        });
+      }
+    }
+
+    // Scroll Progress
+    function initScrollProgress() {
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (scrollTop / scrollHeight) * 100;
+        
+        scrollProgress.style.transform = `scaleX(${progress / 100})`;
+        
+        if (scrollTop > 50) {
+          header.classList.add('bg-dark/80');
+          header.classList.add('backdrop-blur-md');
+        } else {
+          header.classList.remove('bg-dark/80');
+          header.classList.remove('backdrop-blur-md');
+        }
+        
+        // Show/hide back to top button
+        if (scrollTop > 300) {
+          backToTop.classList.add('opacity-100');
+          backToTop.classList.remove('pointer-events-none');
+        } else {
+          backToTop.classList.remove('opacity-100');
+          backToTop.classList.add('pointer-events-none');
+        }
+        
+        // Update active nav link based on scroll position
+        const sections = document.querySelectorAll('section[id]');
+        let currentSection = '';
+        
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionHeight = section.offsetHeight;
+          if (scrollTop >= sectionTop && scrollTop < sectionTop + sectionHeight) {
+            currentSection = section.getAttribute('id');
+          }
+        });
+        
+        navLinks.forEach(link => {
+          link.classList.remove('text-accent');
+          if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('text-accent');
+          }
+        });
+        
+        mobileNavLinks.forEach(link => {
+          link.classList.remove('text-accent');
+          if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('text-accent');
+          }
+        });
+      });
+    }
+
+    // Reveal on Scroll
+    function initRevealOnScroll() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      revealUpElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      revealLeftElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      revealRightElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      scaleInElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      rotateInElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      blurInElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      clipRevealElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+      staggerItems.forEach(element => {
+        observer.observe(element);
+      });
+    }
+
+    // Mobile Menu Toggle
+    function initMobileMenu() {
+      menuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('opacity-0');
+        mobileMenu.classList.toggle('pointer-events-none');
+        
+        // Toggle menu button appearance
+        const spans = menuButton.querySelectorAll('span');
+        if (!mobileMenu.classList.contains('opacity-0')) {
+          spans[0].style.transform = 'translateY(3px) rotate(45deg)';
+          spans[1].style.transform = 'translateY(-3px) rotate(-45deg)';
+        } else {
+          spans[0].style.transform = 'none';
+          spans[1].style.transform = 'none';
+        }
+      });
+
+      // Close mobile menu when clicking a link (except careers)
+      mobileNavLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          // Don't close if it's a careers trigger
+          if (link.classList.contains('careers-trigger')) {
+            e.preventDefault();
+            // Close mobile menu first
+            mobileMenu.classList.add('opacity-0');
+            mobileMenu.classList.add('pointer-events-none');
+            
+            // Reset menu button appearance
+            const spans = menuButton.querySelectorAll('span');
+            spans[0].style.transform = 'none';
+            spans[1].style.transform = 'none';
+            
+            // Open careers modal after a small delay
+            setTimeout(() => {
+              openCareersModal();
+            }, 300);
+            return;
+          }
+          
+          mobileMenu.classList.add('opacity-0');
+          mobileMenu.classList.add('pointer-events-none');
+          
+          // Reset menu button appearance
+          const spans = menuButton.querySelectorAll('span');
+          spans[0].style.transform = 'none';
+          spans[1].style.transform = 'none';
+        });
+      });
+    }
+
+    // Careers Modal
+    let careersModal, careersCloseBtn;
+    let careersModalInitialized = false;
+
+    function openCareersModal() {
+      const modal = document.getElementById('careersModal');
+      if (!modal) return;
+      modal.classList.add('active');
+      document.body.classList.add('modal-open');
+      // Reset scroll position
+      modal.scrollTop = 0;
+    }
+
+    function closeCareersModal() {
+      const modal = document.getElementById('careersModal');
+      if (!modal) return;
+      modal.classList.remove('active');
+      document.body.classList.remove('modal-open');
+    }
+
+    function initCareersModal() {
+      careersModal = document.getElementById('careersModal');
+      careersCloseBtn = document.getElementById('careersCloseBtn');
+      
+      if (careersModalInitialized || !careersModal) return;
+      careersModalInitialized = true;
+
+      const careersTriggers = document.querySelectorAll('.careers-trigger');
+
+      // Open modal on careers trigger click
+      careersTriggers.forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          openCareersModal();
+        });
+      });
+
+      // Close modal on close button click
+      if (careersCloseBtn) {
+        careersCloseBtn.addEventListener('click', () => {
+          closeCareersModal();
+        });
+      }
+
+      // Close modal when clicking outside (on backdrop)
+      careersModal.addEventListener('click', (e) => {
+        if (e.target === careersModal) {
+          closeCareersModal();
+        }
+      });
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && careersModal && careersModal.classList.contains('active')) {
+          closeCareersModal();
+        }
+      });
+
+      // Close modal when clicking apply button (it will navigate to contact)
+      const careersApplyBtns = document.querySelectorAll('.careers-apply-btn');
+      careersApplyBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          closeCareersModal();
+        });
+      });
+    }
+
+    // Testimonial Slider
+    function initTestimonialSlider() {
+      const slider = document.getElementById('testimonialSlider');
+      const track = slider.querySelector('.minimal-slider-track');
+      const dots = slider.querySelectorAll('.minimal-slider-dot');
+      let currentSlide = 0;
+      
+      function goToSlide(index) {
+        track.style.transform = `translateX(-${index * 100}%)`;
+        
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+        
+        currentSlide = index;
+      }
+      
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          goToSlide(index);
+        });
+      });
+      
+      // Auto slide
+      setInterval(() => {
+        const nextSlide = (currentSlide + 1) % dots.length;
+        goToSlide(nextSlide);
+      }, 5000);
+    }
+
+    // Process Timeline
+    function initProcessTimeline() {
+      let currentStep = 0;
+      
+      function updateProcessStep(index) {
+        // Update active step
+        processSteps.forEach((step, i) => {
+          step.classList.toggle('active', i === index);
+        });
+        
+        // Update process dots
+        processDotBtns.forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+        
+        // Update process image
+        processImage.style.opacity = 0;
+        setTimeout(() => {
+          processImage.src = processImages[index];
+          processStepLabel.textContent = `Step 0${index + 1}`;
+          processStepTitle.textContent = processStepTitles[index];
+          processImage.style.opacity = 1;
+        }, 300);
+        
+        currentStep = index;
+      }
+      
+      // Process navigation buttons
+      processNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const direction = btn.getAttribute('data-direction');
+          let newStep = currentStep;
+          
+          if (direction === 'prev') {
+            newStep = (currentStep - 1 + processSteps.length) % processSteps.length;
+          } else {
+            newStep = (currentStep + 1) % processSteps.length;
+          }
+          
+          updateProcessStep(newStep);
+        });
+      });
+      
+      // Process dot buttons
+      processDotBtns.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          updateProcessStep(index);
+        });
+      });
+      
+      // Scroll to activate steps
+      const processObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const step = parseInt(entry.target.getAttribute('data-step')) - 1;
+            updateProcessStep(step);
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      processSteps.forEach(step => {
+        processObserver.observe(step);
+      });
+    }
+
+    // Magnetic Buttons
+    function initMagneticButtons() {
+      const magneticItems = document.querySelectorAll('.magnetic-wrap');
+      
+      magneticItems.forEach(magneticWrap => {
+        const magneticArea = magneticWrap.querySelector('.magnetic-area');
+        
+        magneticWrap.addEventListener('mousemove', (e) => {
+          const rect = magneticWrap.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          
+          const distanceX = e.clientX - centerX;
+          const distanceY = e.clientY - centerY;
+          
+          magneticArea.style.transform = `translate(${distanceX * 0.2}px, ${distanceY * 0.2}px)`;
+        });
+        
+        magneticWrap.addEventListener('mouseleave', () => {
+          magneticArea.style.transform = 'translate(0, 0)';
+        });
+      });
+    }
+
+    // Split Text Animation
+    function initSplitText() {
+      if (typeof SplitType === 'undefined') return;
+      const splitText = new SplitType('#heroTitle', { types: 'chars' });
+      // Ensure visibility even if GSAP is unavailable
+      heroTitle.classList.add('active');
+      if (typeof gsap !== 'undefined' && splitText && splitText.chars) {
+        gsap.from(splitText.chars, {
+          opacity: 0,
+          y: 50,
+          stagger: 0.02,
+          duration: 0.8,
+          ease: 'power4.out'
+        });
+      }
+    }
+
+    // Link Click Animation
+    function initLinkClickAnimation() {
+      linkTriggers.forEach(link => {
+        link.addEventListener('click', (e) => {
+          // Create ripple effect
+          const ripple = document.createElement('div');
+          ripple.classList.add('link-click-ripple');
+          ripple.style.left = `${e.clientX}px`;
+          ripple.style.top = `${e.clientY}px`;
+          document.body.appendChild(ripple);
+          
+          // Remove ripple after animation
+          setTimeout(() => {
+            ripple.remove();
+          }, 600);
+          
+          // If it's an anchor link, don't trigger page transition
+          if (link.getAttribute('href') && link.getAttribute('href').startsWith('#')) {
+            return;
+          }
+          
+          // Trigger page transition for non-anchor links
+          if (link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+            e.preventDefault();
+            
+            pageTransition.classList.add('active');
+            
+            setTimeout(() => {
+              window.location.href = link.getAttribute('href');
+            }, 500);
+          }
+        });
+      });
+    }
+
+    // AI Chat Widget
+    function initAiChatWidget() {
+      aiChatButton.addEventListener('click', () => {
+        aiChatPanel.classList.add('active');
+      });
+      
+      aiChatClose.addEventListener('click', () => {
+        aiChatPanel.classList.remove('active');
+      });
+      
+      function addUserMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('ai-message', 'ai-message-user');
+        messageElement.textContent = message;
+        aiChatMessages.appendChild(messageElement);
+        aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      }
+      
+      function addBotMessage(message) {
+        // Add typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.classList.add('ai-typing');
+        
+        for (let i = 0; i < 3; i++) {
+          const dot = document.createElement('div');
+          dot.classList.add('ai-typing-dot');
+          typingIndicator.appendChild(dot);
+        }
+        
+        aiChatMessages.appendChild(typingIndicator);
+        aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        
+        // Remove typing indicator and add message after delay
+        setTimeout(() => {
+          typingIndicator.remove();
+          
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('ai-message', 'ai-message-bot');
+          messageElement.textContent = message;
+          aiChatMessages.appendChild(messageElement);
+          aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+        }, 1500);
+      }
+      
+      function handleUserMessage() {
+        const message = aiChatInput.value.trim();
+        
+        if (message) {
+          addUserMessage(message);
+          aiChatInput.value = '';
+          
+          // Get random response
+          const response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+          addBotMessage(response);
+        }
+      }
+      
+      aiChatSend.addEventListener('click', handleUserMessage);
+      
+      aiChatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleUserMessage();
+        }
+      });
+    }
+
+    // AI Text Generator
+    function initAiTextGenerator() {
+      function generateResponse(inputRaw) {
+        const input = inputRaw.trim().toLowerCase();
+        if (!input) return;
+        textGeneratorOutput.innerHTML = '<div class="ai-typing"><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div></div>';
+        setTimeout(() => {
+          let response = '';
+          for (const keyword in textGeneratorResponses) {
+            if (input.includes(keyword)) {
+              response = textGeneratorResponses[keyword];
+              break;
+            }
+          }
+          if (!response) {
+            // Lightly tailored generic scaffold
+            response = `Here’s a concise outline to get you started on ${inputRaw}:
+
+1) Goal and audience
+2) Key benefits and differentiators
+3) Implementation steps (stack, timeline, owners)
+4) Launch checklist (QA, SEO, analytics)
+5) Growth plan (iterations, experiments, KPIs)`;
+          }
+          // Stream the response for realism
+          const container = document.createElement('div');
+          container.className = 'text-light whitespace-pre-line';
+          textGeneratorOutput.innerHTML = '';
+          textGeneratorOutput.appendChild(container);
+          let i = 0;
+          const interval = setInterval(() => {
+            container.textContent += response.charAt(i);
+            i++;
+            if (i >= response.length) clearInterval(interval);
+          }, 12);
+        }, 500);
+      }
+
+      textGeneratorButton.addEventListener('click', () => {
+        generateResponse(textGeneratorInput.value);
+      });
+      textGeneratorInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') generateResponse(textGeneratorInput.value);
+      });
+    }
+
+    // Demo Chat
+    function initDemoChat() {
+      function addUserMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('ai-message', 'ai-message-user');
+        messageElement.textContent = message;
+        demoChatMessages.appendChild(messageElement);
+        demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+      }
+      
+      function addBotMessage(message) {
+        // Add typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.classList.add('ai-typing');
+        
+        for (let i = 0; i < 3; i++) {
+          const dot = document.createElement('div');
+          dot.classList.add('ai-typing-dot');
+          typingIndicator.appendChild(dot);
+        }
+        
+        demoChatMessages.appendChild(typingIndicator);
+        demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+        
+        // Remove typing indicator and add message after delay with streaming
+        setTimeout(() => {
+          typingIndicator.remove();
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('ai-message', 'ai-message-bot');
+          demoChatMessages.appendChild(messageElement);
+          demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+          let i = 0;
+          const interval = setInterval(() => {
+            messageElement.textContent += message.charAt(i);
+            i++;
+            demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+            if (i >= message.length) clearInterval(interval);
+          }, 12);
+        }, 500);
+      }
+      
+      function respond(message) {
+        // Find matching response
+        let response = "I'm sorry, I don't have information about that specific topic. Would you like to know about our web design, app development, chatbot, e-commerce, or Print & Digital Marketing services?";
+        for (const keyword in demoChatResponses) {
+          if (message.toLowerCase().includes(keyword)) {
+            response = demoChatResponses[keyword];
+            break;
+          }
+        }
+        addBotMessage(response);
+      }
+
+      function handleUserMessage() {
+        const message = demoChatInput.value.trim();
+        
+        if (message) {
+          addUserMessage(message);
+          demoChatInput.value = '';
+          respond(message);
+        }
+      }
+      
+      demoChatSend.addEventListener('click', handleUserMessage);
+      
+      demoChatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleUserMessage();
+        }
+      });
+
+      // Quick replies
+      const quickReplies = [
+        { label: 'Services', text: 'web design, app, chatbot, e-commerce, marketing' },
+        { label: 'Timeline', text: 'How long does a project take?' },
+        { label: 'Portfolio', text: 'Can I see portfolio examples?' }
+      ];
+      const quickWrap = document.getElementById('demoQuickReplies');
+      if (quickWrap) {
+        quickReplies.forEach(q => {
+          const btn = document.createElement('button');
+          btn.className = 'text-xs px-3 py-1 border border-neutral-700 rounded-sm hover:border-accent hover:text-accent transition-colors';
+          btn.textContent = q.label;
+          btn.addEventListener('click', () => {
+            addUserMessage(q.label);
+            respond(q.text);
+          });
+          quickWrap.appendChild(btn);
+        });
+      }
+    }
+
+    // AI Typing Animation
+    function initAiTypingAnimation() {
+      if (!aiTyping) return;
+      const prompts = [
+        'How can I help transform your business with digital solutions today?',
+        'Ask me about web design, apps, chatbots, or e‑commerce.',
+        'Type a topic and I’ll draft a quick outline for you.'
+      ];
+      let idx = 0;
+      function type(text, cb) {
+        aiTyping.textContent = '';
+        let i = 0;
+        (function loop() {
+          if (i < text.length) {
+            aiTyping.textContent += text.charAt(i++);
+            setTimeout(loop, 35);
+          } else if (cb) cb();
+        })();
+      }
+      function cycle() {
+        type(prompts[idx], () => setTimeout(() => {
+          idx = (idx + 1) % prompts.length;
+          cycle();
+        }, 1600));
+      }
+      cycle();
+    }
+
+    // Back to Top
+    function initBackToTop() {
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }
+    
+    // Contact Form
+    function initContactForm() {
+      contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // In a real application, you would handle form submission here
+        alert('Thank you for your message! We will get back to you soon.');
+        contactForm.reset();
+      });
+    }
+
+    // Initialize everything when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      initGridLines();
+      initParticles();
+      initNeuralNetwork();
+      initHeroSwiper();
+      initCustomCursor();
+      initScrollProgress();
+      initRevealOnScroll();
+      initMobileMenu();
+      initCareersModal();
+      initTestimonialSlider();
+      initProcessTimeline();
+      initMagneticButtons();
+      // Removed split-text animation to prevent line wrapping glitches
+      initLinkClickAnimation();
+      initAiChatWidget();
+      initAiTextGenerator();
+      initDemoChat();
+      initAiTypingAnimation();
+      initBackToTop();
+      initContactForm();
+    });
+  </script>
+</body>
+</html>

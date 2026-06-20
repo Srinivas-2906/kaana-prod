@@ -13,7 +13,6 @@ out/
 .env
 .env.*
 !.env.example
-!.env.production.example
 
 # SQLite & local data
 data/
@@ -26,16 +25,23 @@ data/
 .vscode/
 *.log
 
-# Firebase
-.firebase/
-firebase-debug.log
-
 # Vercel
 .vercel/
 
-# Docker local
-docker-compose.override.yml
-
-# Demo HTML at repo root only (not app entrypoints)
+# Demo HTML at repo root
 /kaana_*.html
 /*_demo.html
+
+# Other local apps — not deployed from this repo (kaana only)
+botiq/
+botiq-whatsapp-server/
+kaana-platform/
+propcrm/
+inventory-wms/
+ui-review/
+
+# Legacy deployment configs for other apps
+render.yaml
+firebase.json
+.firebaserc
+scripts/build-frontends.sh

@@ -1,80 +1,58 @@
 # Kaana — GCP deployment
 
-Auto-deploy on every push to `main` via **Cloud Build** → **Cloud Run** (API) + **Firebase Hosting** (3 frontends).
+Auto-deploy the **Next.js marketing site** (`kaana/`) on every push to `main`.
+
+```
+git push main → Cloud Build → Cloud Run (kaana-web)
+```
 
 ## Stack
 
-| App | Folder | Hosted on |
-|-----|--------|-----------|
-| Marketing site | `kaana-platform/` | Firebase (`kaana-prod-marketing`) |
-| WhatsApp inbox | `botiq/` | Firebase (`kaana-prod-inbox`) |
-| CRM | `propcrm/` | Firebase (`kaana-prod-crm`) |
-| API + SQLite | `botiq-whatsapp-server/` | Cloud Run (`kaana-api`) |
+| Component | Path | Hosted on |
+|-----------|------|-----------|
+| Marketing site | `kaana/` | Cloud Run (`kaana-web`) |
 
-SQLite is replicated to GCS via [Litestream](https://litestream.io/) (`LITESTREAM_BUCKET=kaana-prod-db`).
+Other apps in this workspace (`kaana-platform`, `botiq`, `propcrm`, API) are **not deployed** from this repo.
 
 ## One-time setup
 
 ```bash
-# From repo root
-chmod +x scripts/*.sh
+chmod +x scripts/gcp-first-time-setup.sh
 ./scripts/gcp-first-time-setup.sh
 ```
 
-Then connect GitHub:
+Connect GitHub:
 
 1. [Cloud Build Triggers](https://console.cloud.google.com/cloud-build/triggers?project=kaana-prod)
 2. **Connect repository** → `Srinivas-2906/kaana-prod`
-3. **Create trigger** → Push to branch `^main$` → Configuration: `cloudbuild.yaml`
+3. **Create trigger** → Push to `^main$` → Config: `cloudbuild.yaml`
 
 ## After first deploy
 
-1. Get Cloud Run URL:
-   ```bash
-   gcloud run services describe kaana-api --region asia-south1 --format='value(status.url)'
-   ```
+```bash
+gcloud run services describe kaana-web --region asia-south1 --format='value(status.url)'
+```
 
-2. Update `cloudbuild.yaml` substitutions (`_PUBLIC_URL`, `_VITE_*`, etc.) with real URLs.
+Map **kaana.in** in Cloud Run → **Manage custom domains** (SSL included).
 
-3. Fill secrets in [Secret Manager](https://console.cloud.google.com/security/secret-manager?project=kaana-prod):
-   - `kaana-whatsapp-access-token`
-   - `kaana-whatsapp-phone-id`
-   - `kaana-whatsapp-verify-token`
-   - `kaana-admin-password`
-   - (others as needed)
-
-4. Push to `main` again to redeploy with correct URLs.
-
-## Custom domains (optional)
-
-| Domain | Point to |
-|--------|----------|
-| `kaana.in` | Firebase site `kaana-prod-marketing` |
-| `inbox.kaana.in` | Firebase site `kaana-prod-inbox` |
-| `crm.kaana.in` | Firebase site `kaana-prod-crm` |
-| `api.kaana.in` | Cloud Run custom domain mapping |
-
-## Manual deploy (without git push)
+## Manual deploy (without git)
 
 ```bash
 gcloud builds submit --config cloudbuild.yaml .
 ```
 
-## Local API in Docker
+## Local Docker test
 
 ```bash
-cd botiq-whatsapp-server
-docker build -t kaana-api .
-docker run --rm -p 3002:3002 --env-file .env kaana-api
+cd kaana
+docker build -t kaana-web .
+docker run --rm -p 8080:8080 kaana-web
 ```
 
-Without `LITESTREAM_BUCKET`, the API runs with local SQLite only (fine for dev).
+Open [http://localhost:8080](http://localhost:8080).
 
-## Files added for hosting
+## Files
 
-- `botiq-whatsapp-server/Dockerfile` — API container
-- `botiq-whatsapp-server/docker-entrypoint.sh` — Litestream + Node startup
-- `cloudbuild.yaml` — CI/CD pipeline
-- `firebase.json` / `.firebaserc` — 3 Firebase Hosting targets
-- `scripts/build-frontends.sh` — builds all Vite apps with prod env
-- `scripts/gcp-first-time-setup.sh` — one-time GCP bootstrap
+- `kaana/Dockerfile` — Next.js standalone container
+- `kaana/next.config.ts` — `output: "standalone"` for Cloud Run
+- `cloudbuild.yaml` — build image + deploy on push
