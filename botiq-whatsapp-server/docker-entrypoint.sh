@@ -4,38 +4,12 @@ set -e
 mkdir -p /data
 DB_PATH="${DATABASE_PATH:-/data/kaana.db}"
 
-# If set, replicate SQLite to GCS using Litestream.
-# Required IAM: the Cloud Run service account must have access to the bucket.
 if [ -n "${LITESTREAM_BUCKET:-}" ]; then
   cat > /tmp/litestream.yml <<EOF
 dbs:
   - path: ${DB_PATH}
     replicas:
-      - type: gcs
-        bucket: ${LITESTREAM_BUCKET}
-        path: kaana.db
-EOF
-
-  litestream restore -if-replica-exists -config /tmp/litestream.yml
-  exec litestream replicate -config /tmp/litestream.yml -exec "node /app/src/index.js"
-fi
-
-exec node /app/src/index.js
-
-#!/bin/sh
-set -e
-
-mkdir -p /data
-DB_PATH="${DATABASE_PATH:-/data/kaana.db}"
-
-if [ -n "$LITESTREAM_BUCKET" ]; then
-  cat > /tmp/litestream.yml <<EOF
-dbs:
-  - path: ${DB_PATH}
-    replicas:
-      - type: gcs
-        bucket: ${LITESTREAM_BUCKET}
-        path: kaana.db
+      - url: gs://${LITESTREAM_BUCKET}/kaana.db
 EOF
 
   litestream restore -if-replica-exists -config /tmp/litestream.yml
