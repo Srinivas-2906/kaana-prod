@@ -5,7 +5,7 @@ mkdir -p /data
 DB_PATH="${DATABASE_PATH:-/data/kaana.db}"
 
 if [ -n "${LITESTREAM_BUCKET:-}" ]; then
-  REPLICA_URL="gs://${LITESTREAM_BUCKET}/kaana.db"
+  REPLICA_URL="gcs://${LITESTREAM_BUCKET}/kaana.db"
 
   # Restore snapshot if it exists.
   litestream restore -if-replica-exists -o "${DB_PATH}" "${REPLICA_URL}"
