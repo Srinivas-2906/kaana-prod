@@ -5,15 +5,13 @@ mkdir -p /data
 DB_PATH="${DATABASE_PATH:-/data/kaana.db}"
 
 if [ -n "${LITESTREAM_BUCKET:-}" ]; then
-  cat > /tmp/litestream.yml <<EOF
-dbs:
-  - path: ${DB_PATH}
-    replicas:
-      - url: gs://${LITESTREAM_BUCKET}/kaana.db
-EOF
+  REPLICA_URL="gs://${LITESTREAM_BUCKET}/kaana.db"
 
-  litestream restore -if-replica-exists -config /tmp/litestream.yml
-  exec litestream replicate -config /tmp/litestream.yml -exec "node /app/src/index.js"
+  # Restore snapshot if it exists.
+  litestream restore -if-replica-exists -o "${DB_PATH}" "${REPLICA_URL}"
+
+  # Replicate while running the API process.
+  exec litestream replicate -exec "node /app/src/index.js" "${DB_PATH}" "${REPLICA_URL}"
 fi
 
 exec node /app/src/index.js
