@@ -1,0 +1,59 @@
+.lead-capture {
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.lead-capture-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.lead-capture-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.lead-capture input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--border);
+  background: var(--surface-1, var(--bg));
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.lead-capture-fine {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+.lead-capture-error {
+  font-size: 13px;
+  color: #e55;
+  margin-top: 10px;
+}
+
+.lead-capture-done {
+  text-align: center;
+}
+
+.lead-capture-success {
+  font-size: 15px;
+  color: var(--accent-bright);
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .lead-capture-fields {
+    grid-template-columns: 1fr;
+  }
+}

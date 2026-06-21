@@ -1,30 +1,31 @@
 steps:
-  - id: build-kaana
+  # ── Build & deploy marketing (kaana.in) ────────────────────────────────
+  - id: build-marketing
     name: gcr.io/cloud-builders/docker
     args:
       - build
       - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:$BUILD_ID
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:$BUILD_ID
       - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:latest
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:latest
       - ./kaana
 
-  - id: push-kaana
+  - id: push-marketing
     name: gcr.io/cloud-builders/docker
     args:
       - push
       - --all-tags
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing
 
-  - id: deploy-kaana
+  - id: deploy-marketing
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: bash
     args:
       - -c
       - |
         set -euo pipefail
-        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:$BUILD_ID"
-        gcloud run deploy ${_SERVICE} \
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:$BUILD_ID"
+        gcloud run deploy ${_MARKETING_SERVICE} \
           --image "$$IMAGE" \
           --region ${_REGION} \
           --platform managed \
@@ -35,14 +36,230 @@ steps:
           --memory 512Mi \
           --cpu 1
 
+  # ── Build & deploy Platform (app.kaana.in) ─────────────────────────────
+  - id: build-platform
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:latest
+      - --build-arg
+      - VITE_API_URL=${_VITE_API_URL}
+      - --build-arg
+      - VITE_BILLING_URL=${_VITE_BILLING_URL}
+      - --build-arg
+      - VITE_BOTIQ_URL=${_VITE_BOTIQ_URL}
+      - --build-arg
+      - VITE_CRM_URL=${_VITE_CRM_URL}
+      - --build-arg
+      - VITE_LISTINGS_URL=${_VITE_LISTINGS_URL}
+      - --build-arg
+      - VITE_WHATSAPP_LINK=${_VITE_WHATSAPP_LINK}
+      - --build-arg
+      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - ./kaana-platform
+
+  - id: push-platform
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform
+
+  - id: deploy-platform
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:$BUILD_ID"
+        gcloud run deploy ${_PLATFORM_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1
+
+  # ── Build & deploy Inbox (inbox.kaana.in) ──────────────────────────────
+  - id: build-inbox
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:latest
+      - --build-arg
+      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - ./botiq
+
+  - id: push-inbox
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox
+
+  - id: deploy-inbox
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:$BUILD_ID"
+        gcloud run deploy ${_INBOX_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1
+
+  # ── Build & deploy CRM (crm.kaana.in) ──────────────────────────────────
+  - id: build-crm
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:latest
+      - --build-arg
+      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - ./propcrm
+
+  - id: push-crm
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm
+
+  - id: deploy-crm
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:$BUILD_ID"
+        gcloud run deploy ${_CRM_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1
+
+  # ── Build & deploy API (api.kaana.in) ──────────────────────────────────
+  - id: build-api
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:latest
+      - ./botiq-whatsapp-server
+
+  - id: push-api
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api
+
+  - id: deploy-api
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$BUILD_ID"
+        gcloud run deploy ${_API_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 3002 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 512Mi \
+          --cpu 1 \
+          --service-account ${_API_SERVICE_ACCOUNT} \
+          --set-env-vars "NODE_ENV=production,PORT=3002,DATABASE_PATH=/data/kaana.db,LITESTREAM_BUCKET=${_DB_BUCKET},PUBLIC_URL=${_PUBLIC_URL},LISTINGS_BASE_URL=${_LISTINGS_BASE_URL},WHATSAPP_PROVIDER=meta,META_API_VERSION=v21.0,KAANA_SELF_SERVE=false,KAANA_CONCIERGE_SPOTS=10,JWT_EXPIRES=7d,TYPING_DELAY_MS=350,KAANA_PLATFORM_URL=${_KAANA_PLATFORM_URL},KAANA_BOTIQ_URL=${_KAANA_BOTIQ_URL}" \
+          --set-secrets "JWT_SECRET=${_SECRET_JWT}:latest,WHATSAPP_ACCESS_TOKEN=${_SECRET_WHATSAPP_TOKEN}:latest,WHATSAPP_PHONE_NUMBER_ID=${_SECRET_WHATSAPP_PHONE}:latest,WHATSAPP_VERIFY_TOKEN=${_SECRET_WHATSAPP_VERIFY}:latest,PLATFORM_ADMIN_EMAIL=${_SECRET_ADMIN_EMAIL}:latest,PLATFORM_ADMIN_PASSWORD=${_SECRET_ADMIN_PASSWORD}:latest"
+
 substitutions:
   _REGION: asia-south1
   _ARTIFACT_REPO: kaana
-  _SERVICE: kaana-web
+
+  _MARKETING_SERVICE: kaana-web
+  _PLATFORM_SERVICE: kaana-platform
+  _INBOX_SERVICE: kaana-inbox
+  _CRM_SERVICE: kaana-crm
+  _API_SERVICE: kaana-api
+
+  # Public URLs
+  _PUBLIC_URL: https://api.kaana.in
+  _LISTINGS_BASE_URL: https://api.kaana.in/listings
+  _KAANA_PLATFORM_URL: https://app.kaana.in
+  _KAANA_BOTIQ_URL: https://inbox.kaana.in
+
+  # Frontend build-time envs
+  _VITE_API_URL: https://api.kaana.in/api/platform
+  _VITE_BILLING_URL: https://api.kaana.in/api/billing
+  _VITE_BOTIQ_URL: https://inbox.kaana.in
+  _VITE_CRM_URL: https://crm.kaana.in
+  _VITE_LISTINGS_URL: https://api.kaana.in/listings
+  _VITE_WHATSAPP_LINK: https://wa.me/91XXXXXXXXXX
+  _VITE_WHATSAPP_API: https://api.kaana.in/api
+  _VITE_PLATFORM_URL: https://app.kaana.in
+
+  # API runtime
+  _DB_BUCKET: kaana-prod-db
+  _API_SERVICE_ACCOUNT: kaana-api-runner@kaana-prod.iam.gserviceaccount.com
+
+  # Secrets (Secret Manager)
+  _SECRET_JWT: kaana-jwt-secret
+  _SECRET_WHATSAPP_TOKEN: kaana-whatsapp-access-token
+  _SECRET_WHATSAPP_PHONE: kaana-whatsapp-phone-id
+  _SECRET_WHATSAPP_VERIFY: kaana-whatsapp-verify-token
+  _SECRET_ADMIN_EMAIL: kaana-admin-email
+  _SECRET_ADMIN_PASSWORD: kaana-admin-password
 
 options:
   logging: CLOUD_LOGGING_ONLY
 
 images:
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:$BUILD_ID
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/kaana:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:latest

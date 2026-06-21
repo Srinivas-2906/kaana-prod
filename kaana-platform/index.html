@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0f19" />
+    <meta name="description" content="Kaana — WhatsApp bots, CRM dashboard, and mini-sites for every business. Go live in 24 hours." />
+    <meta name="robots" content="index,follow" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:title" content="Kaana — WhatsApp automation for modern businesses" />
+    <meta property="og:description" content="WhatsApp bot, shared inbox, CRM, and mini-sites for every business. Go live in 24 hours." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kaana.in/" />
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&h=630&q=80"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kaana — WhatsApp automation for modern businesses" />
+    <meta name="twitter:description" content="WhatsApp bot, shared inbox, CRM, and mini-sites for every business. Go live in 24 hours." />
+    <meta
+      name="twitter:image"
+      content="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&h=630&q=80"
+    />
+
+    <link rel="canonical" href="https://kaana.in/" />
+    <title>Kaana — WhatsApp automation for modern businesses</title>
+    <script>
+      (function () {
+        try {
+          var p = localStorage.getItem('kaana-theme');
+          /* Default to light — our market (Indian SMBs) is light-first, WhatsApp-familiar */
+          var dark = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          var theme = dark ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#0b0f19' : '#ffffff');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,44 @@
+.ultimate-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.ultimate-spotlight {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: var(--spot-opacity, 0.2);
+}
+
+.ultimate-spotlight-1 {
+  width: min(70vw, 560px);
+  height: min(70vw, 560px);
+  top: -12%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, var(--ambient-1) 0%, transparent 70%);
+}
+
+.ultimate-spotlight-2 {
+  width: min(50vw, 400px);
+  height: min(50vw, 400px);
+  bottom: 5%;
+  right: 10%;
+  background: radial-gradient(circle, var(--ambient-2) 0%, transparent 72%);
+  opacity: calc(var(--spot-opacity, 0.2) * 0.6);
+}
+
+.ultimate-grid-lines {
+  display: none;
+}
+
+.ultimate-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 0%, transparent 50%, var(--bg) 100%);
+  opacity: 0.9;
+}

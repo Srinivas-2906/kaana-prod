@@ -33,15 +33,9 @@ data/
 /*_demo.html
 
 # Other local apps — not deployed from this repo (kaana only)
-botiq/
-botiq-whatsapp-server/
-kaana-platform/
-propcrm/
+# (Now deploying all of these)
 inventory-wms/
 ui-review/
 
 # Legacy deployment configs for other apps
 render.yaml
-firebase.json
-.firebaserc
-scripts/build-frontends.sh
