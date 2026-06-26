@@ -1,6 +1,7 @@
 import { getClient, getRequestTenantId, runWithTenantAsync, checkTenantLimits, incrementUsage } from './tenantContext.js';
 import { getTenantById } from './tenantContext.js';
 import { handleIndustryMessage } from './industryBot.js';
+import { handleClinicMessage } from './clinicBot.js';
 import { searchProperties, getPropertyById, buildListingsUrl } from './data/properties.js';
 import { getSession, resetSession, patchSession } from './sessions.js';
 import {
@@ -297,6 +298,9 @@ async function confirmBooking(phone, contactText) {
 
 export async function handleIncomingMessage(phone, rawBody, buttonPayload, incomingMessageId, tenantId = getRequestTenantId()) {
   const tenant = getTenantById(tenantId);
+  if (tenant?.industry === 'clinic') {
+    return handleClinicMessage(phone, rawBody, buttonPayload, incomingMessageId, tenant);
+  }
   if (tenant && tenant.industry && tenant.industry !== 'real-estate') {
     return handleIndustryMessage(phone, rawBody, buttonPayload, incomingMessageId, tenant);
   }

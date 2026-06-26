@@ -1,9 +1,11 @@
-import { BOTIQ, CRM, getToken } from './api';
+import { BOTIQ, CRM, CLINIC, getToken } from './api';
 
-type AppKey = 'botiq' | 'crm';
+type AppKey = 'botiq' | 'crm' | 'clinic';
 
 function appUrl(app: AppKey) {
-  return app === 'botiq' ? BOTIQ : CRM;
+  if (app === 'botiq') return BOTIQ;
+  if (app === 'clinic') return CLINIC;
+  return CRM;
 }
 
 function originOf(url: string) {

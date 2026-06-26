@@ -29,6 +29,14 @@ export function optionId(option, index) {
 }
 
 async function sendMessage(to, payload) {
+  if (process.env.WHATSAPP_DRY_RUN === 'true') {
+    const preview = payload.type === 'text' ? payload.text?.body
+      : payload.type === 'interactive' ? payload.interactive?.body?.text
+      : payload.type;
+    console.log(`💬 [dry-run → ${normalizeTo(to)}]: ${String(preview || payload.type).slice(0, 200)}`);
+    return { messages: [{ id: `dry-${Date.now()}` }] };
+  }
+
   const { phoneId, token } = getCredentials();
   if (!phoneId || !token) throw new Error('WhatsApp not configured for this tenant');
 

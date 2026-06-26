@@ -9,6 +9,10 @@ import { getTenantByWhatsAppPhoneId } from './tenantContext.js';
 import apiRouter from './api.js';
 import platformRouter from './routes/platform.js';
 import billingRouter from './routes/billing.js';
+import demoRouter from './routes/demo.js';
+import { corsMiddleware } from './middleware/cors.js';
+import { getWhatsAppDisplayNumber, setWhatsAppDisplayNumber } from './whatsappConfig.js';
+import { startReminderScheduler } from './services/clinicReminders.js';
 
 initDatabase();
 
@@ -20,18 +24,14 @@ const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'propbot_verify_token'
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use((_req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Tenant-Slug');
-  if (_req.method === 'OPTIONS') return res.sendStatus(204);
-  next();
-});
+app.use(corsMiddleware);
 
 app.use('/api/platform', platformRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/demo', demoRouter);
 app.use('/api', apiRouter);
 app.use('/listings', express.static(path.join(__dirname, '../public/listings')));
+app.use('/services', express.static(path.join(__dirname, '../public/services')));
 
 app.get('/', (_req, res) => {
   res.json({
@@ -158,13 +158,24 @@ app.listen(PORT, () => {
   console.log('🏠 Kaana Platform — WhatsApp Server');
   console.log(`   Provider:   ${activeProvider}`);
   console.log(`   API:        http://localhost:${PORT}/api`);
+  console.log(`   Demo chat:  POST http://localhost:${PORT}/api/demo/whatsapp`);
   console.log(`   Listings:   http://localhost:${PORT}/listings`);
   console.log(`   Webhook:    http://localhost:${PORT}/webhook`);
-  console.log(`   Dashboard:  polls /api/conversations & /api/leads`);
+  startReminderScheduler(60000);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('   Clinic login: demo@dentacare.in / demo1234');
+  }
   console.log('');
   if (activeProvider === 'meta') {
     verifyMetaTokenOnStart();
   }
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n⚠️  Port ${PORT} is already in use. Stop the other server first:`);
+    console.error(`   lsof -ti :${PORT} | xargs kill\n`);
+    process.exit(1);
+  }
+  throw err;
 });
 
 async function verifyMetaTokenOnStart() {
@@ -179,7 +190,13 @@ async function verifyMetaTokenOnStart() {
       { headers: { Authorization: `Bearer ${token}` } },
     );
     if (res.ok) {
-      console.log('✅ Meta access token valid');
+      const data = await res.json();
+      if (data.display_phone_number) {
+        setWhatsAppDisplayNumber(data.display_phone_number);
+        console.log('✅ Meta access token valid · WhatsApp:', data.display_phone_number);
+      } else {
+        console.log('✅ Meta access token valid');
+      }
       return;
     }
     console.error('\n⚠️  Meta access token EXPIRED or invalid — bot cannot reply on WhatsApp');

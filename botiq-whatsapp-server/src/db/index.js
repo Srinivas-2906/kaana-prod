@@ -235,12 +235,104 @@ export function initDatabase() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_site_leads_created ON site_leads(created_at);
+
+    CREATE TABLE IF NOT EXISTS patients (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      phone_digits TEXT NOT NULL,
+      email TEXT DEFAULT '',
+      age INTEGER,
+      gender TEXT DEFAULT '',
+      chief_complaint TEXT DEFAULT '',
+      is_returning INTEGER DEFAULT 0,
+      tags TEXT DEFAULT '[]',
+      notes TEXT DEFAULT '[]',
+      last_visit TEXT,
+      source TEXT DEFAULT 'WhatsApp',
+      conversation_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(tenant_id, phone_digits),
+      FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS appointments (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL,
+      patient_id TEXT NOT NULL,
+      service TEXT DEFAULT '',
+      service_id TEXT,
+      scheduled_at TEXT NOT NULL,
+      duration_min INTEGER DEFAULT 30,
+      status TEXT DEFAULT 'requested',
+      assigned_doctor TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      source TEXT DEFAULT 'WhatsApp',
+      reminder_sent INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+      FOREIGN KEY (patient_id) REFERENCES patients(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_patients_tenant ON patients(tenant_id);
+    CREATE INDEX IF NOT EXISTS idx_appointments_tenant ON appointments(tenant_id);
+    CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(tenant_id, scheduled_at);
+    CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
   `);
 
   migrateSiteLeadsColumns();
+  migrateClinicExtensions();
+  syncDentaCareDemo();
   seedDefaults();
   migrateCatalogs();
   return db;
+}
+
+function migrateClinicExtensions() {
+  const reminderCols = db.prepare('PRAGMA table_info(reminders)').all().map((c) => c.name);
+  if (!reminderCols.includes('appointment_id')) {
+    db.exec(`ALTER TABLE reminders ADD COLUMN appointment_id TEXT`);
+  }
+  if (!reminderCols.includes('reminder_type')) {
+    db.exec(`ALTER TABLE reminders ADD COLUMN reminder_type TEXT DEFAULT 'followup'`);
+  }
+  if (!reminderCols.includes('patient_id')) {
+    db.exec(`ALTER TABLE reminders ADD COLUMN patient_id TEXT`);
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS patient_payments (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL,
+      patient_id TEXT NOT NULL,
+      appointment_id TEXT,
+      amount REAL NOT NULL DEFAULT 0,
+      method TEXT DEFAULT 'cash',
+      reference TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      status TEXT DEFAULT 'paid',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+      FOREIGN KEY (patient_id) REFERENCES patients(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL,
+      user_id TEXT,
+      action TEXT NOT NULL,
+      entity_type TEXT,
+      entity_id TEXT,
+      detail TEXT DEFAULT '{}',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_payments_tenant ON patient_payments(tenant_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_tenant ON audit_log(tenant_id);
+  `);
 }
 
 function migrateSiteLeadsColumns() {
@@ -269,6 +361,108 @@ function slugify(name) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 48) || 'business';
+}
+
+function syncDentaCareDemo() {
+  const tenantId = 'denta-care';
+  const settings = {
+    botName: 'Reception',
+    agentName: 'Reception',
+    agentPhone: '',
+    city: 'Visakhapatnam',
+    emoji: '🦷',
+    doctorName: 'Dr. D. Ajit',
+    doctorQualification: 'BDS, MDS — Oral Medicine & Radiology',
+    experience: '18 years',
+    address: '#39-11-70, 1st Floor, Shankar Plaza, Muralinagar, Visakhapatnam',
+    hoursLabel: 'Mon–Sat · 10 AM – 1 PM · 5 PM – 9 PM',
+    consultationFee: 100,
+    clinicHours: { start: 10, end: 21, slotMin: 30 },
+  };
+
+  const existing = db.prepare('SELECT id FROM tenants WHERE id = ?').get(tenantId);
+  if (!existing) {
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 14);
+    db.prepare(`
+      INSERT INTO tenants (id, slug, name, industry, plan, status, trial_ends_at, settings, whatsapp_phone_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      tenantId,
+      'denta-care',
+      'Denta Care Dental Clinic',
+      'clinic',
+      'growth',
+      'active',
+      trialEnd.toISOString(),
+      JSON.stringify(settings),
+      process.env.WHATSAPP_PHONE_NUMBER_ID || null,
+    );
+    seedCatalogForTenant(tenantId, 'clinic');
+  } else {
+    db.prepare('UPDATE tenants SET name = ?, settings = ? WHERE id = ?').run(
+      'Denta Care Dental Clinic',
+      JSON.stringify(settings),
+      tenantId,
+    );
+  }
+
+  const demoAccounts = [
+    { id: 'user-denta-care', email: 'demo@dentacare.in', name: 'Dr. D. Ajit' },
+    { id: 'user-denta-care-alt', email: 'clinic@demo.kaana.in', name: 'Dr. D. Ajit' },
+  ];
+  const hash = bcrypt.hashSync('demo1234', 10);
+  for (const acct of demoAccounts) {
+    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(acct.email);
+    if (!user) {
+      db.prepare(`
+        INSERT INTO users (id, tenant_id, email, password_hash, name, role, is_platform_admin)
+        VALUES (?, ?, ?, ?, ?, 'owner', 0)
+      `).run(acct.id, tenantId, acct.email, hash, acct.name);
+    } else {
+      db.prepare('UPDATE users SET tenant_id = ?, name = ?, password_hash = ? WHERE email = ?').run(
+        tenantId, acct.name, hash, acct.email,
+      );
+    }
+  }
+
+  seedDentaCareSampleData(tenantId);
+}
+
+function seedDentaCareSampleData(tenantId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const existing = db.prepare(`
+    SELECT COUNT(*) AS c FROM appointments WHERE tenant_id = ? AND date(scheduled_at) = date(?)
+  `).get(tenantId, today)?.c ?? 0;
+  if (existing >= 2) return;
+
+  const samples = [
+    { id: 'pat-demo-1', name: 'Lakshmi Reddy', phone: '9876543210', complaint: 'Tooth pain', service: 'Conservative Dentistry', hour: 10, min: 30, status: 'requested', source: 'WhatsApp' },
+    { id: 'pat-demo-2', name: 'Rajesh Kumar', phone: '9876543211', complaint: 'Denture consult', service: 'Complete/Partial Dentures', hour: 11, min: 0, status: 'confirmed', source: 'Walk-in' },
+    { id: 'pat-demo-3', name: 'Priya Sharma', phone: '9876543212', complaint: 'Smile makeover', service: 'Cosmetic Dentistry', hour: 17, min: 30, status: 'confirmed', source: 'WhatsApp' },
+  ];
+
+  for (const s of samples) {
+    const pat = db.prepare('SELECT id FROM patients WHERE id = ?').get(s.id);
+    if (!pat) {
+      db.prepare(`
+        INSERT INTO patients (id, tenant_id, name, phone, phone_digits, chief_complaint, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        s.id, tenantId, s.name,
+        `+91 ${s.phone.slice(0, 5)} ${s.phone.slice(5)}`,
+        s.phone, s.complaint, s.source,
+      );
+    }
+    const apptExists = db.prepare('SELECT id FROM appointments WHERE patient_id = ? AND date(scheduled_at) = date(?)').get(s.id, today);
+    if (!apptExists) {
+      const scheduledAt = `${today}T${String(s.hour).padStart(2, '0')}:${String(s.min).padStart(2, '0')}:00`;
+      db.prepare(`
+        INSERT INTO appointments (id, tenant_id, patient_id, service, scheduled_at, status, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(`appt-${s.id}`, tenantId, s.id, s.service, scheduledAt, s.status, s.source);
+    }
+  }
 }
 
 function seedDefaults() {

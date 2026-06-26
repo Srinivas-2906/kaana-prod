@@ -2,9 +2,10 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/platform'
 const BILLING = import.meta.env.VITE_BILLING_URL || 'http://localhost:3002/api/billing';
 const BOTIQ = import.meta.env.VITE_BOTIQ_URL || 'http://localhost:5174';
 const CRM = import.meta.env.VITE_CRM_URL || 'http://localhost:5175';
+const CLINIC = import.meta.env.VITE_CLINIC_URL || 'http://localhost:5185';
 const WHATSAPP_API = import.meta.env.VITE_WHATSAPP_API || 'http://localhost:3002/api';
 
-export { API, BILLING, BOTIQ, CRM, WHATSAPP_API };
+export { API, BILLING, BOTIQ, CRM, CLINIC, WHATSAPP_API };
 
 export type AuthUser = {
   id: string;

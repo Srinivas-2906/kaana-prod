@@ -1,0 +1,36 @@
+name: kaana-web-map-multi
+defaultService: global/backendServices/kaana-web-backend-classic
+hostRules:
+  - hosts:
+      - kaana.in
+      - www.kaana.in
+    pathMatcher: marketing
+  - hosts:
+      - app.kaana.in
+    pathMatcher: platform
+  - hosts:
+      - inbox.kaana.in
+    pathMatcher: inbox
+  - hosts:
+      - crm.kaana.in
+    pathMatcher: crm
+  - hosts:
+      - clinic.kaana.in
+    pathMatcher: clinic
+  - hosts:
+      - api.kaana.in
+    pathMatcher: api
+pathMatchers:
+  - name: marketing
+    defaultService: global/backendServices/kaana-web-backend-classic
+  - name: platform
+    defaultService: global/backendServices/kaana-platform-backend
+  - name: inbox
+    defaultService: global/backendServices/kaana-inbox-backend
+  - name: crm
+    defaultService: global/backendServices/kaana-crm-backend
+  - name: clinic
+    defaultService: global/backendServices/kaana-clinic-backend
+  - name: api
+    defaultService: global/backendServices/kaana-api-backend
+

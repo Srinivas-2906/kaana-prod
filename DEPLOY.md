@@ -12,7 +12,7 @@ git push main → Cloud Build → Cloud Run (kaana-web)
 |-----------|------|-----------|
 | Marketing site | `kaana/` | Cloud Run (`kaana-web`) |
 
-Other apps in this workspace (`kaana-platform`, `botiq`, `propcrm`, API) are **not deployed** from this repo.
+This repo can also deploy the Kaana suite apps (platform/inbox/CRM/clinic/API) as separate Cloud Run services via `cloudbuild.yaml`.
 
 ## One-time setup
 
@@ -40,6 +40,22 @@ Map **kaana.in** in Cloud Run → **Manage custom domains** (SSL included).
 ```bash
 gcloud builds submit --config cloudbuild.yaml .
 ```
+
+## Deploy only the clinic desk (kaana-clinic)
+
+If you want to deploy *just* the clinic desk without redeploying everything else:
+
+```bash
+gcloud builds submit --config cloudbuild.kaana-clinic.yaml .
+```
+
+After deploy, confirm the live URL:
+
+```bash
+gcloud run services describe kaana-clinic --region asia-south1 --format='value(status.url)'
+```
+
+To make it available at `clinic.kaana.in`, map the custom domain in Cloud Run (or use the HTTPS LB URL-map approach in `scripts/url-map-multi.yaml`).
 
 ## Local Docker test
 

@@ -54,6 +54,8 @@ steps:
       - --build-arg
       - VITE_CRM_URL=${_VITE_CRM_URL}
       - --build-arg
+      - VITE_CLINIC_URL=${_VITE_CLINIC_URL}
+      - --build-arg
       - VITE_LISTINGS_URL=${_VITE_LISTINGS_URL}
       - --build-arg
       - VITE_WHATSAPP_LINK=${_VITE_WHATSAPP_LINK}
@@ -171,6 +173,49 @@ steps:
           --memory 256Mi \
           --cpu 1
 
+  # ── Build & deploy Clinic desk (clinic.kaana.in) ───────────────────────
+  - id: build-clinic
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic:latest
+      - --build-arg
+      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - --build-arg
+      - VITE_INBOX_URL=${_VITE_BOTIQ_URL}
+      - ./clinic-crm
+
+  - id: push-clinic
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic
+
+  - id: deploy-clinic
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic:$BUILD_ID"
+        gcloud run deploy ${_CLINIC_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1
+
   # ── Build & deploy API (api.kaana.in) ──────────────────────────────────
   - id: build-api
     name: gcr.io/cloud-builders/docker
@@ -219,6 +264,7 @@ substitutions:
   _PLATFORM_SERVICE: kaana-platform
   _INBOX_SERVICE: kaana-inbox
   _CRM_SERVICE: kaana-crm
+  _CLINIC_SERVICE: kaana-clinic
   _API_SERVICE: kaana-api
 
   # Public URLs
@@ -232,6 +278,7 @@ substitutions:
   _VITE_BILLING_URL: https://api.kaana.in/api/billing
   _VITE_BOTIQ_URL: https://inbox.kaana.in
   _VITE_CRM_URL: https://crm.kaana.in
+  _VITE_CLINIC_URL: https://clinic.kaana.in
   _VITE_LISTINGS_URL: https://api.kaana.in/listings
   _VITE_WHATSAPP_LINK: https://wa.me/91XXXXXXXXXX
   _VITE_WHATSAPP_API: https://api.kaana.in/api
@@ -261,5 +308,7 @@ images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:latest
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:$BUILD_ID
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/crm:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic:latest
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:$BUILD_ID
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/api:latest

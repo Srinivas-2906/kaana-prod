@@ -87,6 +87,7 @@ export function DashboardPage() {
   const slug = profile.tenant?.slug;
   const locked = !!pending;
   const concierge = profile.platform?.conciergeMode ?? true;
+  const isClinic = profile.tenant?.industry === 'clinic';
 
   return (
     <main className="page-main dash-page" id="main-content">
@@ -175,10 +176,12 @@ export function DashboardPage() {
           </article>
 
           <article className={`dash-card ${locked ? 'is-locked' : ''}`}>
-            <span className="dash-icon">🎯</span>
-            <h2>Kaana CRM</h2>
-            <p>Pipeline, leads from WhatsApp, bookings, follow-ups.</p>
-            <button type="button" className="btn btn-accent" disabled={locked} onClick={() => openAppWithSSO('crm')}>Open CRM →</button>
+            <span className="dash-icon">{isClinic ? '🦷' : '🎯'}</span>
+            <h2>{isClinic ? 'Clinic front desk' : 'Kaana CRM'}</h2>
+            <p>{isClinic ? 'Today\'s appointments, patient cards, walk-in booking.' : 'Pipeline, leads from WhatsApp, bookings, follow-ups.'}</p>
+            <button type="button" className="btn btn-accent" disabled={locked} onClick={() => openAppWithSSO(isClinic ? 'clinic' : 'crm')}>
+              {isClinic ? 'Open clinic desk →' : 'Open CRM →'}
+            </button>
           </article>
 
           <article className={`dash-card ${locked ? 'is-locked' : ''}`}>

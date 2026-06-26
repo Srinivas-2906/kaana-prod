@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
+    "test:clinic": "bash ../scripts/test-clinic-local.sh",
     "test-token": "node scripts/test-meta-token.js",
     "verify-webhook": "bash scripts/verify-webhook.sh"
   },

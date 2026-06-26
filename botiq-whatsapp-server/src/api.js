@@ -7,9 +7,17 @@ import {
   getConversations, getLeads, addMessage, updateConversation, updateLead, getLeadById,
   summarizeConversation, getAnalytics, assignConversation, createBroadcast, createReminder, getReminders,
 } from './store.js';
+import {
+  getPatients, getPatientById, createPatient, updatePatient, getPatientTimeline,
+  getAppointments, getAppointmentById, createAppointment, updateAppointment,
+  getTodayStats, getAvailableSlots,
+} from './services/clinicStore.js';
+import { createPayment, getPayments, getPaymentSummary } from './services/clinicPayments.js';
+import { logAudit, getAuditLog } from './services/clinicAudit.js';
 import { getCatalogItems, getDb, parseSettings } from './db/index.js';
 import { sendText, showTyping, delay } from './messaging.js';
-import { getSession, patchSession } from './sessions.js';
+import { getWhatsAppDisplayNumber } from './whatsappConfig.js';
+import { prepareBookingResume } from './clinicBookingResume.js';
 import { authMiddleware, optionalAuth, requirePlatformAdmin } from './middleware/auth.js';
 import { requireLiveTenant } from './middleware/requireLiveTenant.js';
 
@@ -56,8 +64,45 @@ function getPropertiesForTenant(tenantId, filters) {
   return items.map(catalogToProperty);
 }
 
+function clientPayload() {
+  const client = getClient();
+  const biz = getWhatsAppDisplayNumber();
+  return {
+    ...client,
+    whatsappNumber: client.whatsappNumber || biz || '',
+    whatsappBusinessNumber: biz || client.whatsappNumber || '',
+  };
+}
+
 router.get('/client', optionalAuth, (_req, res) => {
-  res.json(getClient());
+  res.json(clientPayload());
+});
+
+/** Save booking progress, then open the same WhatsApp chat to continue. */
+router.get('/clinic/resume-booking', (req, res) => {
+  const tenantSlug = req.query.tenant;
+  const from = req.query.from;
+  const serviceId = req.query.service;
+
+  if (!tenantSlug || !from || !serviceId) {
+    return res.status(400).send('This link is incomplete. Please open services from your WhatsApp chat again.');
+  }
+
+  const tenant = getTenantBySlug(tenantSlug);
+  if (!tenant) {
+    return res.status(404).send('Clinic not found.');
+  }
+
+  const phone = String(from).replace(/\D/g, '');
+  const title = prepareBookingResume(phone, tenant, serviceId);
+  if (!title) {
+    return res.status(404).send('Service not found.');
+  }
+
+  const bizPhone = getWhatsAppDisplayNumber();
+  const target = bizPhone ? `https://wa.me/${bizPhone}` : 'https://wa.me/';
+
+  res.redirect(302, target);
 });
 
 router.get('/properties', optionalAuth, (req, res) => {
@@ -79,7 +124,7 @@ router.get('/properties', optionalAuth, (req, res) => {
   const tenantId = req.user?.tenantId || getClient().id;
 
   const items = getPropertiesForTenant(tenantId, { bhk, budgetMin, budgetMax });
-  res.json({ client: getClient(), total: items.length, properties: items });
+  res.json({ client: clientPayload(), total: items.length, properties: items });
 });
 
 router.get('/catalog', authMiddleware, requireLiveTenant, (req, res) => {
@@ -242,6 +287,106 @@ router.post('/api-keys', authMiddleware, requireLiveTenant, (req, res) => {
     id, req.user.tenantId, rawKey.slice(0, 12), hash, req.body?.label || 'Default',
   );
   res.status(201).json({ id, key: rawKey, label: req.body?.label || 'Default' });
+});
+
+// ── Clinic: patients & appointments ─────────────────────────────────────
+
+router.get('/clinic/today', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  res.json(getTodayStats(req.user.tenantId));
+});
+
+router.get('/patients', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  res.json(getPatients(req.user.tenantId, { search: req.query.search }));
+});
+
+router.get('/patients/:id', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const timeline = getPatientTimeline(req.params.id, req.user.tenantId);
+  if (!timeline) return res.status(404).json({ error: 'Patient not found' });
+  res.json(timeline);
+});
+
+router.post('/patients', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const { name, phone, email, age, gender, chiefComplaint, isReturning, source } = req.body ?? {};
+  if (!name || !phone) return res.status(400).json({ error: 'Name and phone required' });
+  try {
+    const patient = createPatient(req.user.tenantId, {
+      name, phone, email, age, gender, chiefComplaint, isReturning, source: source || 'Walk-in',
+    });
+    logAudit(req.user.tenantId, req.user.sub, 'create', 'patient', patient.id, { name });
+    res.status(201).json(patient);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.patch('/patients/:id', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const patient = updatePatient(req.params.id, req.user.tenantId, req.body ?? {});
+  if (!patient) return res.status(404).json({ error: 'Patient not found' });
+  logAudit(req.user.tenantId, req.user.sub, 'update', 'patient', patient.id, req.body ?? {});
+  res.json(patient);
+});
+
+router.get('/appointments', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  res.json(getAppointments(req.user.tenantId, {
+    date: req.query.date,
+    status: req.query.status,
+    patientId: req.query.patientId,
+  }));
+});
+
+router.get('/appointments/slots', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const date = req.query.date || new Date().toISOString().slice(0, 10);
+  res.json({ date, slots: getAvailableSlots(req.user.tenantId, date) });
+});
+
+router.post('/appointments', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const body = req.body ?? {};
+  if (!body.scheduledAt) return res.status(400).json({ error: 'scheduledAt required' });
+  try {
+    const appt = createAppointment(req.user.tenantId, body);
+    logAudit(req.user.tenantId, req.user.sub, 'create', 'appointment', appt.id, { service: body.service });
+    res.status(201).json(appt);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.patch('/appointments/:id', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const appt = updateAppointment(req.params.id, req.user.tenantId, req.body ?? {});
+  if (!appt) return res.status(404).json({ error: 'Appointment not found' });
+  logAudit(req.user.tenantId, req.user.sub, 'update', 'appointment', appt.id, req.body ?? {});
+  res.json(appt);
+});
+
+router.get('/clinic/payments', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  res.json({
+    summary: getPaymentSummary(req.user.tenantId),
+    payments: getPayments(req.user.tenantId, { patientId: req.query.patientId }),
+  });
+});
+
+router.post('/clinic/payments', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const { patientId, appointmentId, amount, method, reference, notes, status } = req.body ?? {};
+  if (!patientId || amount == null) return res.status(400).json({ error: 'patientId and amount required' });
+  const payment = createPayment(req.user.tenantId, { patientId, appointmentId, amount: Number(amount), method, reference, notes, status });
+  logAudit(req.user.tenantId, req.user.sub, 'create', 'payment', payment.id, { amount });
+  res.status(201).json(payment);
+});
+
+router.get('/clinic/audit', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  res.json(getAuditLog(req.user.tenantId));
 });
 
 router.get('/health', (_req, res) => {
