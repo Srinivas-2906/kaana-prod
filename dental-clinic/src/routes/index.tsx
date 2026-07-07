@@ -252,16 +252,18 @@ function Home() {
               </p>
             </Reveal>
 
-            <Reveal delayMs={120} className="relative flex min-h-[10.5rem] flex-col justify-between overflow-hidden rounded-3xl bg-[var(--gradient-aqua)] p-5 text-primary-foreground sm:min-h-[11.5rem] sm:p-7 lg:col-span-4 lg:row-start-2">
-              <CalendarCheck className="h-6 w-6 sm:h-7 sm:w-7" />
+            <Reveal delayMs={120} className="flex min-h-[10.5rem] flex-col justify-between rounded-3xl border border-border bg-card p-5 sm:min-h-[11.5rem] sm:p-6 lg:col-span-4 lg:row-start-2">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--color-aqua)]/20 text-[var(--color-deep)] sm:h-11 sm:w-11">
+                <CalendarCheck className="h-5 w-5" />
+              </div>
               <div>
-                <h3 className="font-display text-lg sm:text-xl">Easy bookings</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/90">
-                Call ahead or walk in during clinic hours.
+                <h3 className="font-display text-base text-foreground sm:text-lg">Easy bookings</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:mt-1.5">
+                  Call ahead or walk in during clinic hours.
                 </p>
                 <a
                   href="tel:+916301433852"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-white hover:underline"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                 >
                   Call the clinic <ArrowUpRight className="h-4 w-4" />
                 </a>
