@@ -315,13 +315,12 @@ function Home() {
       {/* DOCTOR */}
       <section className="page-container section-y">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-          <Reveal direction="right" className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
+          <Reveal once direction="up" className="relative mx-auto w-full max-w-md pb-6 sm:pb-8 lg:mx-0 lg:max-w-none">
             <img
               src={heroImg}
               alt="Dr. D. Ajit at Denta Care Dental Clinic"
               width={1024}
               height={1280}
-              loading="lazy"
               className="aspect-[4/5] w-full rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-soft)] sm:rounded-[2rem]"
             />
             <div className="absolute -bottom-4 -right-2 w-36 rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] sm:-bottom-5 sm:-right-5 sm:w-44 sm:p-4">
@@ -332,7 +331,7 @@ function Home() {
               <div className="text-[11px] text-muted-foreground">AP State Dental Council</div>
             </div>
           </Reveal>
-          <Reveal delayMs={80} direction="left">
+          <Reveal once delayMs={60} direction="up">
             <span className="eyebrow">Meet your dentist</span>
             <h2 className="display-lg mt-3">Dr. D. Ajit — clear advice, careful care.</h2>
             <p className="lead mt-4 sm:mt-5">
