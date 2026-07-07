@@ -41,7 +41,7 @@ export function Header() {
         </nav>
         <div className="flex shrink-0 items-center gap-2">
           <a
-            href="tel:+910000000000"
+            href="tel:+916301433852"
             className="hidden items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[var(--shadow-soft)] transition-transform hover:scale-[1.02] sm:inline-flex"
           >
             <Phone className="h-4 w-4" /> Book visit
@@ -69,7 +69,7 @@ export function Header() {
               </Link>
             ))}
             <a
-              href="tel:+910000000000"
+              href="tel:+916301433852"
               className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground sm:hidden"
             >
               <Phone className="h-4 w-4" /> Book visit
