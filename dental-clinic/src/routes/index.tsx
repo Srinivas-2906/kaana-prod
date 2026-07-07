@@ -16,7 +16,9 @@ import {
 import { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-dentist.jpg";
 import clinicImg from "@/assets/clinic-interior.jpg";
+import clinicReceptionImg from "@/assets/clinic-reception.jpg";
 import treatmentImg from "@/assets/treatment-room.jpg";
+import treatmentSessionImg from "@/assets/treatment-session.jpg";
 import toolsImg from "@/assets/tools.jpg";
 import patientImg from "@/assets/patient-smile.jpg";
 import { Reveal } from "@/components/site/Reveal";
@@ -44,6 +46,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const gallery = [
+    { src: clinicReceptionImg, alt: "Reception and waiting area at Denta Care Dental Clinic", label: "Reception & waiting" },
+    { src: treatmentSessionImg, alt: "Dr. D. Ajit treating a patient at Denta Care Dental Clinic", label: "Dental treatment" },
     { src: clinicImg, alt: "Clinic interior at Denta Care Dental Clinic", label: "Clinic interior" },
     { src: treatmentImg, alt: "Treatment room at Denta Care Dental Clinic", label: "Treatment room" },
     { src: toolsImg, alt: "Sterilised dental tools at Denta Care", label: "Sterilised tools" },
@@ -184,7 +188,7 @@ function Home() {
       </section>
 
       {/* BENTO: WHY DENTA CARE */}
-      <section className="page-container pt-16 pb-10 md:pt-20 md:pb-12 lg:pt-24 lg:pb-14">
+      <section className="page-container pt-12 pb-6 sm:pt-16 sm:pb-10 md:pt-20 md:pb-12 lg:pt-24 lg:pb-14">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="eyebrow">Why Denta Care</span>
           <h2 className="display-lg mt-3">Comfortable care. Clear advice.</h2>
@@ -193,12 +197,12 @@ function Home() {
         <div className="mt-10 grid gap-4 sm:gap-5 lg:mt-14 lg:grid-cols-12 lg:items-stretch">
           <Reveal className="relative min-h-[260px] overflow-hidden rounded-3xl sm:min-h-[300px] lg:col-span-5 lg:min-h-[440px]">
             <img
-              src={treatmentImg}
-              alt="Modern dental treatment room at Denta Care"
+              src={treatmentSessionImg}
+              alt="Dental treatment at Denta Care Dental Clinic"
               width={1280}
               height={1280}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.20_0.05_245_/_0.88)] via-[oklch(0.20_0.05_245_/_0.3)] to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 text-primary-foreground sm:p-7">
@@ -269,7 +273,7 @@ function Home() {
 
       {/* SERVICES */}
       <section className="bg-secondary/50">
-        <div className="page-container pt-10 pb-16 md:pt-12 md:pb-20 lg:pt-14 lg:pb-24">
+        <div className="page-container pt-6 pb-16 sm:pt-10 md:pt-12 md:pb-20 lg:pt-14 lg:pb-24">
           <Reveal className="flex flex-col items-start justify-between gap-5 sm:gap-6 md:flex-row md:items-end">
             <div className="max-w-2xl">
               <span className="eyebrow">Treatments</span>
@@ -423,20 +427,14 @@ function Home() {
             {[
               {
                 n: "Manohar Bala",
-                meta: "Local Guide · 4 reviews · 0 photos",
-                date: "26 Nov 2018",
                 q: "Clean clinic and polite staff. The doctor explained the treatment clearly.",
               },
               {
                 n: "Vijay Shankar",
-                meta: "10 reviews · 4 photos",
-                date: "22 Apr 2016",
                 q: "Good consultation and clear guidance. Professional treatment and affordable pricing.",
               },
               {
                 n: "Srinivas Y",
-                meta: undefined,
-                date: undefined,
                 q: "I checked a couple of other clinics. I was recommended this clinic by a doctor friend. He treated me very well and suggested only the treatment I needed. The treatment was good, affordable, and I’m very happy with the result.",
               },
             ].map((t, i) => (
@@ -458,8 +456,6 @@ function Home() {
                   </div>
                   <div>
                     <div className="font-medium text-foreground">{t.n}</div>
-                    {t.meta ? <div className="text-muted-foreground">{t.meta}</div> : null}
-                    {t.date ? <div className="text-muted-foreground">{t.date}</div> : null}
                   </div>
                 </figcaption>
                 </figure>
@@ -562,8 +558,8 @@ function Home() {
           </Reveal>
           <Reveal delayMs={80} direction="left">
             <img
-              src={clinicImg}
-              alt="Denta Care clinic interior"
+              src={clinicReceptionImg}
+              alt="Reception and waiting area at Denta Care Dental Clinic"
               width={1280}
               height={960}
               loading="lazy"
