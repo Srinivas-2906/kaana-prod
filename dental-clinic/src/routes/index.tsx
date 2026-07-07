@@ -64,14 +64,14 @@ function Home() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="page-container pb-12 pt-8 sm:pb-14 sm:pt-10 lg:pb-16 lg:pt-14">
-          <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-14">
+        <div className="page-container pb-10 pt-3 sm:pb-14 sm:pt-10 lg:pb-16 lg:pt-14">
+          <div className="grid items-center gap-5 sm:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-14">
             <div className="max-w-xl lg:max-w-2xl">
               <Reveal immediate>
-                <h1 className="display-xl mt-5 sm:mt-6">
+                <h1 className="display-xl mt-0 sm:mt-6">
                   Dental care made simple.
                 </h1>
-                <p className="lead mt-4 max-w-lg sm:mt-5">
+                <p className="lead mt-3 max-w-lg sm:mt-5">
                   Visit Denta Care Dental Clinic for dental cleaning, fillings, root canal treatment
                   (RCT), dentures, aligners and cosmetic dentistry. We’re based in Muralinagar,
                   Visakhapatnam.
@@ -82,7 +82,7 @@ function Home() {
                     6301433852
                   </a>
                 </div>
-                <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
+                <div className="mt-5 flex flex-wrap items-center gap-3 sm:mt-8">
                   <a
                     href="tel:+916301433852"
                     className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[var(--shadow-elegant)] transition-transform hover:scale-[1.02] sm:px-6 sm:py-3.5"
@@ -106,7 +106,7 @@ function Home() {
                 alt="Dr. D. Ajit at Denta Care Dental Clinic"
                 width={1024}
                 height={1280}
-                className="aspect-[4/5] max-h-[min(72vh,520px)] w-full rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-elegant)] sm:rounded-[2rem] lg:max-h-[540px]"
+                className="aspect-[4/5] max-h-[min(52vh,360px)] w-full rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-elegant)] sm:max-h-[min(72vh,520px)] sm:rounded-[2rem] lg:max-h-[540px]"
               />
             </Reveal>
           </div>
