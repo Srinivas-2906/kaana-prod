@@ -14,8 +14,8 @@ out/
 .env.*
 !.env.example
 
-# SQLite & local data
-data/
+# SQLite & local data (repo root only — not botiq src/data modules)
+/data/
 *.db
 *.db-*
 
