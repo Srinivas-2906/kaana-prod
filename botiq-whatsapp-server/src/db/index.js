@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { getCatalogTemplate } from '../data/catalogTemplates.js';
+import { getCatalogTemplate } from '../templates/catalogTemplates.js';
 import { getSetupStatus } from '../services/setupStatus.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
