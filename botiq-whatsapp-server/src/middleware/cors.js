@@ -14,9 +14,18 @@ const ALLOWED_ORIGINS = new Set([
   'https://api.kaana.in',
 ]);
 
+function isAllowedTenantOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin);
+    return /^[a-z0-9-]+\.(inbox|crm|clinic|app)\.kaana\.in$/i.test(hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function corsMiddleware(req, res, next) {
   const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.has(origin) || process.env.NODE_ENV !== 'production')) {
+  if (origin && (ALLOWED_ORIGINS.has(origin) || isAllowedTenantOrigin(origin) || process.env.NODE_ENV !== 'production')) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   } else if (!origin) {

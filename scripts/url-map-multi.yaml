@@ -18,6 +18,12 @@ hostRules:
       - clinic.kaana.in
     pathMatcher: clinic
   - hosts:
+      - dentacare.crm.kaana.in
+    pathMatcher: clinic
+  - hosts:
+      - '*.clinic.kaana.in'
+    pathMatcher: clinic
+  - hosts:
       - api.kaana.in
     pathMatcher: api
 pathMatchers:

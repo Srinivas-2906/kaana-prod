@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, LayoutDashboard, CalendarDays, Users, CalendarPlus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutDashboard, CalendarDays, Users, CalendarPlus, LogOut, Banknote } from 'lucide-react';
+import { logout } from '../lib/auth';
 import type { TabId } from '../types';
 
 const NAV_ITEMS: { id: TabId; label: string; Icon: React.ElementType }[] = [
@@ -6,6 +7,7 @@ const NAV_ITEMS: { id: TabId; label: string; Icon: React.ElementType }[] = [
   { id: 'today',     label: 'Today',    Icon: CalendarDays },
   { id: 'patients',  label: 'Patients', Icon: Users },
   { id: 'book',      label: 'Book',     Icon: CalendarPlus },
+  { id: 'payments',  label: 'Payments', Icon: Banknote },
 ];
 
 interface Props {
@@ -13,9 +15,12 @@ interface Props {
   collapsed: boolean;
   onChange: (t: TabId) => void;
   onToggle: () => void;
+  brandName: string;
+  brandSub: string;
+  userInitials: string;
 }
 
-export function Sidebar({ active, collapsed, onChange, onToggle }: Props) {
+export function Sidebar({ active, collapsed, onChange, onToggle, brandName, brandSub, userInitials }: Props) {
   return (
     <aside className={`clinic-sidebar${collapsed ? ' collapsed' : ''}`}>
 
@@ -28,8 +33,8 @@ export function Sidebar({ active, collapsed, onChange, onToggle }: Props) {
         </div>
         {!collapsed && (
           <div>
-            <div className="sidebar-brand-name">Denta Care</div>
-            <div className="sidebar-brand-sub">Dental Clinic</div>
+            <div className="sidebar-brand-name">{brandName}</div>
+            <div className="sidebar-brand-sub">{brandSub}</div>
           </div>
         )}
       </div>
@@ -53,18 +58,30 @@ export function Sidebar({ active, collapsed, onChange, onToggle }: Props) {
 
       {/* Footer */}
       <div className="sidebar-footer">
-        {!collapsed && (
-          <div className="sidebar-user">
-            <div className="sidebar-user-ava">DA</div>
-            <div>
-              <div className="sidebar-user-name">Dr. D. Ajit</div>
-              <div className="sidebar-user-role">BDS · MDS</div>
+        {!collapsed ? (
+          <div className="sidebar-footer-main">
+            <div className="sidebar-user-row">
+              <div className="sidebar-user">
+                <div className="sidebar-user-ava">{userInitials}</div>
+                <div className="sidebar-user-meta">
+                  <div className="sidebar-user-name">Admin</div>
+                  <div className="sidebar-user-role">Workspace owner</div>
+                </div>
+              </div>
+              <button type="button" className="collapse-btn" onClick={onToggle} aria-label="Toggle sidebar">
+                <ChevronLeft size={14} />
+              </button>
             </div>
+            <button type="button" className="sidebar-logout-btn" onClick={logout}>
+              <LogOut size={16} strokeWidth={1.8} />
+              <span>Log out</span>
+            </button>
           </div>
+        ) : (
+          <button type="button" className="collapse-btn" onClick={onToggle} aria-label="Toggle sidebar">
+            <ChevronRight size={14} />
+          </button>
         )}
-        <button type="button" className="collapse-btn" onClick={onToggle} aria-label="Toggle sidebar">
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
       </div>
     </aside>
   );

@@ -1,14 +1,20 @@
-import { authHeaders } from './auth';
-import type { Appointment, Patient, TodayStats, Payment, PaymentSummary } from '../types';
+import { authHeaders, clearToken } from './auth';
+import type { Appointment, Patient, TodayStats, Payment, PaymentSummary, CatalogItem } from '../types';
+import { resolveTenantSlug } from './tenant';
 
 const API = import.meta.env.VITE_WHATSAPP_API || '/api';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
+    const tenantSlug = resolveTenantSlug();
     res = await fetch(`${API}${path}`, {
       ...init,
-      headers: { ...authHeaders(), ...(init?.headers || {}) },
+      headers: {
+        ...authHeaders(),
+        ...(tenantSlug ? { 'x-tenant-slug': tenantSlug } : {}),
+        ...(init?.headers || {}),
+      },
     });
   } catch {
     throw new Error(
@@ -16,6 +22,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     );
   }
   if (res.status === 401) throw new Error('Unauthorized');
+  if (res.status === 403) {
+    const err = await res.json().catch(() => ({}));
+    const msg = (err as { error?: string }).error || res.statusText;
+    if (/tenant access required/i.test(msg)) {
+      clearToken();
+      throw new Error('Session expired or wrong clinic account. Sign in again with your clinic login.');
+    }
+    throw new Error(msg);
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error((err as { error?: string }).error || res.statusText);
@@ -57,6 +72,7 @@ export function createAppointment(data: {
   patientName?: string;
   phone?: string;
   service: string;
+  serviceId?: string;
   scheduledAt: string;
   status?: string;
   source?: string;
@@ -85,8 +101,27 @@ export function fetchClient() {
   return request<{ name: string; emoji: string; agentPhone: string }>('/client');
 }
 
-export function fetchPayments() {
-  return request<{ summary: PaymentSummary; payments: Payment[] }>('/clinic/payments');
+export function fetchMe() {
+  return request<{ user: { id: string; name?: string; email?: string; username?: string; role?: string; isPlatformAdmin?: boolean } }>('/platform/me');
+}
+
+export function fetchPayments(patientId?: string) {
+  const q = patientId ? `?patientId=${encodeURIComponent(patientId)}` : '';
+  return request<{ summary: PaymentSummary; payments: Payment[] }>(`/clinic/payments${q}`);
+}
+
+export function fetchPatientPayments(patientId: string) {
+  return fetchPayments(patientId);
+}
+
+export function fetchAvailableSlots(date: string) {
+  return request<{ date: string; slots: string[]; hours?: { start: number; end: number; slotMin: number } }>(
+    `/appointments/slots?date=${encodeURIComponent(date)}`,
+  );
+}
+
+export function fetchCatalog() {
+  return request<{ items: CatalogItem[] } | CatalogItem[]>('/catalog');
 }
 
 export function recordPayment(data: {

@@ -12,6 +12,7 @@ import { getTenantBySlug, invalidateTenantCache } from '../tenantContext.js';
 import { getAnalytics } from '../store.js';
 import { getPlatformConfig } from '../platformConfig.js';
 import { requireLiveTenant } from '../middleware/requireLiveTenant.js';
+import { provisionTenantByAdmin, resetTenantAdminPassword } from '../services/provisioning.js';
 import {
   getIntakeForTenant,
   saveIntake,
@@ -97,9 +98,11 @@ router.post('/signup', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-  const { email, password } = req.body ?? {};
-  if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-  const result = loginUser(email, password);
+  const { email, identifier, password, tenantSlug } = req.body ?? {};
+  const id = identifier || email;
+  const inferredTenant = tenantSlug || req.headers['x-tenant-slug'] || req.query.tenant;
+  if (!id || !password) return res.status(400).json({ error: 'Email/username and password required' });
+  const result = loginUser(id, password, { tenantSlug: inferredTenant });
   if (result.error) return res.status(401).json({ error: result.error });
   res.json({ ...result, ...getPlatformConfig() });
 });
@@ -195,6 +198,35 @@ router.get('/admin/tenants', authMiddleware, requirePlatformAdmin, (_req, res) =
   res.json({ tenants, stats, total: tenants.length, pendingIntakes: pending, platform: getPlatformConfig(), overview, queue });
 });
 
+router.post('/admin/provision', authMiddleware, requirePlatformAdmin, (req, res) => {
+  const result = provisionTenantByAdmin(req.body ?? {});
+  if (result.error) return res.status(400).json({ error: result.error });
+
+  const tenant = tenantToClient(result.tenant);
+  const slug = tenant.slug;
+
+  const root = process.env.TENANT_ROOT_DOMAIN || 'kaana.in';
+  const links = {
+    platform: `https://app.${root}`,
+    inbox: `https://${slug}.inbox.${root}`,
+    crm: `https://${slug}.crm.${root}`,
+    clinic: `https://${slug}.clinic.${root}`,
+  };
+
+  res.status(201).json({
+    tenant,
+    links,
+    credentials: result.credentials,
+  });
+});
+
+router.post('/admin/tenants/:id/reset-password', authMiddleware, requirePlatformAdmin, (req, res) => {
+  const password = req.body?.password;
+  const result = resetTenantAdminPassword(req.params.id, password);
+  if (result.error) return res.status(404).json({ error: result.error });
+  res.json(result);
+});
+
 router.get('/admin/queue', authMiddleware, requirePlatformAdmin, (_req, res) => {
   res.json(getSetupQueue());
 });
@@ -217,6 +249,43 @@ router.get('/admin/tenants/:id', authMiddleware, requirePlatformAdmin, (req, res
   const detail = getTenantAdminDetail(req.params.id);
   if (!detail) return res.status(404).json({ error: 'Tenant not found' });
   res.json(detail);
+});
+
+router.patch('/admin/tenants/:id', authMiddleware, requirePlatformAdmin, (req, res) => {
+  const tenantId = req.params.id;
+  const db = getDb();
+  const tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId);
+  if (!tenant) return res.status(404).json({ error: 'Tenant not found' });
+
+  const { name, industry, settings: settingsUpdate } = req.body ?? {};
+
+  const fields = [];
+  const values = [];
+
+  const trimmedName = String(name || '').trim();
+  if (trimmedName) { fields.push('name = ?'); values.push(trimmedName); }
+
+  const trimmedIndustry = String(industry || '').trim();
+  if (trimmedIndustry) { fields.push('industry = ?'); values.push(trimmedIndustry); }
+
+  if (fields.length) {
+    db.prepare(`UPDATE tenants SET ${fields.join(', ')} WHERE id = ?`).run(...values, tenantId);
+  }
+
+  if (settingsUpdate && typeof settingsUpdate === 'object') {
+    const current = parseSettings(tenant.settings);
+    const merged = { ...current };
+    for (const [k, v] of Object.entries(settingsUpdate)) {
+      if (v !== undefined && v !== null && String(v).trim() !== '') {
+        merged[k] = typeof v === 'number' ? v : String(v).trim();
+      }
+    }
+    db.prepare('UPDATE tenants SET settings = ? WHERE id = ?').run(JSON.stringify(merged), tenantId);
+  }
+
+  invalidateTenantCache(tenantId);
+  const updated = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId);
+  res.json(tenantToClient(updated));
 });
 
 router.patch('/admin/tenants/:id/notes', authMiddleware, requirePlatformAdmin, (req, res) => {

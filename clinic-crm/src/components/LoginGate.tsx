@@ -1,30 +1,85 @@
 import { useState, useEffect } from 'react';
-import { Info, LogIn, MapPin, Clock, ShieldCheck } from 'lucide-react';
-import { isAuthenticated, requestSSOFromPlatform, loginWithCredentials, saveToken } from '../lib/auth';
+import { Eye, EyeOff, Info, LogIn } from 'lucide-react';
+import { isAuthenticated, loginWithCredentials, saveToken, clearToken, getAuthToken } from '../lib/auth';
+import { resolveTenantSlug, getTenantLoginDefaults } from '../lib/tenant';
 
-const DEMO_EMAIL = 'demo@dentacare.in';
-const DEMO_PASSWORD = 'demo1234';
+const API_BASE = (() => {
+  const api = (import.meta as any).env?.VITE_WHATSAPP_API as string | undefined || '/api';
+  return api.replace(/\/api$/, '') || '';
+})();
 
 export function LoginGate({ children }: { children: React.ReactNode }) {
-  const [email,   setEmail]   = useState(DEMO_EMAIL);
-  const [password,setPassword]= useState(DEMO_PASSWORD);
+  const tenantSlug = resolveTenantSlug();
+  const loginDefaults = getTenantLoginDefaults(tenantSlug);
+  const [identifier, setIdentifier] = useState(loginDefaults.user);
+  const [password, setPassword] = useState(loginDefaults.pass);
   const [error,   setError]   = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [businessName, setBusinessName] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated() && window.opener) requestSSOFromPlatform();
-  }, []);
+    if (!tenantSlug) return;
+    fetch(`${API_BASE}/api/platform/tenant/${encodeURIComponent(tenantSlug)}/public`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.name) setBusinessName(d.name); })
+      .catch(() => {});
+  }, [tenantSlug]);
+
+  useEffect(() => {
+    async function validate() {
+      const token = getAuthToken();
+      if (!token) { setChecking(false); return; }
+      try {
+        const API = import.meta.env.VITE_WHATSAPP_API || '/api';
+        const base = API.replace(/\/api$/, '') || '';
+        const res = await fetch(`${base}/api/platform/me`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Unauthorized');
+        const data = await res.json();
+        const user = data?.user;
+        const tenant = data?.tenant;
+        if (tenantSlug) {
+          if (user?.isPlatformAdmin) throw new Error('Use client credentials');
+          if (!tenant?.slug || tenant.slug !== tenantSlug) throw new Error('Wrong workspace');
+        }
+      } catch {
+        clearToken();
+      } finally {
+        setChecking(false);
+      }
+    }
+    void validate();
+  }, [tenantSlug]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!identifier.trim() || !password) {
+      setError('Enter your username/email and password.');
+      return;
+    }
     setLoading(true); setError('');
     try {
-      const token = await loginWithCredentials(email, password);
+      const token = await loginWithCredentials(identifier, password);
       saveToken(token);
       window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wrong email or password.');
     } finally { setLoading(false); }
+  }
+
+  if (checking) {
+    return (
+      <div className="login-screen">
+        <div className="login-card">
+          <div className="login-hero">
+            <div className="login-clinic-badge">Clinic Desk</div>
+            <h1 className="login-hero-dr-name">Checking session…</h1>
+            <p className="login-hero-qual">Please wait</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated()) {
@@ -35,27 +90,14 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           {/* Hero */}
           <div className="login-hero">
             <div className="login-clinic-badge">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 3c-1.2 0-2.4.6-3 1.5C8.4 5.4 8 7 8 8.5c0 1.5.4 3 .8 4.5.4 1.5.5 3 .5 4 0 1 .4 2 1.2 2s1.2-1.3 1.5-3c.3 1.7.7 3 1.5 3s1.2-1 1.2-2c0-1 .1-2.5.5-4 .4-1.5.8-3 .8-4.5 0-1.5-.4-3.1-1-4C15.4 3.6 13.2 3 12 3z"/></svg>
-              Denta Care Dental Clinic
+              Clinic Desk
             </div>
-            <h1 className="login-hero-dr-name">Dr. D. Ajit</h1>
+            <h1 className="login-hero-dr-name">
+              {businessName || (tenantSlug ? tenantSlug.replace(/-/g, ' ') : 'Front desk')}
+            </h1>
             <p className="login-hero-qual">
-              BDS · MDS · 18 years experience
+              Appointments · patients · payments
             </p>
-            <div className="login-meta-list">
-              <div className="login-meta-row">
-                <span className="login-meta-ico"><MapPin size={12} /></span>
-                Muralinagar, Visakhapatnam
-              </div>
-              <div className="login-meta-row">
-                <span className="login-meta-ico"><Clock size={12} /></span>
-                Mon–Sat · 10 AM – 1 PM · 5 PM – 9 PM
-              </div>
-              <div className="login-meta-row">
-                <span className="login-meta-ico"><ShieldCheck size={12} /></span>
-                Consultation ₹100
-              </div>
-            </div>
           </div>
 
           {/* Form */}
@@ -63,35 +105,61 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
             <div className="login-demo-hint">
               <Info size={15} color="var(--brand)" style={{ flexShrink: 0, marginTop: 1 }} />
               <div className="login-demo-hint-text">
-                <strong>Demo login (already filled)</strong>
-                {DEMO_EMAIL} · password: {DEMO_PASSWORD}
+                <strong>{loginDefaults.label}</strong>
+                {tenantSlug ? (
+                  <>
+                    Workspace: <code>{tenantSlug}</code>
+                    <br />
+                    Email: <code>{loginDefaults.user}</code> · password: <code>{loginDefaults.pass}</code>
+                  </>
+                ) : (
+                  <>Username: {loginDefaults.user} · password: {loginDefaults.pass}</>
+                )}
               </div>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="login-field">
-                <label htmlFor="lEmail" className="login-label">Email</label>
+                <label htmlFor="lUser" className="login-label">Username or email</label>
                 <input
-                  id="lEmail"
-                  type="email"
+                  id="lUser"
+                  name="username"
+                  type="text"
                   className="login-input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   required
                 />
               </div>
               <div className="login-field">
                 <label htmlFor="lPass" className="login-label">Password</label>
-                <input
-                  id="lPass"
-                  type="password"
-                  className="login-input"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  required
-                />
+                <div className="login-password-wrap">
+                  <input
+                    id="lPass"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="login-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="login-password-toggle"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {error && <div className="login-error">{error}</div>}

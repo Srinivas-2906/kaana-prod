@@ -46,8 +46,13 @@ export function getTenantById(id) {
   return row ?? null;
 }
 
+const SLUG_ALIASES = {
+  'denta-care': 'dentacare',
+};
+
 export function getTenantBySlug(slug) {
-  const row = getDb().prepare('SELECT * FROM tenants WHERE slug = ?').get(slug);
+  const resolved = SLUG_ALIASES[slug] || slug;
+  const row = getDb().prepare('SELECT * FROM tenants WHERE slug = ?').get(resolved);
   if (row) tenantCache.set(row.id, row);
   return row ?? null;
 }

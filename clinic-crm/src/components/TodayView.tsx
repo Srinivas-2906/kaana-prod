@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { RefreshCw, Phone, MessageSquare, Sunrise, Sunset, LayoutList, Columns3 } from 'lucide-react';
+import { RefreshCw, Phone, MessageSquare, Sunrise, Sunset, LayoutList, Columns3, Banknote, MoreVertical } from 'lucide-react';
 import type { Appointment, AppointmentStatus } from '../types';
 import { STATUS_LABELS } from '../types';
 import { updateAppointment } from '../lib/api';
 import { AppointmentBoard } from './AppointmentBoard';
+import { CompleteVisitDialog } from './CompleteVisitDialog';
+import { AppointmentActionsDialog } from './AppointmentActionsDialog';
 
 type TodayViewMode = 'list' | 'board';
 
@@ -55,11 +57,17 @@ interface Props {
 
 export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoToBook, onToast }: Props) {
   const [viewMode, setViewMode] = useState<TodayViewMode>('board');
+  const [completeAppt, setCompleteAppt] = useState<Appointment | null>(null);
+  const [actionsAppt, setActionsAppt] = useState<Appointment | null>(null);
   const today = appointments.length ? dateHeader(appointments[0].scheduledAt) : dateHeader(new Date().toISOString());
 
   async function advance(appt: Appointment) {
     const next = NEXT[appt.status];
     if (!next) return;
+    if (next === 'visited') {
+      setCompleteAppt(appt);
+      return;
+    }
     try {
       await updateAppointment(appt.id, { status: next });
       onRefresh();
@@ -94,13 +102,16 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
             {name.charAt(0).toUpperCase()}
           </div>
           <div className="appt-info">
-            <button type="button" className="appt-name" onClick={() => appt.patientId && onOpenPatient(appt.patientId)}>
+            <button type="button" className="appt-name" onClick={() => onOpenPatient(appt.patientId)}>
               {name}
             </button>
             <p className="appt-treatment">{appt.service || 'Check-up'}</p>
             <div className="appt-tags">
               <span className={TAG_CLASS[appt.status]}>{STATUS_LABELS[appt.status]}</span>
               {appt.source === 'WhatsApp' && <span className="tag tag-wa"><MessageSquare size={9}/> WA</span>}
+              {appt.paymentAmount != null && appt.paymentAmount > 0 && (
+                <span className="tag tag-payment"><Banknote size={9}/> ₹{appt.paymentAmount.toLocaleString('en-IN')}</span>
+              )}
             </div>
           </div>
           <div className="appt-action-col">
@@ -115,6 +126,9 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
                 </a>
               </div>
             )}
+            <button type="button" className="quick-action-btn" title="Actions" onClick={() => setActionsAppt(appt)}>
+              <MoreVertical size={14} />
+            </button>
             {NEXT[appt.status] && (
               <button type="button" className={ACTION_CLASS[appt.status]} onClick={() => advance(appt)}>
                 {ACTION_LABEL[appt.status]}
@@ -264,6 +278,24 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
             />
           )}
         </>
+      )}
+
+      {completeAppt && (
+        <CompleteVisitDialog
+          appointment={completeAppt}
+          onClose={() => setCompleteAppt(null)}
+          onDone={() => { setCompleteAppt(null); onRefresh(); }}
+          onToast={onToast}
+        />
+      )}
+
+      {actionsAppt && (
+        <AppointmentActionsDialog
+          appointment={actionsAppt}
+          onClose={() => setActionsAppt(null)}
+          onDone={() => { setActionsAppt(null); onRefresh(); }}
+          onToast={onToast}
+        />
       )}
     </div>
   );

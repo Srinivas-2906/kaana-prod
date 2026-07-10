@@ -163,7 +163,7 @@ app.listen(PORT, () => {
   console.log(`   Webhook:    http://localhost:${PORT}/webhook`);
   startReminderScheduler(60000);
   if (process.env.NODE_ENV !== 'production') {
-    console.log('   Clinic login: demo@dentacare.in / demo1234');
+    console.log('   Clinic login: ajitdentacare@gmail.com / Dentacare@123  (tenant: dentacare)');
   }
   console.log('');
   if (activeProvider === 'meta') {

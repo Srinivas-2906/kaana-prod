@@ -1,3 +1,5 @@
+import { resolveTenantSlug } from './tenant';
+
 const TOKEN_KEY = 'kaana_token';
 
 export function requestSSOFromPlatform() {
@@ -25,6 +27,12 @@ export function getAuthToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem('kaana_user');
+  localStorage.removeItem('kaana_tenant');
+}
+
 export function authHeaders(): HeadersInit {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -38,16 +46,25 @@ export function saveToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
-export async function loginWithCredentials(email: string, password: string) {
+export function logout() {
+  clearToken();
+  window.location.reload();
+}
+
+export async function loginWithCredentials(identifier: string, password: string) {
   const API = import.meta.env.VITE_WHATSAPP_API || '/api';
   const base = API.replace(/\/api$/, '') || '';
+  const tenantSlug = resolveTenantSlug();
   const res = await fetch(`${base}/api/platform/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    headers: {
+      'Content-Type': 'application/json',
+      ...(tenantSlug ? { 'x-tenant-slug': tenantSlug } : {}),
+    },
+    body: JSON.stringify({ identifier, password, tenantSlug }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Invalid email or password');
+  if (!res.ok) throw new Error(data.error || 'Invalid login');
   if (!data.token) throw new Error('No token returned');
   return data.token as string;
 }

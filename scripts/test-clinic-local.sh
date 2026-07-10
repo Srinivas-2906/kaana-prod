@@ -3,7 +3,7 @@
 set -euo pipefail
 
 API="${API:-http://localhost:3002/api}"
-SLUG="${SLUG:-denta-care}"
+SLUG="${SLUG:-dentacare}"
 PHONE="${PHONE:-919998887766}"
 
 send() {
