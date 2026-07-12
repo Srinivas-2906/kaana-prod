@@ -48,6 +48,7 @@ export function getTenantById(id) {
 
 const SLUG_ALIASES = {
   'denta-care': 'dentacare',
+  ajithdentacare: 'dentacare',
 };
 
 export function getTenantBySlug(slug) {

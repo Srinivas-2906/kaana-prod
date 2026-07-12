@@ -1634,7 +1634,14 @@ img, video, canvas { max-width: 100%; height: auto; }
   text-align: left;
   transition: all .15s;
   line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
+
+.service-chip-title { font-size: 12px; font-weight: 700; color: inherit; }
+.service-chip-sub { font-size: 11px; font-weight: 600; color: var(--muted); }
+.service-chip.selected .service-chip-sub { color: rgba(10, 55, 120, .75); }
 
 .service-chip.selected {
   border-color: var(--brand);
@@ -3312,4 +3319,57 @@ body.modal-open .clinic-app {
   .service-chip {
     touch-action: manipulation;
   }
+}
+
+/* ── Reports ───────────────────────────────────────────────────────────── */
+.report-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-breakdown {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.report-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.report-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.report-list li span { color: var(--muted); font-weight: 600; }
+.report-list li strong { color: var(--text); font-weight: 800; }
+
+@media (min-width: 980px) {
+  .report-breakdown { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+@media (max-width: 520px) {
+  .report-range { grid-template-columns: 1fr; }
 }

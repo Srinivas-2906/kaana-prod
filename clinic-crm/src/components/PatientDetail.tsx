@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment, useMemo } from 'react';
 import { ChevronLeft, MessageSquare, UserCheck, Clock, FileText, PlusCircle, Phone, Stethoscope, Search, X, Pencil, Banknote } from 'lucide-react';
 import type { Appointment, Patient, Payment } from '../types';
-import { SERVICES, STATUS_LABELS } from '../types';
+import { STATUS_LABELS } from '../types';
 import type { CatalogItem } from '../types';
 import { updatePatient, updateAppointment, createPatient, createAppointment, fetchPatients, fetchAvailableSlots, fetchCatalog, fetchPatientPayments } from '../lib/api';
 import { PatientFormDialog } from './PatientFormDialog';
@@ -65,10 +65,19 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
   const phone = patient.phone.replace(/\D/g, '');
   const chatUrl = `${INBOX}?thread=wa-${phone}`;
 
-  const visited   = appointments.filter(a => a.status === 'visited').sort((a,b)=>new Date(b.scheduledAt).getTime()-new Date(a.scheduledAt).getTime());
-  const upcoming  = appointments.filter(a => a.status === 'confirmed' || a.status === 'arrived' || a.status === 'requested').sort((a,b)=>new Date(a.scheduledAt).getTime()-new Date(b.scheduledAt).getTime());
-  const lastVisit = visited[0];
-  const nextAppt  = upcoming[0];
+  const visited = appointments
+    .filter((a) => a.status === 'visited')
+    .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
+
+  const nowTs = Date.now();
+  const upcomingSorted = appointments
+    .filter((a) => a.status === 'confirmed' || a.status === 'arrived' || a.status === 'requested')
+    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+
+  // "Next visit" should be future-only; past-but-not-completed is shown as "Overdue".
+  const nextAppt = upcomingSorted.find((a) => new Date(a.scheduledAt).getTime() >= nowTs) || null;
+  const overdueAppt = upcomingSorted.find((a) => new Date(a.scheduledAt).getTime() < nowTs) || null;
+  const lastVisit = visited[0] || null;
 
   useEffect(() => {
     let alive = true;
@@ -195,9 +204,13 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
                   <dl className="info-item">
                     <dt>Next visit</dt>
                     <dd style={{ color: nextAppt ? 'var(--brand)' : 'var(--muted)' }}>
-                      {nextAppt
-                        ? new Date(nextAppt.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-                        : 'None'}
+                      {nextAppt ? (
+                        new Date(nextAppt.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                      ) : overdueAppt ? (
+                        <>Overdue · {new Date(overdueAppt.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</>
+                      ) : (
+                        'None'
+                      )}
                     </dd>
                   </dl>
                   <dl className="info-item">
@@ -293,6 +306,33 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
                 </div>
               );
             })()}
+
+            {overdueAppt && (
+              <div className="panel">
+                <div className="panel-head">
+                  <Clock size={14} color="var(--brand)" />
+                  <span className="panel-title">Overdue appointment</span>
+                  <span className={TAG_CLASS[overdueAppt.status]}>{STATUS_LABELS[overdueAppt.status]}</span>
+                </div>
+                <div className="panel-body">
+                  <div className="info-grid">
+                    <dl className="info-item">
+                      <dt>When</dt>
+                      <dd>{new Date(overdueAppt.scheduledAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</dd>
+                    </dl>
+                    <dl className="info-item">
+                      <dt>What for</dt>
+                      <dd>{overdueAppt.service}</dd>
+                    </dl>
+                  </div>
+                  {overdueAppt.status === 'requested' && (
+                    <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 10 }} onClick={() => confirmAppt(overdueAppt.id)}>
+                      Confirm booking
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {nextAppt && (
               <div className="panel">
@@ -437,7 +477,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
   const [phone, setPhone] = useState('');
   const [age, setAge] = useState('');
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
-  const [service, setService] = useState(SERVICES[0]);
+  const [service, setService] = useState('');
   const [serviceId, setServiceId] = useState<string>('');
   const [chiefComplaint, setChiefComplaint] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -469,7 +509,14 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
       .then((d: any) => {
         if (!alive) return;
         const items: CatalogItem[] = Array.isArray(d) ? d : (d?.items || []);
-        const clean = (items || []).filter((it) => it && it.title);
+        const clean = (items || [])
+          .filter((it) => it && it.title)
+          .map((it: any) => ({
+            ...it,
+            // normalize server fields if present
+            priceNum: it.priceNum ?? it.price_num ?? it.priceNum,
+            imageUrl: it.imageUrl ?? it.image_url ?? it.imageUrl,
+          }));
         setCatalogItems(clean);
         if (clean.length > 0) {
           setService(clean[0].title);
@@ -481,9 +528,21 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
   }, []);
 
   const servicesList = useMemo(() => {
-    const items = catalogItems.filter((it) => it && it.title && it.active !== false);
-    return items.length > 0 ? items : SERVICES.map((t, i) => ({ id: `fallback-${i}`, title: t } as CatalogItem));
+    // Canonical: the tenant catalog is the source of truth.
+    // If catalog is empty/unavailable, allow a custom text service entry instead of silently drifting.
+    const items = catalogItems.filter((it: any) => {
+      if (!it || !it.title) return false;
+      const s = String((it as any).status || '').toLowerCase();
+      if (!s) return true;
+      return !['inactive', 'disabled', 'archived'].includes(s);
+    });
+    return items;
   }, [catalogItems]);
+
+  const selectedCatalog = useMemo(() => {
+    if (!serviceId) return null;
+    return servicesList.find((s) => s.id === serviceId) || null;
+  }, [servicesList, serviceId]);
 
   useEffect(() => {
     let alive = true;
@@ -756,18 +815,50 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
           )}
           <div className="form-field">
             <label className="form-label"><Stethoscope size={12} /> Pick one</label>
-            <div className="service-grid">
-              {servicesList.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className={`service-chip${service === s.title ? ' selected' : ''}`}
-                  onClick={() => { setService(s.title); setServiceId(s.id); }}
-                >
-                  {s.title}
-                </button>
-              ))}
-            </div>
+            {servicesList.length > 0 ? (
+              <>
+                <div className="service-grid">
+                  {servicesList.map((s) => {
+                    const priceLabel = (s.price && String(s.price).trim()) || (s.priceNum && s.priceNum > 0 ? `₹${Number(s.priceNum).toLocaleString('en-IN')}` : '');
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        className={`service-chip${serviceId === s.id ? ' selected' : ''}`}
+                        onClick={() => { setService(s.title); setServiceId(s.id); }}
+                        title={priceLabel ? `${s.title} · ${priceLabel}` : s.title}
+                      >
+                        <span className="service-chip-title">{s.title}</span>
+                        {(priceLabel || s.category) && (
+                          <span className="service-chip-sub">
+                            {priceLabel ? priceLabel : ''}
+                            {priceLabel && s.category ? ' · ' : ''}
+                            {s.category ? s.category : ''}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedCatalog?.subtitle && (
+                  <p className="form-hint" style={{ marginTop: 10 }}>
+                    {selectedCatalog.subtitle}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="form-hint" style={{ marginTop: 0 }}>
+                  No services are configured for this clinic yet. Type the visit reason below for now.
+                </p>
+                <input
+                  className="form-input"
+                  value={service}
+                  onChange={(e) => { setService(e.target.value); setServiceId(''); }}
+                  placeholder="e.g. Consultation / RCT / Cleaning"
+                />
+              </>
+            )}
           </div>
           <div className="form-field">
             <label className="form-label" style={{ fontWeight: 500 }}>Problem <span style={{ color: 'var(--muted)' }}>(if you know)</span></label>
@@ -779,7 +870,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
               type="button"
               className="btn btn-primary"
               style={{ flex: 1 }}
-              disabled={!returningAgeValid}
+              disabled={!returningAgeValid || !service.trim()}
               onClick={() => setStep('schedule')}
             >
               Next

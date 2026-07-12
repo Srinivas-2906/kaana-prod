@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Banknote, X } from 'lucide-react';
 import type { Appointment } from '../types';
 import { PAYMENT_METHODS } from '../types';
 import { recordPayment, updateAppointment } from '../lib/api';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface Props {
   appointment: Appointment;
@@ -17,10 +18,7 @@ export function CompleteVisitDialog({ appointment, onClose, onDone, onToast }: P
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
+  useScrollLock(true);
 
   async function complete(withPayment: boolean) {
     if (saving) return;

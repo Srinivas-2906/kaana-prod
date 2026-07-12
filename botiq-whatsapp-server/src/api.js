@@ -10,9 +10,9 @@ import {
 import {
   getPatients, getPatientById, createPatient, updatePatient, getPatientTimeline,
   getAppointments, getAppointmentById, createAppointment, updateAppointment,
-  getTodayStats, getAvailableSlots,
+  getTodayStats, getAvailableSlots, getAppointmentsRange,
 } from './services/clinicStore.js';
-import { createPayment, getPayments, getPaymentSummary } from './services/clinicPayments.js';
+import { createPayment, getPayments, getPaymentsRange, getPaymentSummary } from './services/clinicPayments.js';
 import { logAudit, getAuditLog } from './services/clinicAudit.js';
 import { getCatalogItems, getDb, parseSettings } from './db/index.js';
 import { sendText, showTyping, delay } from './messaging.js';
@@ -380,6 +380,17 @@ router.get('/clinic/payments', authMiddleware, requireLiveTenant, (req, res) => 
     summary: getPaymentSummary(req.user.tenantId),
     payments: getPayments(req.user.tenantId, { patientId: req.query.patientId }),
   });
+});
+
+router.get('/clinic/report', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const to = String(req.query.to || new Date().toISOString().slice(0, 10));
+  const from = String(req.query.from || to);
+  const appointments = getAppointmentsRange(req.user.tenantId, { from, to, limit: 5000 });
+  const payments = getPaymentsRange(req.user.tenantId, { from, to, limit: 5000 });
+  const summary = getPaymentSummary(req.user.tenantId);
+  const total = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  res.json({ from, to, appointments, payments, summary: { ...summary, total } });
 });
 
 router.post('/clinic/payments', authMiddleware, requireLiveTenant, (req, res) => {

@@ -1,4 +1,4 @@
-import { LayoutDashboard, CalendarDays, Users, PlusCircle, Banknote } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Users, PlusCircle, Banknote, BarChart3 } from 'lucide-react';
 import type { TabId } from '../types';
 
 const TABS: { id: TabId; label: string; Icon: React.ElementType }[] = [
@@ -7,6 +7,7 @@ const TABS: { id: TabId; label: string; Icon: React.ElementType }[] = [
   { id: 'patients',  label: 'Patients', Icon: Users },
   { id: 'book',      label: 'Book',     Icon: PlusCircle },
   { id: 'payments',  label: 'Payments', Icon: Banknote },
+  { id: 'reports',   label: 'Reports',  Icon: BarChart3 },
 ];
 
 export function BottomNav({ active, onChange }: { active: TabId; onChange: (t: TabId) => void }) {

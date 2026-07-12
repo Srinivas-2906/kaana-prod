@@ -63,6 +63,31 @@ export function getPayments(tenantId, { patientId, limit = 100 } = {}) {
   return getDb().prepare(sql).all(...params).map(rowToPayment);
 }
 
+export function getPaymentsRange(tenantId, { from, to, patientId, limit = 5000 } = {}) {
+  let sql = `
+    SELECT pp.*, p.name AS patient_name
+    FROM patient_payments pp
+    JOIN patients p ON p.id = pp.patient_id
+    WHERE pp.tenant_id = ?
+  `;
+  const params = [tenantId];
+  if (patientId) {
+    sql += ' AND pp.patient_id = ?';
+    params.push(patientId);
+  }
+  if (from) {
+    sql += ' AND date(pp.created_at) >= date(?)';
+    params.push(from);
+  }
+  if (to) {
+    sql += ' AND date(pp.created_at) <= date(?)';
+    params.push(to);
+  }
+  sql += ' ORDER BY pp.created_at DESC LIMIT ?';
+  params.push(limit);
+  return getDb().prepare(sql).all(...params).map(rowToPayment);
+}
+
 export function getPaymentSummary(tenantId) {
   const today = new Date().toISOString().slice(0, 10);
   const monthStart = today.slice(0, 8) + '01';

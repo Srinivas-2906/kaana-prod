@@ -9,9 +9,10 @@ import { PatientsView } from './components/PatientsView';
 import { PatientDetail, BookView } from './components/PatientDetail';
 import { Toaster } from './components/Toaster';
 import { PaymentsView } from './components/PaymentsView';
+import { ReportsView } from './components/ReportsView';
 import { GlobalSearchDialog } from './components/GlobalSearchDialog';
 import { useKeyboardOpen } from './hooks/useKeyboardOpen';
-import { fetchToday, fetchPatients, fetchPatient, fetchClient, fetchPayments, fetchMe } from './lib/api';
+import { fetchToday, fetchPatients, fetchPatient, fetchClient, fetchPayments, fetchMe, fetchClinicReport } from './lib/api';
 import { logout } from './lib/auth';
 import type { Patient, TabId, TodayStats, ToastMsg, Payment, PaymentSummary } from './types';
 import './styles.css';
@@ -22,6 +23,7 @@ const PAGE_TITLES: Record<TabId, { title: string; sub: string }> = {
   patients:  { title: 'Patients',  sub: 'Find and open patient details' },
   book:      { title: 'Book',      sub: 'Add a new appointment' },
   payments:  { title: 'Payments',  sub: 'Track collections and dues' },
+  reports:   { title: 'Reports',   sub: 'Collections, operations, and retention' },
 };
 
 function ClinicApp() {
@@ -40,6 +42,14 @@ function ClinicApp() {
   const [displayName,   setDisplayName]   = useState<string>('');
   const [payments,      setPayments]      = useState<Payment[]>([]);
   const [paymentSummary, setPaymentSummary] = useState<PaymentSummary>({ todayTotal: 0, monthTotal: 0, dueCount: 0 });
+  const [reportRange, setReportRange] = useState<{ from: string; to: string }>(() => {
+    const to = new Date().toISOString().slice(0, 10);
+    const fromD = new Date();
+    fromD.setDate(fromD.getDate() - 29);
+    const from = fromD.toISOString().slice(0, 10);
+    return { from, to };
+  });
+  const [report, setReport] = useState<any>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const lastApiErrorRef = useRef<{ at: number; msg: string } | null>(null);
 
@@ -114,15 +124,55 @@ function ClinicApp() {
       const n = m?.user?.name || m?.user?.username || m?.user?.email || '';
       if (n) setDisplayName(n);
     }).catch(() => {});
-    const id = setInterval(loadToday, 15000);
-    return () => clearInterval(id);
   }, [loadToday, loadPatients]);
+
+  // Poll "today" only when it matters (Home/Today) and only while tab is visible.
+  useEffect(() => {
+    let interval: number | null = null;
+
+    function shouldPoll() {
+      if (document.visibilityState !== 'visible') return false;
+      return tab === 'today' || tab === 'overview';
+    }
+
+    async function tick() {
+      if (!shouldPoll()) return;
+      await loadToday();
+    }
+
+    function start(ms: number) {
+      if (interval) window.clearInterval(interval);
+      interval = window.setInterval(() => { void tick(); }, ms);
+    }
+
+    // Fast refresh when user is actively looking at Today/Home.
+    start(15_000);
+    void tick();
+
+    function onVisibility() {
+      if (document.visibilityState === 'visible') void tick();
+    }
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      if (interval) window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [tab, loadToday]);
 
   useEffect(() => {
     if (tab !== 'payments') return;
     loadPayments();
     loadPatients();
   }, [tab, loadPayments, loadPatients]);
+
+  useEffect(() => {
+    if (tab !== 'reports') return;
+    let alive = true;
+    fetchClinicReport(reportRange.from, reportRange.to)
+      .then((d) => { if (alive) setReport(d); })
+      .catch((e) => { if (alive) toastApiError(e); });
+    return () => { alive = false; };
+  }, [tab, reportRange.from, reportRange.to]);
 
   /* ── Navigation helpers ── */
   async function handleOpenPatient(id: string) {
@@ -317,6 +367,19 @@ function ClinicApp() {
               patients={patients}
               onRecorded={() => { loadPayments(); loadToday(); loadPatients(); }}
               onOpenPatient={handleOpenPatient}
+            />
+          ) : tab === 'reports' ? (
+            <ReportsView
+              from={reportRange.from}
+              to={reportRange.to}
+              report={report}
+              today={today}
+              patients={patients}
+              onChangeRange={(from, to) => setReportRange({ from, to })}
+              onRefresh={() => fetchClinicReport(reportRange.from, reportRange.to).then(setReport).catch(toastApiError)}
+              onOpenPatient={handleOpenPatient}
+              onGoToToday={() => handleTabChange('today')}
+              onToast={toast}
             />
           ) : (
             <BookView

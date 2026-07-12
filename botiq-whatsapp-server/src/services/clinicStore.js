@@ -396,6 +396,41 @@ export function getAppointments(tenantId, { date, status, patientId, limit = 200
   return getDb().prepare(sql).all(...params).map(rowToAppointment);
 }
 
+export function getAppointmentsRange(tenantId, { from, to, status, patientId, limit = 1500 } = {}) {
+  let sql = `
+    SELECT a.*, p.name AS patient_name, p.phone AS patient_phone,
+      (SELECT pp.amount FROM patient_payments pp
+        WHERE pp.appointment_id = a.id AND pp.tenant_id = a.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS payment_amount,
+      (SELECT pp.method FROM patient_payments pp
+        WHERE pp.appointment_id = a.id AND pp.tenant_id = a.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS payment_method
+    FROM appointments a
+    JOIN patients p ON p.id = a.patient_id
+    WHERE a.tenant_id = ?
+  `;
+  const params = [tenantId];
+  if (from) {
+    sql += ' AND date(a.scheduled_at) >= date(?)';
+    params.push(from);
+  }
+  if (to) {
+    sql += ' AND date(a.scheduled_at) <= date(?)';
+    params.push(to);
+  }
+  if (status) {
+    sql += ' AND a.status = ?';
+    params.push(status);
+  }
+  if (patientId) {
+    sql += ' AND a.patient_id = ?';
+    params.push(patientId);
+  }
+  sql += ' ORDER BY a.scheduled_at ASC LIMIT ?';
+  params.push(limit);
+  return getDb().prepare(sql).all(...params).map(rowToAppointment);
+}
+
 export function getTodayStats(tenantId) {
   const today = new Date().toISOString().slice(0, 10);
   const db = getDb();

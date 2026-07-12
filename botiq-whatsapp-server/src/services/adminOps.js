@@ -201,8 +201,8 @@ export function getTenantAdminDetail(tenantId) {
     links: {
       platform: isProdDomains ? `https://app.${root}` : `${platformBase}`,
       inbox: isProdDomains ? `https://${slug}.inbox.${root}` : `${botiqBase}?tenant=${slug}`,
-      crm: isProdDomains ? `https://${slug}.crm.${root}` : `${crmBase}?tenant=${slug}`,
-      clinic: isProdDomains ? `https://${slug}.clinic.${root}` : `${clinicBase}?tenant=${slug}`,
+      crm: isProdDomains ? `https://crm.${slug}.${root}` : `${crmBase}?tenant=${slug}`,
+      clinic: isProdDomains ? `https://crm.${slug}.${root}` : `${clinicBase}?tenant=${slug}`,
       listings: `${process.env.LISTINGS_BASE_URL || process.env.PUBLIC_URL || 'http://localhost:3002/listings'}?tenant=${row.slug}`,
     },
     settings,

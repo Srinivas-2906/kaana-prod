@@ -44,7 +44,8 @@ router.get('/clinic-credentials', (_req, res) => {
     },
     tenant: 'dentacare',
     url: 'http://localhost:5185?tenant=dentacare',
-    productionUrl: 'https://dentacare.crm.kaana.in',
+    productionUrl: 'https://crm.dentacare.kaana.in',
+    siteUrl: 'https://dentacare.kaana.in',
     clinic: 'Denta Care Dental Clinic — Dr. D. Ajit',
     simulate: 'POST /api/demo/whatsapp with { tenantSlug: "dentacare", phone, message }',
   });

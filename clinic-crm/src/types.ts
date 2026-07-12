@@ -75,7 +75,7 @@ export interface PaymentSummary {
   dueCount: number;
 }
 
-export type TabId = 'overview' | 'today' | 'patients' | 'book' | 'payments';
+export type TabId = 'overview' | 'today' | 'patients' | 'book' | 'payments' | 'reports';
 
 export const STATUS_LABELS: Record<AppointmentStatus, string> = {
   requested: 'Not confirmed',
@@ -108,9 +108,13 @@ export const PAYMENT_METHODS = ['Cash', 'UPI', 'Card', 'Online', 'Other'];
 export interface CatalogItem {
   id: string;
   title: string;
+  subtitle?: string;
   category?: string;
-  price?: number;
-  active?: boolean;
+  price?: string;      // display price label (e.g. "₹500" or "From ₹800")
+  priceNum?: number;   // numeric price if applicable
+  meta?: string;
+  imageUrl?: string;
+  status?: string;     // e.g. "Available" (from backend)
 }
 
 export interface ToastMsg {

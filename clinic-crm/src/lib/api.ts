@@ -124,6 +124,16 @@ export function fetchCatalog() {
   return request<{ items: CatalogItem[] } | CatalogItem[]>('/catalog');
 }
 
+export function fetchClinicReport(from: string, to: string) {
+  return request<{
+    from: string;
+    to: string;
+    appointments: Appointment[];
+    payments: Payment[];
+    summary: PaymentSummary & { total: number };
+  }>(`/clinic/report?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+}
+
 export function recordPayment(data: {
   patientId: string;
   amount: number;

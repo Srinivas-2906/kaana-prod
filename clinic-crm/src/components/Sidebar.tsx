@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, LayoutDashboard, CalendarDays, Users, CalendarPlus, LogOut, Banknote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutDashboard, CalendarDays, Users, CalendarPlus, LogOut, Banknote, BarChart3 } from 'lucide-react';
 import { logout } from '../lib/auth';
 import type { TabId } from '../types';
 
@@ -8,6 +8,7 @@ const NAV_ITEMS: { id: TabId; label: string; Icon: React.ElementType }[] = [
   { id: 'patients',  label: 'Patients', Icon: Users },
   { id: 'book',      label: 'Book',     Icon: CalendarPlus },
   { id: 'payments',  label: 'Payments', Icon: Banknote },
+  { id: 'reports',   label: 'Reports',  Icon: BarChart3 },
 ];
 
 interface Props {

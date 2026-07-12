@@ -209,8 +209,9 @@ router.post('/admin/provision', authMiddleware, requirePlatformAdmin, (req, res)
   const links = {
     platform: `https://app.${root}`,
     inbox: `https://${slug}.inbox.${root}`,
-    crm: `https://${slug}.crm.${root}`,
-    clinic: `https://${slug}.clinic.${root}`,
+    crm: `https://crm.${slug}.${root}`,
+    clinic: `https://crm.${slug}.${root}`,
+    site: `https://${slug}.${root}`,
   };
 
   res.status(201).json({
