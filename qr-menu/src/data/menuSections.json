@@ -1,0 +1,1586 @@
+[
+  {
+    "id": "veg-main-course",
+    "title": "Veg Main Course",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "mixed-veg-curry",
+        "name": "Mixed Veg Curry",
+        "price": 220,
+        "isVeg": true,
+        "description": "Serves 1 | A flavorful Indian delight with a medley of vibrant vegetables in a rich, aromatic curry sauce."
+      },
+      {
+        "id": "green-peas-masala",
+        "name": "Green Peas Masala",
+        "price": 220,
+        "isVeg": true
+      },
+      {
+        "id": "kadai-veg",
+        "name": "Kadai Veg",
+        "price": 249,
+        "isVeg": true
+      },
+      {
+        "id": "mushroom-curry",
+        "name": "Mushroom Curry",
+        "price": 290,
+        "isVeg": true
+      },
+      {
+        "id": "veg-manchurian-gravy",
+        "name": "Veg Manchurian Gravy",
+        "price": 200,
+        "isVeg": true
+      },
+      {
+        "id": "shahi-paneer",
+        "name": "Shahi Paneer",
+        "price": 310,
+        "isVeg": true,
+        "description": "A creamy indulgence made by cooking paneer cubes in a tomato gravy seasoned with Indian spices."
+      },
+      {
+        "id": "baby-corn-masala",
+        "name": "Baby Corn Masala",
+        "price": 300,
+        "isVeg": true
+      },
+      {
+        "id": "paneer-curry",
+        "name": "Paneer Curry",
+        "price": 290,
+        "isVeg": true,
+        "description": "Satisfy your cravings with the creamy, aromatic flavors of this classic Indian vegetarian dish. Serves 1"
+      },
+      {
+        "id": "kaju-tomato-curry",
+        "name": "Kaju Tomato Curry",
+        "price": 330,
+        "isVeg": true,
+        "description": "Serves 1"
+      },
+      {
+        "id": "kaju-masala",
+        "name": "Kaju Masala",
+        "price": 330,
+        "isVeg": true
+      },
+      {
+        "id": "paneer-mattar-masala",
+        "name": "Paneer Mattar Masala",
+        "price": 320,
+        "isVeg": true,
+        "description": "A mouth-watering blend of creamy paneer and tender peas, immersed in a fragrant Indian tomato-based sauce. Serves 1"
+      },
+      {
+        "id": "paneer-butter-masala",
+        "name": "Paneer Butter Masala",
+        "price": 300,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "Serves 1 | Creamy and mild sweet gravy made with butter, tomato, cashew, paneer and spices"
+      },
+      {
+        "id": "chana-masala",
+        "name": "Chana Masala",
+        "price": 220,
+        "isVeg": true,
+        "description": "A tasty and savory gravy made from cooking chickepeas in a flavorful gravy, seasoned with Indian spices."
+      },
+      {
+        "id": "kaju-paneer-curry",
+        "name": "Kaju Paneer Curry",
+        "price": 330,
+        "isVeg": true,
+        "description": "A rich and creamy Indian curry featuring tender paneer cheese and crunchy cashews. Serves 1"
+      },
+      {
+        "id": "methi-chaman",
+        "name": "Methi Chaman",
+        "price": 320,
+        "isVeg": true
+      },
+      {
+        "id": "kadai-paneer",
+        "name": "Kadai Paneer",
+        "price": 300,
+        "isVeg": true,
+        "description": "A rich and flavorful Indian vegetarian dish with soft paneer and aromatic spices. Serves 1"
+      },
+      {
+        "id": "mushroom-masala",
+        "name": "Mushroom Masala",
+        "price": 319,
+        "isVeg": true
+      },
+      {
+        "id": "veg-kolhapuri",
+        "name": "Veg Kolhapuri",
+        "price": 240,
+        "isVeg": true,
+        "description": "A tantalizing Indian specialty bursting with bold flavors and rich, aromatic spices."
+      },
+      {
+        "id": "paneer-tikka-masala",
+        "name": "Paneer Tikka Masala",
+        "price": 300,
+        "isVeg": true,
+        "description": "A flavorful and aromatic Indian delight with tender paneer cooked in a creamy, mouthwatering tikka masala sauce."
+      }
+    ]
+  },
+  {
+    "id": "chicken-main-course",
+    "title": "Chicken Main Course",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "butter-chicken",
+        "name": "Butter Chicken",
+        "price": 330,
+        "isVeg": false,
+        "description": "Serves 1 | A rich and creamy Indian dish with tender chicken, bursting with flavor. Serves 1"
+      },
+      {
+        "id": "andhra-chicken-curry-b-l",
+        "name": "Andhra Chicken Curry B/L",
+        "price": 319,
+        "isVeg": false,
+        "description": "A flavorful and aromatic Indian curry made with tender chicken, perfect for those who crave the vibrant tastes of the Andhra region."
+      },
+      {
+        "id": "kadai-chicken",
+        "name": "Kadai Chicken",
+        "price": 330,
+        "isVeg": false
+      },
+      {
+        "id": "chicken-mughlai",
+        "name": "Chicken Mughlai",
+        "price": 330,
+        "isVeg": false,
+        "description": "An all-time loved combo with finger-licking chicken Mughlai served along with chilli chicken, 1 lollipop and raitha."
+      },
+      {
+        "id": "chicken-patiala",
+        "name": "Chicken Patiala",
+        "price": 340,
+        "isVeg": false
+      },
+      {
+        "id": "boneless-chicken-curry",
+        "name": "Boneless Chicken Curry",
+        "price": 319,
+        "isVeg": false,
+        "description": "A tender, flavorful curry made with boneless chicken and traditional Indian spices. Serves 1-2"
+      },
+      {
+        "id": "chicken-do-pyaza",
+        "name": "Chicken Do Pyaza",
+        "price": 319,
+        "isVeg": false
+      },
+      {
+        "id": "punjabi-chicken",
+        "name": "Punjabi Chicken",
+        "price": 319,
+        "isVeg": false
+      },
+      {
+        "id": "methi-chicken",
+        "name": "Methi Chicken",
+        "price": 319,
+        "isVeg": false
+      },
+      {
+        "id": "chicken-tikka-masala",
+        "name": "Chicken Tikka Masala",
+        "price": 330,
+        "isVeg": false
+      },
+      {
+        "id": "chicken-masala",
+        "name": "Chicken Masala",
+        "price": 290,
+        "isVeg": false
+      },
+      {
+        "id": "chicken-curry",
+        "name": "Chicken Curry",
+        "price": 220,
+        "isVeg": false,
+        "description": "A savory and aromatic Indian chicken dish with a rich and creamy curry sauce that will leave you wanting more. Serves 1-2"
+      },
+      {
+        "id": "chicken-rogan-josh",
+        "name": "Chicken Rogan Josh",
+        "price": 330,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "chicken-biryanis",
+    "title": "Chicken Biryanis",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "chicken-dum-biryani",
+        "name": "Chicken Dum Biryani",
+        "price": 310,
+        "isVeg": false,
+        "description": "Serves 1 | A delightful preparation of richly flavoured aromatic rice layered with marinated chicken pieces in a delicate blend of whole spices"
+      },
+      {
+        "id": "kalmi-chicken-biryani",
+        "name": "Kalmi Chicken Biryani",
+        "price": 360,
+        "isVeg": false,
+        "description": "Serves 1 | Aromatic basmati rice and tender chicken, cooked to perfection with fragrant Indian spices. Serves 1-2"
+      },
+      {
+        "id": "tandoori-chicken-biryani",
+        "name": "Tandoori Chicken Biryani",
+        "price": 450,
+        "isVeg": false,
+        "description": "Serves 1 | Aromatic Indian rice dish layered with flavorful tandoori chicken. Serves 1-2"
+      },
+      {
+        "id": "chicken-mughlai-biryani",
+        "name": "Chicken Mughlai Biryani",
+        "price": 369,
+        "isVeg": false,
+        "description": "Serves 1 | A royal blend of aromatic rice and succulent chicken, cooked to perfection with traditional Indian spices. Serves 1-2"
+      },
+      {
+        "id": "chicken-special-biryani",
+        "name": "Chicken Special Biryani",
+        "price": 340,
+        "isVeg": false,
+        "description": "Comes with Egg , Chicken Gravy , Raita | Serves 1 | Flavourful seasoned rice and chicken,made with just the right spiciness"
+      },
+      {
+        "id": "chicken-pot-biryani",
+        "name": "Chicken Pot Biryani",
+        "price": 360,
+        "isVeg": false,
+        "description": "Comes with Raita | Serves 1 | This flavoursome biryani made in authentic hyerabadi style using marinated tender chicken aromatic spices and fluffy rice cooked in a claypot which gives different touch to the taste."
+      },
+      {
+        "id": "chicken-fry-biryani",
+        "name": "Chicken Fry Biryani",
+        "price": 330,
+        "isVeg": false,
+        "description": "Serves 1 | Yummy chicken fry biryani served with raita and gravy perfect dish to satinate your hunger"
+      }
+    ]
+  },
+  {
+    "id": "chicken-tandoor",
+    "title": "Chicken Tandoor",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "chicken-tikka",
+        "name": "Chicken Tikka",
+        "price": 310,
+        "isVeg": false,
+        "description": "Super soft chunks of chicken are coated with a spicy and peppery masala and grilled to perfection."
+      },
+      {
+        "id": "kalmi-chicken-kebab",
+        "name": "Kalmi Chicken Kebab",
+        "price": 330,
+        "isVeg": false,
+        "description": "Serves 1 | Tender chicken kebabs bursting with Indian flavors. Serves 1"
+      },
+      {
+        "id": "reshmi-chicken-kebab",
+        "name": "Reshmi Chicken Kebab",
+        "price": 320,
+        "isVeg": false,
+        "description": "Serves 1"
+      },
+      {
+        "id": "chicken-malai-tikka",
+        "name": "Chicken Malai Tikka",
+        "price": 310,
+        "isVeg": false
+      },
+      {
+        "id": "grilled-chicken",
+        "name": "Grilled Chicken",
+        "price": 600,
+        "isVeg": false
+      },
+      {
+        "id": "azwani-kebab",
+        "name": "Azwani Kebab",
+        "price": 300,
+        "isVeg": false
+      },
+      {
+        "id": "hariyali-tikka",
+        "name": "Hariyali Tikka",
+        "price": 300,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "indian-breads",
+    "title": "Indian Breads",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "tandoori-roti",
+        "name": "Tandoori Roti",
+        "price": 44,
+        "isVeg": true,
+        "description": "Super soft roti that is cooked to perfection in a tandoor."
+      },
+      {
+        "id": "butter-roti",
+        "name": "Butter Roti",
+        "price": 50,
+        "isVeg": true,
+        "description": "Soft and fluffy rotis topped with a generous serving of butter."
+      },
+      {
+        "id": "plain-naan",
+        "name": "Plain Naan",
+        "price": 55,
+        "isVeg": true,
+        "description": "Soft and fluffy naan tastes amazing when paired with a gravy."
+      },
+      {
+        "id": "paneer-kulcha",
+        "name": "Paneer Kulcha",
+        "price": 120,
+        "isVeg": true,
+        "description": "A delightfully wholesome combo of paneer kulcha, served along with chana masala, curds, gravy and butter."
+      },
+      {
+        "id": "butter-naan-1-pc",
+        "name": "Butter Naan ( 1 Pc )",
+        "price": 60,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "1 piece | A soft and buttery Indian bread, perfect for pairing with any flavorful dish. Serves 1"
+      },
+      {
+        "id": "cheese-naan",
+        "name": "Cheese Naan",
+        "price": 70,
+        "isVeg": true,
+        "description": "North Indian bread with a generous serving of cheese that tastes brilliant when paired with a gravy."
+      },
+      {
+        "id": "onion-kulcha",
+        "name": "Onion Kulcha",
+        "price": 99,
+        "isVeg": true,
+        "description": "A delectable, savory flatbread bursting with layers of exquisite flavors, perfect to pair with your favorite Indian dishes."
+      },
+      {
+        "id": "plain-kulcha",
+        "name": "Plain Kulcha",
+        "price": 75,
+        "isVeg": true
+      },
+      {
+        "id": "butter-kulcha",
+        "name": "Butter Kulcha",
+        "price": 85,
+        "isVeg": true
+      },
+      {
+        "id": "laccha-paratha",
+        "name": "Laccha Paratha",
+        "price": 85,
+        "isVeg": true,
+        "description": "Multi-layered flatbread made with wheat and plain flour."
+      },
+      {
+        "id": "garlic-naan",
+        "name": "Garlic Naan",
+        "price": 105,
+        "isVeg": true,
+        "description": "North Indian bread with a rich undertone of garlic that tastes brilliant when paired with a gravy."
+      },
+      {
+        "id": "masala-kulcha",
+        "name": "Masala Kulcha",
+        "price": 115,
+        "isVeg": true,
+        "description": "Stuffed paratha that tastes great with gravy or pickle."
+      }
+    ]
+  },
+  {
+    "id": "indian-starters",
+    "title": "Starters",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "chicken-liver-fry",
+        "name": "Chicken Liver Fry",
+        "price": 180,
+        "isVeg": false,
+        "description": "A succulent Indian dish with tender chicken liver, fried to golden perfection. Serves 1"
+      },
+      {
+        "id": "egg-bhurji",
+        "name": "Egg Bhurji",
+        "price": 160,
+        "isVeg": false,
+        "description": "A wholesome dish prepared with delectable eggs scarambled and flavored with masalas and assorted veggies."
+      },
+      {
+        "id": "mutton-fry-bone",
+        "name": "Mutton Fry Bone",
+        "price": 380,
+        "isVeg": false
+      },
+      {
+        "id": "chicken-fry",
+        "name": "Chicken Fry",
+        "price": 290,
+        "isVeg": false,
+        "description": "Crispy, flavorful and tender fried chicken with Indian spices. Serves 1"
+      },
+      {
+        "id": "prawns-fry",
+        "name": "Prawns Fry",
+        "price": 350,
+        "isVeg": false,
+        "description": "Golden brown and flavorful, this dish is brimming with succulent prawns that are sure to tantalize your taste buds. Serves 1-2"
+      },
+      {
+        "id": "fish-fry",
+        "name": "Fish Fry",
+        "price": 290,
+        "isVeg": false,
+        "description": "A delightfully delectable dish prepared with tender fish coated in special spices and fried to a perfect golden brown."
+      }
+    ]
+  },
+  {
+    "id": "seafood-biryanis",
+    "title": "Seafood Biryanis",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "fish-biryani",
+        "name": "Fish Biryani",
+        "price": 399,
+        "isVeg": false,
+        "description": "A flavorful Indian rice dish with tender fish and aromatic spices. Serves 1-2"
+      },
+      {
+        "id": "prawns-biryani",
+        "name": "Prawns Biryani",
+        "price": 399,
+        "isVeg": false,
+        "description": "A fragrant and flavorful Indian rice dish with succulent prawns cooked to perfection. Serves 1-2"
+      },
+      {
+        "id": "mixed-biryani",
+        "name": "Mixed Biryani",
+        "price": 399,
+        "isVeg": false,
+        "description": "Contains chicken, mutton & prawns."
+      }
+    ]
+  },
+  {
+    "id": "mutton-main-course",
+    "title": "Mutton Main Course",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "mutton-curry-bone-250-gms",
+        "name": "Mutton Curry Bone (250 Gms)",
+        "price": 380,
+        "isVeg": false
+      },
+      {
+        "id": "mutton-do-pyaza-bone",
+        "name": "Mutton Do Pyaza Bone",
+        "price": 380,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "mutton-biryanis",
+    "title": "Mutton Biryanis",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "mutton-biryani-bone",
+        "name": "Mutton Biryani Bone",
+        "price": 390,
+        "isVeg": false,
+        "description": "Serves 1 | A fragrant and flavorful Indian rice dish with tender mutton. Serves 1-2"
+      }
+    ]
+  },
+  {
+    "id": "prawns-main-course",
+    "title": "Prawns Main Course",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "prawns-curry-200-gms",
+        "name": "Prawns Curry (200 Gms)",
+        "price": 350,
+        "isVeg": false,
+        "description": "A savory and fragrant curry featuring succulent prawns in a rich Indian sauce. Serves 1-2"
+      }
+    ]
+  },
+  {
+    "id": "veg-tandoor",
+    "title": "Veg Tandoor",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "paneer-tikka",
+        "name": "Paneer Tikka",
+        "price": 310,
+        "isVeg": true,
+        "description": "Soft paneer cubes marinated in a seasoned masala and cooked in a tandoor."
+      }
+    ]
+  },
+  {
+    "id": "veg-biryani",
+    "title": "Veg Biryani",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "vegetable-pot-biryani",
+        "name": "Vegetable Pot Biryani",
+        "price": 269,
+        "isVeg": true,
+        "description": "Comes with raita and serva | Serves 1 | Freshly picked assorted vegetables are seasoned with exotic herbs and masalas cooked in a new avtar"
+      }
+    ]
+  },
+  {
+    "id": "egg-main-course",
+    "title": "Egg Main Course",
+    "topCategory": "indian",
+    "items": [
+      {
+        "id": "egg-curry-2-pcs",
+        "name": "Egg Curry (2 Pcs)",
+        "price": 130,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "noodles",
+    "title": "Noodles",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "veg-noodles",
+        "name": "Veg Noodles",
+        "price": 110,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "Serves 1 | A flavorful Chinese dish brimming with noodles & garden-fresh vegetables. Serves 1"
+      },
+      {
+        "id": "veg-schezwan-noodles",
+        "name": "Veg Schezwan Noodles",
+        "price": 130,
+        "isVeg": true
+      },
+      {
+        "id": "egg-noodles",
+        "name": "Egg Noodles",
+        "price": 140,
+        "isVeg": false,
+        "description": "A delightfully hearty combo of egg noodles and spicy chicken Manchurian and refreshing soda."
+      },
+      {
+        "id": "double-egg-noodles",
+        "name": "Double Egg Noodles",
+        "price": 160,
+        "isVeg": false,
+        "description": "Twice the egg, twice the fun - savor the abundant taste of Double Egg Noodles! Serves 1"
+      },
+      {
+        "id": "chicken-schezwan-noodles",
+        "name": "Chicken Schezwan Noodles",
+        "price": 200,
+        "isVeg": false,
+        "description": "Delectable noodles tossed along with assorted fresh veggies, chicken, Schezwan sauce and spices - perfect to satisfy your hunger."
+      },
+      {
+        "id": "chicken-noodles",
+        "name": "Chicken Noodles",
+        "price": 180,
+        "isVeg": false,
+        "isBestseller": true,
+        "description": "Comes with tomato and chilli sauce | Serves 1 | Noodles sauted egg and chicken with ginger,garlic and assorted vegetables in soy sauce."
+      },
+      {
+        "id": "veg-manchurian-noodles",
+        "name": "Veg Manchurian Noodles",
+        "price": 230,
+        "isVeg": true,
+        "description": "Serves 1 | A tantalizing blend of Chinese flavors in a veggie-packed noodle dish. Serves 1"
+      },
+      {
+        "id": "double-chicken-noodles",
+        "name": "Double Chicken Noodles",
+        "price": 210,
+        "isVeg": false,
+        "isBestseller": true,
+        "description": "Serves 1 | Flavorful Chinese dish with double the chicken and savory noodles. Serves 1"
+      },
+      {
+        "id": "veg-mushroom-noodles",
+        "name": "Veg Mushroom Noodles",
+        "price": 240,
+        "isVeg": true
+      },
+      {
+        "id": "veg-paneer-noodles",
+        "name": "Veg Paneer Noodles",
+        "price": 240,
+        "isVeg": true
+      }
+    ]
+  },
+  {
+    "id": "veg-starters",
+    "title": "Veg Starters",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "veg-manchurian",
+        "name": "Veg Manchurian",
+        "price": 230,
+        "isVeg": true,
+        "description": "Serves 1 | An Indo-chinese dish made of deep fried mixed vegetable dumpling tossed in spicy chinese sauces"
+      },
+      {
+        "id": "manchurian-paneer",
+        "name": "Manchurian Paneer",
+        "price": 325,
+        "isVeg": true
+      },
+      {
+        "id": "crispy-baby-corn",
+        "name": "Crispy Baby Corn",
+        "price": 325,
+        "isVeg": true,
+        "description": "Crispy and satisfying, this mouth-watering Chinese dish features tender baby corn coated in a delicious crunch. Serves 1"
+      },
+      {
+        "id": "chilli-baby-corn",
+        "name": "Chilli Baby Corn",
+        "price": 308,
+        "isVeg": true
+      },
+      {
+        "id": "baby-corn-65",
+        "name": "Baby Corn 65",
+        "price": 325,
+        "isVeg": true
+      },
+      {
+        "id": "schezwan-baby-corn",
+        "name": "Schezwan Baby Corn",
+        "price": 318,
+        "isVeg": true
+      },
+      {
+        "id": "chilli-paneer",
+        "name": "Chilli Paneer",
+        "price": 310,
+        "isVeg": true,
+        "description": "Serves 1"
+      },
+      {
+        "id": "schezwan-paneer",
+        "name": "Schezwan Paneer",
+        "price": 336,
+        "isVeg": true,
+        "description": "A tantalizing Chinese delight with flavors that pack a punch, combining succulent paneer in a delectable blend of zesty seasonings."
+      },
+      {
+        "id": "manchurian-baby-corn",
+        "name": "Manchurian Baby Corn",
+        "price": 308,
+        "isVeg": true
+      },
+      {
+        "id": "chilli-mushroom",
+        "name": "Chilli Mushroom",
+        "price": 325,
+        "isVeg": true
+      },
+      {
+        "id": "manchurian-mushroom",
+        "name": "Manchurian Mushroom",
+        "price": 325,
+        "isVeg": true,
+        "description": "Serves 1"
+      },
+      {
+        "id": "paneer-65",
+        "name": "Paneer 65",
+        "price": 325,
+        "isVeg": true,
+        "description": "Serves 1 | Deliciously crispy thin and long dosa smothered with butter; served with sambhar and chutney - a typical South Indian breakfast."
+      },
+      {
+        "id": "schezwan-mushroom",
+        "name": "Schezwan Mushroom",
+        "price": 336,
+        "isVeg": true
+      }
+    ]
+  },
+  {
+    "id": "chicken-starters",
+    "title": "Chicken Starters",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "chicken-lollipop-4-pcs",
+        "name": "Chicken Lollipop (4 Pcs)",
+        "price": 340,
+        "isVeg": false,
+        "description": "Tasty morsels of succulent chicken, delicately flavoured and crisply fried, making it an irresistible Chinese delicacy. Serves 1"
+      },
+      {
+        "id": "chilli-chicken",
+        "name": "Chilli Chicken",
+        "price": 330,
+        "isVeg": false,
+        "description": "Serves 1 | Tender chicken cooked in a flavorful sauce with a perfect balance of savory and sweet. Serves 1"
+      },
+      {
+        "id": "chicken-555",
+        "name": "Chicken 555",
+        "price": 330,
+        "isVeg": false,
+        "description": "Serves 1 | A succulent, flavorful Chinese chicken dish. Serves 1"
+      },
+      {
+        "id": "garlic-chicken",
+        "name": "Garlic Chicken",
+        "price": 330,
+        "isVeg": false
+      },
+      {
+        "id": "chicken-65",
+        "name": "Chicken 65",
+        "price": 330,
+        "isVeg": false,
+        "description": "This crispy and flavorful Chinese chicken dish will take your taste buds on a savory adventure. Serves 1"
+      },
+      {
+        "id": "chicken-manchurian",
+        "name": "Chicken Manchurian",
+        "price": 330,
+        "isVeg": false
+      },
+      {
+        "id": "ginger-chicken",
+        "name": "Ginger Chicken",
+        "price": 330,
+        "isVeg": false
+      },
+      {
+        "id": "schezwan-chicken",
+        "name": "Schezwan Chicken",
+        "price": 330,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "veg-fried-rice",
+    "title": "Veg Fried Rice",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "veg-fried-rice",
+        "name": "Veg Fried Rice",
+        "price": 239,
+        "isVeg": true,
+        "description": "Serves 1 | Stir fried dish turns plain white rice into flavourful grains lightly seasoned with soy sauce and tossed with colouful vegetables"
+      },
+      {
+        "id": "veg-schezwan-fried-rice",
+        "name": "Veg Schezwan Fried Rice",
+        "price": 259,
+        "isVeg": true,
+        "description": "A slightly spicy dish made by tossing vegetables and rice in a garlic and chilli flavored schezwan sauce."
+      },
+      {
+        "id": "veg-manchurian-fried-rice",
+        "name": "Veg Manchurian Fried Rice",
+        "price": 330,
+        "isVeg": true,
+        "description": "A flavorsome, Chinese-inspired dish with a crispy Veg Manchurian topping that perfectly complements the classic fried rice. Serves 1"
+      },
+      {
+        "id": "jeera-fried-rice",
+        "name": "Jeera Fried Rice",
+        "price": 239,
+        "isVeg": true,
+        "description": "Aromatic rice cooked in a tempering of cumin and whole spices - perfect dish to accompany any side dish."
+      },
+      {
+        "id": "veg-paneer-fried-rice",
+        "name": "Veg Paneer Fried Rice",
+        "price": 359,
+        "isVeg": true,
+        "description": "Serves 1 | A delectable Chinese dish with a perfect balance of veggies and paneer, served over flavorful fried rice. Serves 1"
+      },
+      {
+        "id": "veg-mushroom-fried-rice",
+        "name": "Veg Mushroom Fried Rice",
+        "price": 359,
+        "isVeg": true
+      },
+      {
+        "id": "mixed-veg-fried-rice",
+        "name": "Mixed Veg Fried Rice",
+        "price": 379,
+        "isVeg": true,
+        "description": "A tantalizing Chinese delicacy with mixed vegetables and fried rice. Serves 1-2"
+      }
+    ]
+  },
+  {
+    "id": "non-veg-fried-rice",
+    "title": "Non-Veg Fried Rice",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "chicken-fried-rice",
+        "name": "Chicken Fried Rice",
+        "price": 339,
+        "isVeg": false,
+        "description": "Comes with raita and gravy | Serves 1 | The richness of chicken and godness of rice packed together in a dish"
+      },
+      {
+        "id": "chicken-schezwan-fried-rice",
+        "name": "Chicken Schezwan Fried Rice",
+        "price": 380,
+        "isVeg": false,
+        "description": "Serves 1"
+      },
+      {
+        "id": "chicken-special-fried-rice",
+        "name": "Chicken Special Fried Rice",
+        "price": 363,
+        "isVeg": false,
+        "description": "Serves 1 | A delectable blend of seasoned rice and savory chicken, perfect for any Chinese cuisine lover. Serves 1-2"
+      },
+      {
+        "id": "chicken-mushroom-fried-rice",
+        "name": "Chicken Mushroom Fried Rice",
+        "price": 380,
+        "isVeg": false,
+        "description": "Golden fried rice sauteed with tender chicken and savory mushrooms. Serves 1-2"
+      },
+      {
+        "id": "mixed-fried-rice",
+        "name": "Mixed Fried Rice",
+        "price": 440,
+        "isVeg": false,
+        "description": "Contains egg, chicken, mutton & prawns."
+      }
+    ]
+  },
+  {
+    "id": "seafood-starters",
+    "title": "Seafood Starters",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "chilli-fish",
+        "name": "Chilli Fish",
+        "price": 340,
+        "isVeg": false,
+        "description": "A flavorful delight of tender fish cooked to perfection, bursting with savory goodness."
+      },
+      {
+        "id": "chilli-prawns",
+        "name": "Chilli Prawns",
+        "price": 340,
+        "isVeg": false,
+        "description": "Serves 1"
+      },
+      {
+        "id": "apollo-fish",
+        "name": "Apollo Fish",
+        "price": 340,
+        "isVeg": false,
+        "description": "Serves 1"
+      },
+      {
+        "id": "schezwan-prawns",
+        "name": "Schezwan Prawns",
+        "price": 340,
+        "isVeg": false
+      },
+      {
+        "id": "fish-manchurian",
+        "name": "Fish Manchurian",
+        "price": 340,
+        "isVeg": false,
+        "description": "A mouthwatering dish prepared with delectable fish stir fried with assorted vegetables and spicy sauces - perfect to satisfy your hunger."
+      },
+      {
+        "id": "loose-prawns",
+        "name": "Loose Prawns",
+        "price": 340,
+        "isVeg": false
+      },
+      {
+        "id": "manchurian-prawns",
+        "name": "Manchurian Prawns",
+        "price": 340,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "egg-fried-rice",
+    "title": "Egg Fried Rice",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "egg-fried-rice",
+        "name": "Egg Fried Rice",
+        "price": 249,
+        "isVeg": false,
+        "description": "Simple, aromatic, and healthy meal of scrambled eggs stir fried with rice."
+      },
+      {
+        "id": "egg-schezwan-fried-rice",
+        "name": "Egg Schezwan Fried Rice",
+        "price": 269,
+        "isVeg": false,
+        "description": "Fresh veggies and egg tossed in a pan with steamed rice and flavorful Hakka sauces and spices."
+      },
+      {
+        "id": "egg-mushroom-fried-rice",
+        "name": "Egg Mushroom Fried Rice",
+        "price": 340,
+        "isVeg": false
+      }
+    ]
+  },
+  {
+    "id": "chicken-soups",
+    "title": "Chicken Soups",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "chicken-sweet-corn-soup",
+        "name": "Chicken Sweet Corn Soup",
+        "price": 131,
+        "isVeg": false,
+        "description": "A healthy soup that is packed with the goodness of tender chicken and nutritious corn."
+      },
+      {
+        "id": "chicken-lemon-coriander-soup",
+        "name": "Chicken Lemon Coriander Soup",
+        "price": 130,
+        "isVeg": false,
+        "description": "A delightfully refreshing and soothing soup prepared with succulent chicken, lemon and coriander."
+      },
+      {
+        "id": "chicken-hot-sour-soup",
+        "name": "Chicken Hot & Sour Soup",
+        "price": 130,
+        "isVeg": false,
+        "description": "A hot and sour chicken soup to tickle your taste buds."
+      },
+      {
+        "id": "chicken-manchow-soup",
+        "name": "Chicken Manchow Soup",
+        "price": 130,
+        "isVeg": false,
+        "description": "A comforting chinese-style thick soup filled with tender, juicy chicken."
+      }
+    ]
+  },
+  {
+    "id": "veg-soups",
+    "title": "Veg Soups",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "veg-sweet-corn-soup",
+        "name": "Veg Sweet Corn Soup",
+        "price": 120,
+        "isVeg": true,
+        "description": "Serves 1 | A healthy soup that is packed with the goodness of tender and nutritious corn."
+      },
+      {
+        "id": "veg-hot-sour-soup",
+        "name": "Veg Hot & Sour Soup",
+        "price": 120,
+        "isVeg": true,
+        "description": "A soup made from vegetables with the rich sweet and sour undertones."
+      },
+      {
+        "id": "veg-manchow-soup",
+        "name": "Veg Manchow Soup",
+        "price": 120,
+        "isVeg": true,
+        "description": "A delicious hot and spicy, thick soup made from mixed vegetables and topped with fried noodles."
+      },
+      {
+        "id": "mushroom-soup",
+        "name": "Mushroom Soup",
+        "price": 120,
+        "isVeg": true
+      }
+    ]
+  },
+  {
+    "id": "shawarma",
+    "title": "Shawarma",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "chicken-butter-shawarma",
+        "name": "Chicken Butter Shawarma",
+        "price": 180,
+        "isVeg": false,
+        "description": "Serves 1 | Tender chicken shawarma drenched in rich butter, bursting with savory flavors. Serves 1"
+      },
+      {
+        "id": "chicken-mint-shawarma",
+        "name": "Chicken Mint Shawarma",
+        "price": 150,
+        "isVeg": false,
+        "description": "Serves 1"
+      }
+    ]
+  },
+  {
+    "id": "chinese-veg-main-course",
+    "title": "Veg Main Course",
+    "topCategory": "chinese",
+    "items": [
+      {
+        "id": "chilli-paneer-gravy",
+        "name": "Chilli Paneer Gravy",
+        "price": 310,
+        "isVeg": true
+      }
+    ]
+  },
+  {
+    "id": "idlis-vada-special-dosa",
+    "title": "Idlis & Vada & Special Dosa",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "idli-2-pcs",
+        "name": "Idli ( 2 Pcs )",
+        "price": 60,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "Serves 1 | Served with sambar and chutney."
+      },
+      {
+        "id": "mysore-bhajji",
+        "name": "Mysore Bhajji",
+        "price": 60,
+        "isVeg": true,
+        "description": "Serves 1 | A popular South Indian dish perfect for a quick snack or meal. Serves 1"
+      },
+      {
+        "id": "vada-sambar-2-pieces",
+        "name": "Vada Sambar ( 2 Pieces )",
+        "price": 70,
+        "isVeg": true,
+        "description": "Serves 1 | Vada served submerged in Sambhar"
+      },
+      {
+        "id": "idli-sambar-2-pieces",
+        "name": "Idli Sambar ( 2 Pieces )",
+        "price": 70,
+        "isVeg": true,
+        "description": "Serves 1 | Idli submerged in hot bowl of sambar."
+      },
+      {
+        "id": "vada-2-pieces",
+        "name": "Vada ( 2 Pieces )",
+        "price": 60,
+        "isVeg": true,
+        "description": "Serves 1 | Served with sambar and chutney."
+      },
+      {
+        "id": "paneer-cheese-onion-dosa-1-pc",
+        "name": "Paneer Cheese Onion Dosa ( 1 Pc )",
+        "price": 180,
+        "isVeg": true,
+        "description": "Medium Spicy"
+      },
+      {
+        "id": "baby-corn-dosa",
+        "name": "Baby Corn Dosa",
+        "price": 180,
+        "isVeg": true
+      },
+      {
+        "id": "green-peas-cheese-dosa",
+        "name": "Green Peas Cheese Dosa",
+        "price": 160,
+        "isVeg": true
+      },
+      {
+        "id": "cheese-onion-mushroom-dosa",
+        "name": "Cheese Onion Mushroom Dosa",
+        "price": 190,
+        "isVeg": true
+      },
+      {
+        "id": "paneer-baby-corn-dosa",
+        "name": "Paneer Baby Corn Dosa",
+        "price": 180,
+        "isVeg": true
+      },
+      {
+        "id": "panner-green-peas-dosa",
+        "name": "Panner Green Peas Dosa",
+        "price": 180,
+        "isVeg": true
+      },
+      {
+        "id": "paneer-kaju-dosa",
+        "name": "Paneer Kaju Dosa",
+        "price": 200,
+        "isVeg": true
+      },
+      {
+        "id": "paneer-mushroom-dosa",
+        "name": "Paneer Mushroom Dosa",
+        "price": 200,
+        "isVeg": true
+      },
+      {
+        "id": "paneer-schezwan-dosa",
+        "name": "Paneer Schezwan Dosa",
+        "price": 200,
+        "isVeg": true
+      },
+      {
+        "id": "sambar",
+        "name": "Sambar",
+        "price": 19,
+        "isVeg": true,
+        "description": "A hot lentil soup with mixed vegetables is a must have accompaniment for popular south indian breakfast and lunch recipes. Tastes good with idli, dosa and rice"
+      },
+      {
+        "id": "dahi-vada-2-pcs",
+        "name": "Dahi Vada ( 2 Pcs )",
+        "price": 80,
+        "isVeg": true,
+        "description": "Serves 1 | Vada is made of urad dal (called garelu in telugu) served with sambar and fresh coconut chutney."
+      },
+      {
+        "id": "butter-chana-dosa",
+        "name": "Butter Chana Dosa",
+        "price": 150,
+        "isVeg": true
+      },
+      {
+        "id": "cheese-kaju-dosa",
+        "name": "Cheese Kaju Dosa",
+        "price": 190,
+        "isVeg": true
+      },
+      {
+        "id": "cheese-chana-masala-dosa",
+        "name": "Cheese Chana Masala Dosa",
+        "price": 150,
+        "isVeg": true
+      }
+    ]
+  },
+  {
+    "id": "dosas",
+    "title": "Dosas",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "onion-minapa-masala-dosa",
+        "name": "Onion Minapa Masala Dosa",
+        "price": 100,
+        "isVeg": true
+      },
+      {
+        "id": "masala-dosa-1-pc",
+        "name": "Masala Dosa ( 1 Pc )",
+        "price": 90,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "Serves 1 | A crispy classic South Indian delight with aromatic filling! Serves 1"
+      },
+      {
+        "id": "onion-upma-minapa-dosa",
+        "name": "Onion Upma Minapa Dosa",
+        "price": 100,
+        "isVeg": true,
+        "description": "A savory South Indian delight featuring crispy dosa and flavor-packed upma topped with caramelized onions. Serves 1"
+      },
+      {
+        "id": "paneer-dosa",
+        "name": "Paneer Dosa",
+        "price": 200,
+        "isVeg": true,
+        "description": "Crispy crepe made from coarsely ground mix of rice, split black gram, beaten rice and fenugreek, center-filled with spicy paneer masala. Served with"
+      },
+      {
+        "id": "mushroom-dosa",
+        "name": "Mushroom Dosa",
+        "price": 200,
+        "isVeg": true,
+        "description": "Crispy crepe made from coarsely ground mix of rice, split black gram, beaten rice and fenugreek, center-filled with spicy mushroom masala. Served with"
+      },
+      {
+        "id": "kaju-dosa",
+        "name": "Kaju Dosa",
+        "price": 200,
+        "isVeg": true
+      },
+      {
+        "id": "plain-dosa-1-pc",
+        "name": "Plain Dosa ( 1 Pc )",
+        "price": 80,
+        "isVeg": true,
+        "description": "Comes with sambhar and chutney | Serves 1 | Crispy golden goodness that's perfect for any meal. Serves 1"
+      },
+      {
+        "id": "onion-minapa-dosa",
+        "name": "Onion Minapa Dosa",
+        "price": 90,
+        "isVeg": true,
+        "description": "Serves 1 | A savory South Indian crepe filled with a flavorful onion twist. Serves 1"
+      },
+      {
+        "id": "onion-rava-masala-dosa-1-pc",
+        "name": "Onion Rava Masala Dosa ( 1 Pc )",
+        "price": 100,
+        "isVeg": true,
+        "description": "Comes with sambar and chutney | Serves 1 | A savory South Indian delight with a crispy texture and flavorful filling. Serves 1"
+      },
+      {
+        "id": "onion-rava-dosa-1-pc",
+        "name": "Onion Rava Dosa ( 1 Pc )",
+        "price": 90,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "Serves 1 | | Delectably thin crispy & tasty dosa prepared with semolina |"
+      },
+      {
+        "id": "chana-masala-dosa",
+        "name": "Chana Masala Dosa",
+        "price": 150,
+        "isVeg": true,
+        "description": "Serves 1 | Served with sambar and chutney."
+      },
+      {
+        "id": "paper-masala-dosa-1-pc",
+        "name": "Paper Masala Dosa ( 1 Pc )",
+        "price": 130,
+        "isVeg": true,
+        "description": "Comes with fresh coconut chutney and sambar. | Serves 1 | Dosa stuffed with potato masala"
+      },
+      {
+        "id": "paper-plain-dosa",
+        "name": "Paper Plain Dosa",
+        "price": 120,
+        "isVeg": true,
+        "description": "Serves 1 | Traditional South Indian dish made by fermented lentil rice and black lentil."
+      },
+      {
+        "id": "plain-rava-dosa-1-pc",
+        "name": "Plain Rava Dosa ( 1 Pc )",
+        "price": 80,
+        "isVeg": true,
+        "description": "Serves 1 | Delectably thin crispy & tasty dosa prepared with semolina."
+      },
+      {
+        "id": "green-peas-masala-dosa",
+        "name": "Green Peas Masala Dosa",
+        "price": 150,
+        "isVeg": true,
+        "description": "A flavorsome and satisfying Indian crepe prepared with a flavorful stuffing of green peas, delivering a delightful culinary experience."
+      }
+    ]
+  },
+  {
+    "id": "poori",
+    "title": "Poori",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "parotta",
+        "name": "Parotta",
+        "price": 100,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "2 pieces | South Indian delight of layered bread. Serves 1"
+      },
+      {
+        "id": "parota-chana-masala",
+        "name": "Parota Chana Masala",
+        "price": 180,
+        "isVeg": true,
+        "description": "A delectable combination of flaky parota and flavorful chana masala, perfect for a delightful tiffin experience."
+      },
+      {
+        "id": "chapati-chana-masala",
+        "name": "Chapati Chana Masala",
+        "price": 180,
+        "isVeg": true
+      },
+      {
+        "id": "poori",
+        "name": "Poori",
+        "price": 90,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "2 pieces | A crispy, flavorful South Indian delight. Serves 1"
+      },
+      {
+        "id": "chapati",
+        "name": "Chapati",
+        "price": 90,
+        "isVeg": true,
+        "isBestseller": true,
+        "description": "2 pieces | A soft and wholesome South Indian delight. Serves 1"
+      }
+    ]
+  },
+  {
+    "id": "pesarattus",
+    "title": "Pesarattus",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "plain-pesarattu",
+        "name": "Plain Pesarattu",
+        "price": 80,
+        "isVeg": true,
+        "description": "Serves 1 | Served with sambar and chutney."
+      },
+      {
+        "id": "upma-pesarattu",
+        "name": "Upma Pesarattu",
+        "price": 90,
+        "isVeg": true,
+        "description": "Comes with sambhar and chutney | Serves 1 | Perfectly crispy, golden fries tossed in deliciously spicy peri-peri spice powder."
+      },
+      {
+        "id": "onion-pesarattu",
+        "name": "Onion Pesarattu",
+        "price": 90,
+        "isVeg": true,
+        "description": "Serves 1 | Served with sambar and chutney."
+      },
+      {
+        "id": "onion-upma-pesarattu",
+        "name": "Onion Upma Pesarattu",
+        "price": 100,
+        "isVeg": true,
+        "description": "Comes with sambhar and chutney | Serves 1"
+      }
+    ]
+  },
+  {
+    "id": "uttapams",
+    "title": "Uttapams",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "plain-uttapam",
+        "name": "Plain Uttapam",
+        "price": 90,
+        "isVeg": true,
+        "description": "Serves 1 | It is very soft, light and spongy dosa, served with coconut chutney and sambar"
+      },
+      {
+        "id": "onion-uttapam",
+        "name": "Onion Uttapam",
+        "price": 100,
+        "isVeg": true,
+        "description": "Comes with sambhar and chutney | Serves 1 | Soft and spongy dosa stuffed with onions."
+      }
+    ]
+  },
+  {
+    "id": "upma",
+    "title": "Upma",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "upma",
+        "name": "Upma",
+        "price": 60,
+        "isVeg": true,
+        "description": "Serves 1 | | Traditional south Indian dish made from rava (cream of wheat) |"
+      }
+    ]
+  },
+  {
+    "id": "quick-bites-desserts",
+    "title": "Quick Bites & Dessers",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "water-bottle-1-liter",
+        "name": "Water Bottle 1 Liter",
+        "price": 25,
+        "isVeg": true,
+        "description": "Serves 1"
+      },
+      {
+        "id": "butter-scotch-milkshake",
+        "name": "Butter Scotch Milkshake",
+        "price": 140,
+        "isVeg": true,
+        "description": "A crunchy and creamy milkshake made with crunchy butterscotch ice cream and milk."
+      },
+      {
+        "id": "banana-milkshake",
+        "name": "Banana Milkshake",
+        "price": 120,
+        "isVeg": true
+      },
+      {
+        "id": "musk-milon-milk-shake",
+        "name": "Musk Milon Milk Shake",
+        "price": 120,
+        "isVeg": true,
+        "description": "A creamy and refreshing milkshake with a subtle musky flavor. Serves 1"
+      },
+      {
+        "id": "caroot-milkshake",
+        "name": "Caroot Milkshake",
+        "price": 130,
+        "isVeg": true
+      },
+      {
+        "id": "chocolet-milkshake",
+        "name": "Chocolet Milkshake",
+        "price": 140,
+        "isVeg": true,
+        "description": "Indulge in a creamy chocolate milkshake that's perfect for dessert or a quick treat. Serves 1"
+      },
+      {
+        "id": "black-current-milkshake",
+        "name": "Black Current Milkshake",
+        "price": 140,
+        "isVeg": true,
+        "description": "A fruity and creamy dessert that satisfies your sweet cravings. Serves 1"
+      },
+      {
+        "id": "pista-milk-shake",
+        "name": "Pista Milk Shake",
+        "price": 140,
+        "isVeg": true
+      },
+      {
+        "id": "strawberry-milkshake",
+        "name": "Strawberry Milkshake",
+        "price": 120,
+        "isVeg": true,
+        "description": "A thick shake made from plush strawberries."
+      },
+      {
+        "id": "vannella-milkshake",
+        "name": "Vannella Milkshake",
+        "price": 120,
+        "isVeg": true
+      },
+      {
+        "id": "water-milon-juice",
+        "name": "Water Milon Juice",
+        "price": 80,
+        "isVeg": true
+      },
+      {
+        "id": "muskmilon-juice",
+        "name": "Muskmilon Juice",
+        "price": 85,
+        "isVeg": true
+      },
+      {
+        "id": "banana-juice",
+        "name": "Banana Juice",
+        "price": 85,
+        "isVeg": true
+      },
+      {
+        "id": "papaya-juice",
+        "name": "Papaya Juice",
+        "price": 85,
+        "isVeg": true
+      },
+      {
+        "id": "caroot-juice",
+        "name": "Caroot Juice",
+        "price": 90,
+        "isVeg": true
+      },
+      {
+        "id": "pineapple-juice",
+        "name": "Pineapple Juice",
+        "price": 85,
+        "isVeg": true
+      },
+      {
+        "id": "grape-juice",
+        "name": "Grape Juice",
+        "price": 80,
+        "isVeg": true,
+        "description": "A vibrant and refreshing blend of pulpy sweet grape juice rich in antioxidants and vitamins"
+      }
+    ]
+  },
+  {
+    "id": "meals",
+    "title": "Meals",
+    "topCategory": "south-indian",
+    "items": [
+      {
+        "id": "veg-mini-meals",
+        "name": "Veg Mini Meals",
+        "price": 140,
+        "isVeg": true,
+        "description": "Medium Spicy | Serves 1 | Fried rice + sambar rice+ curd rice + veg kurma"
+      },
+      {
+        "id": "veg-meal",
+        "name": "Veg Meal",
+        "price": 149,
+        "isVeg": true
+      }
+    ]
+  }
+]
