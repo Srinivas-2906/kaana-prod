@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 export default function AiDemoSection() {
   return (
     <>
@@ -30,9 +32,15 @@ export default function AiDemoSection() {
                   <div className="ai-demo-content">
                     <p className="text-neutral-400 mb-4">Enter a topic or prompt, and our AI will generate content for you.</p>
                     <div className="ai-demo-input">
-                      <input type="text" id="textGeneratorInput" placeholder="Enter a topic (e.g., 'Benefits of responsive web design')" />
-                      <button id="textGeneratorButton">Generate</button>
+                      <input
+                        type="text"
+                        id="textGeneratorInput"
+                        maxLength={400}
+                        placeholder="Enter a topic (e.g., 'Benefits of responsive web design')"
+                      />
+                      <button id="textGeneratorButton" type="button">Generate</button>
                     </div>
+                    <p className="text-neutral-500 text-xs mt-2">Demo limit: a few generations per visitor per day.</p>
                     <div className="ai-demo-output" id="textGeneratorOutput">
                       <p className="text-neutral-400 text-sm">Your AI-generated content will appear here...</p>
                     </div>
@@ -61,6 +69,13 @@ export default function AiDemoSection() {
                       <button id="demoChatSend">Send</button>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2" id="demoQuickReplies"></div>
+                    <Link
+                      href="/work"
+                      className="mt-4 inline-flex items-center text-xs text-accent link-trigger hover:underline"
+                    >
+                      View all case studies
+                      <i className="fas fa-arrow-right text-[10px] ml-2" />
+                    </Link>
                   </div>
                 </div>
               </div>

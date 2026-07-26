@@ -1,5 +1,7 @@
 'use client';
 
+import Link from "next/link";
+
 export default function HeroSection() {
   return (
     <>
@@ -39,11 +41,18 @@ export default function HeroSection() {
                     </a>
                   </div>
                   <div className="magnetic-wrap">
-                    <a href="#ai-demo" className="magnetic-area btn btn-outline link-trigger">
-                      Try AI Demo
-                    </a>
+                    <Link href="/work" className="magnetic-area btn btn-outline link-trigger">
+                      View Case Studies
+                      <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                    </Link>
                   </div>
                 </div>
+                <p className="mt-4 text-sm text-neutral-400 reveal-up" style={{ transitionDelay: "0.45s" }}>
+                  <a href="#ai-demo" className="text-accent hover:underline link-trigger">
+                    Try the live AI demo
+                  </a>
+                  <span className="text-neutral-500"> · scroll to explore</span>
+                </p>
                 
                 
                 <div className="swiper hero-swiper mt-10 reveal-up" style={{ transitionDelay: "0.6s" }}>

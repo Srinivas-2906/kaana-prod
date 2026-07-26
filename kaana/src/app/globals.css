@@ -61,7 +61,7 @@
   }
 }
 
-@import "./kaana.css" layer(base);
+/* Site component styles — imported from layout.tsx to avoid Turbopack path resolution issues */
 
 /* ── Un-layered overrides: beat Swiper's un-layered CSS ── */
 

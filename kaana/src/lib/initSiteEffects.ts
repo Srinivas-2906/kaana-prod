@@ -6,6 +6,25 @@ import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 
+/** Reset overlay + reveal state after back/forward navigation */
+export function resetNavigationUi(): void {
+  const pageTransition = document.getElementById("pageTransition");
+  if (pageTransition) {
+    pageTransition.classList.remove("active");
+    pageTransition.style.transform = "translateY(100%)";
+  }
+
+  const revealSelectors =
+    ".reveal-up, .reveal-left, .reveal-right, .scale-in, .rotate-in, .blur-in, .clip-reveal, .stagger-item";
+  document.querySelectorAll(revealSelectors).forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add("active");
+    }
+  });
+}
+
+
 export function initSiteEffects(): () => void {
   // DOM Elements
       const cursor = document.getElementById('cursor');
@@ -101,6 +120,7 @@ export function initSiteEffects(): () => void {
       // Initialize Grid Lines
       function initGridLines() {
         const gridLines = document.getElementById('gridLines');
+        if (!gridLines) return;
         
         // Create horizontal lines
         for (let i = 0; i < 10; i++) {
@@ -122,6 +142,7 @@ export function initSiteEffects(): () => void {
       // Initialize Particles
       function initParticles() {
         const canvas = document.getElementById('particles-canvas');
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
         // Set canvas size
@@ -213,6 +234,7 @@ export function initSiteEffects(): () => void {
       // Initialize Neural Network
       function initNeuralNetwork() {
         const canvas = document.getElementById('neural-network');
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
         // Set canvas size
@@ -309,6 +331,7 @@ export function initSiteEffects(): () => void {
   
       // Initialize Hero Swiper
     function initHeroSwiper() {
+      if (!document.querySelector(".hero-swiper")) return;
       new Swiper(".hero-swiper", {
         modules: [Autoplay, Pagination],
         slidesPerView: 1,
@@ -370,6 +393,7 @@ export function initSiteEffects(): () => void {
   
       // Scroll Progress
       function initScrollProgress() {
+        if (!scrollProgress || !header || !backToTop) return;
         window.addEventListener('scroll', () => {
           const scrollTop = window.scrollY;
           const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -408,14 +432,42 @@ export function initSiteEffects(): () => void {
           
           navLinks.forEach(link => {
             link.classList.remove('text-accent');
-            if (link.getAttribute('href') === `#${currentSection}`) {
+            const href = link.getAttribute('href') || '';
+            if (href === '#' || href === '') return;
+  
+            const onWorkRoute = window.location.pathname.startsWith('/work');
+            if (onWorkRoute && href === '/work') {
+              link.classList.add('text-accent');
+              return;
+            }
+  
+            if (!onWorkRoute && currentSection === 'work' && href === '/work') {
+              link.classList.add('text-accent');
+              return;
+            }
+  
+            if (!onWorkRoute && currentSection && href === `#${currentSection}`) {
               link.classList.add('text-accent');
             }
           });
           
           mobileNavLinks.forEach(link => {
             link.classList.remove('text-accent');
-            if (link.getAttribute('href') === `#${currentSection}`) {
+            const href = link.getAttribute('href') || '';
+            if (href === '#' || href === '') return;
+  
+            const onWorkRoute = window.location.pathname.startsWith('/work');
+            if (onWorkRoute && href === '/work') {
+              link.classList.add('text-accent');
+              return;
+            }
+  
+            if (!onWorkRoute && currentSection === 'work' && href === '/work') {
+              link.classList.add('text-accent');
+              return;
+            }
+  
+            if (!onWorkRoute && currentSection && href === `#${currentSection}`) {
               link.classList.add('text-accent');
             }
           });
@@ -463,6 +515,8 @@ export function initSiteEffects(): () => void {
         staggerItems.forEach(element => {
           observer.observe(element);
         });
+  
+        resetNavigationUi();
       }
   
       // Mobile Menu Toggle
@@ -585,6 +639,7 @@ export function initSiteEffects(): () => void {
       // Testimonial Slider
       function initTestimonialSlider() {
         const slider = document.getElementById('testimonialSlider');
+        if (!slider) return;
         const track = slider.querySelector('.minimal-slider-track');
         const dots = slider.querySelectorAll('.minimal-slider-dot');
         let currentSlide = 0;
@@ -614,6 +669,7 @@ export function initSiteEffects(): () => void {
   
       // Process Timeline
       function initProcessTimeline() {
+        if (!processImage || processSteps.length === 0) return;
         let currentStep = 0;
         
         function updateProcessStep(index) {
@@ -722,39 +778,27 @@ export function initSiteEffects(): () => void {
       function initLinkClickAnimation() {
         linkTriggers.forEach(link => {
           link.addEventListener('click', (e) => {
-            // Create ripple effect
             const ripple = document.createElement('div');
             ripple.classList.add('link-click-ripple');
             ripple.style.left = `${e.clientX}px`;
             ripple.style.top = `${e.clientY}px`;
             document.body.appendChild(ripple);
-            
-            // Remove ripple after animation
+  
             setTimeout(() => {
               ripple.remove();
             }, 600);
-            
-            // If it's an anchor link, don't trigger page transition
-            if (link.getAttribute('href') && link.getAttribute('href').startsWith('#')) {
-              return;
-            }
-            
-            // Trigger page transition for non-anchor links
-            if (link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
-              e.preventDefault();
-              
-              pageTransition.classList.add('active');
-              
-              setTimeout(() => {
-                window.location.href = link.getAttribute('href');
-              }, 500);
-            }
           });
         });
       }
   
+      function initNavigationRecovery() {
+        resetNavigationUi();
+        window.addEventListener('pageshow', resetNavigationUi);
+      }
+  
       // AI Chat Widget
       function initAiChatWidget() {
+        if (!aiChatButton || !aiChatPanel || !aiChatClose || !aiChatMessages || !aiChatInput || !aiChatSend) return;
         aiChatButton.addEventListener('click', () => {
           aiChatPanel.classList.add('active');
         });
@@ -821,40 +865,54 @@ export function initSiteEffects(): () => void {
   
       // AI Text Generator
       function initAiTextGenerator() {
-        function generateResponse(inputRaw) {
-          const input = inputRaw.trim().toLowerCase();
-          if (!input) return;
-          textGeneratorOutput.innerHTML = '<div class="ai-typing"><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div></div>';
-          setTimeout(() => {
-            let response = '';
-            for (const keyword in textGeneratorResponses) {
-              if (input.includes(keyword)) {
-                response = textGeneratorResponses[keyword];
-                break;
-              }
-            }
-            if (!response) {
-              // Lightly tailored generic scaffold
-              response = `Here’s a concise outline to get you started on ${inputRaw}:
+        if (!textGeneratorInput || !textGeneratorButton || !textGeneratorOutput) return;
   
-  1) Goal and audience
-  2) Key benefits and differentiators
-  3) Implementation steps (stack, timeline, owners)
-  4) Launch checklist (QA, SEO, analytics)
-  5) Growth plan (iterations, experiments, KPIs)`;
+        let inFlight = false;
+  
+        function streamText(container, response) {
+          container.className = 'text-light whitespace-pre-line';
+          textGeneratorOutput.innerHTML = '';
+          textGeneratorOutput.appendChild(container);
+          let i = 0;
+          const interval = setInterval(() => {
+            container.textContent += response.charAt(i);
+            i++;
+            if (i >= response.length) clearInterval(interval);
+          }, 12);
+        }
+  
+        async function generateResponse(inputRaw) {
+          const input = inputRaw.trim();
+          if (!input || inFlight) return;
+  
+          if (input.length > 400) {
+            textGeneratorOutput.innerHTML = '<p class="text-red-400 text-sm">Please keep prompts under 400 characters.</p>';
+            return;
+          }
+  
+          inFlight = true;
+          textGeneratorButton.disabled = true;
+          textGeneratorOutput.innerHTML = '<div class="ai-typing"><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div></div>';
+  
+          try {
+            const res = await fetch('/api/ai/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ prompt: input, _hp: '' }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              throw new Error(data.error || 'Generation failed. Please try again.');
             }
-            // Stream the response for realism
             const container = document.createElement('div');
-            container.className = 'text-light whitespace-pre-line';
-            textGeneratorOutput.innerHTML = '';
-            textGeneratorOutput.appendChild(container);
-            let i = 0;
-            const interval = setInterval(() => {
-              container.textContent += response.charAt(i);
-              i++;
-              if (i >= response.length) clearInterval(interval);
-            }, 12);
-          }, 500);
+            streamText(container, data.text || '');
+          } catch (err) {
+            const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+            textGeneratorOutput.innerHTML = '<p class="text-red-400 text-sm">' + message + '</p>';
+          } finally {
+            inFlight = false;
+            textGeneratorButton.disabled = false;
+          }
         }
   
         textGeneratorButton.addEventListener('click', () => {
@@ -867,6 +925,7 @@ export function initSiteEffects(): () => void {
   
       // Demo Chat
       function initDemoChat() {
+        if (!demoChatSend || !demoChatInput || !demoChatMessages) return;
         function addUserMessage(message) {
           const messageElement = document.createElement('div');
           messageElement.classList.add('ai-message', 'ai-message-user');
@@ -876,7 +935,6 @@ export function initSiteEffects(): () => void {
         }
         
         function addBotMessage(message) {
-          // Add typing indicator
           const typingIndicator = document.createElement('div');
           typingIndicator.classList.add('ai-typing');
           
@@ -889,7 +947,6 @@ export function initSiteEffects(): () => void {
           demoChatMessages.appendChild(typingIndicator);
           demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
           
-          // Remove typing indicator and add message after delay with streaming
           setTimeout(() => {
             typingIndicator.remove();
             const messageElement = document.createElement('div');
@@ -905,17 +962,76 @@ export function initSiteEffects(): () => void {
             }, 12);
           }, 500);
         }
-        
-        function respond(message) {
-          // Find matching response
-          let response = "I'm sorry, I don't have information about that specific topic. Would you like to know about our web design, app development, chatbot, e-commerce, or Print & Digital Marketing services?";
-          for (const keyword in demoChatResponses) {
-            if (message.toLowerCase().includes(keyword)) {
-              response = demoChatResponses[keyword];
-              break;
+
+        let chatInFlight = false;
+
+        function formatChatMessage(text) {
+          const escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          return escaped.replace(
+            /(https?:\/\/[^\s<]+)/g,
+            '<a href="$1" class="text-accent hover:underline break-all" target="_blank" rel="noopener noreferrer">$1</a>',
+          );
+        }
+
+        function streamBotMessage(text) {
+          const messageElement = document.createElement('div');
+          messageElement.classList.add('ai-message', 'ai-message-bot');
+          demoChatMessages.appendChild(messageElement);
+          demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+          let i = 0;
+          const interval = setInterval(() => {
+            messageElement.textContent += text.charAt(i);
+            i++;
+            demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+            if (i >= text.length) {
+              clearInterval(interval);
+              messageElement.innerHTML = formatChatMessage(text);
             }
+          }, 12);
+        }
+
+        async function respond(message) {
+          if (chatInFlight) return;
+          chatInFlight = true;
+          demoChatSend.disabled = true;
+
+          const typingIndicator = document.createElement('div');
+          typingIndicator.classList.add('ai-typing');
+          for (let i = 0; i < 3; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('ai-typing-dot');
+            typingIndicator.appendChild(dot);
           }
-          addBotMessage(response);
+          demoChatMessages.appendChild(typingIndicator);
+          demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+
+          try {
+            const res = await fetch('/api/ai/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message, _hp: '' }),
+            });
+            const data = await res.json().catch(() => ({}));
+            typingIndicator.remove();
+            if (!res.ok) {
+              throw new Error(data.error || 'Could not get a reply. Please try again.');
+            }
+            streamBotMessage(
+              data.text || 'Thanks for your message! How can we help with your project?',
+            );
+          } catch (err) {
+            typingIndicator.remove();
+            const fallback = err instanceof Error
+              ? err.message
+              : 'Something went wrong. Please try again or use the contact form.';
+            streamBotMessage(fallback);
+          } finally {
+            chatInFlight = false;
+            demoChatSend.disabled = false;
+          }
         }
   
         function handleUserMessage() {
@@ -938,9 +1054,9 @@ export function initSiteEffects(): () => void {
   
         // Quick replies
         const quickReplies = [
-          { label: 'Services', text: 'web design, app, chatbot, e-commerce, marketing' },
-          { label: 'Timeline', text: 'How long does a project take?' },
-          { label: 'Portfolio', text: 'Can I see portfolio examples?' }
+          { label: 'Our strengths', text: 'What are your strengths and which projects prove them?' },
+          { label: 'Case studies', text: 'What case studies have you shipped? Share links.' },
+          { label: 'All work', text: 'Show me your full portfolio with links to every project.' },
         ];
         const quickWrap = document.getElementById('demoQuickReplies');
         if (quickWrap) {
@@ -987,6 +1103,7 @@ export function initSiteEffects(): () => void {
   
       // Back to Top
       function initBackToTop() {
+        if (!backToTop) return;
         backToTop.addEventListener('click', () => {
           window.scrollTo({
             top: 0,
@@ -1041,6 +1158,7 @@ export function initSiteEffects(): () => void {
   safeInit("process timeline", initProcessTimeline);
   safeInit("magnetic buttons", initMagneticButtons);
   safeInit("link click animation", initLinkClickAnimation);
+  safeInit("navigation recovery", initNavigationRecovery);
   safeInit("AI chat widget", initAiChatWidget);
   safeInit("AI text generator", initAiTextGenerator);
   safeInit("demo chat", initDemoChat);
@@ -1048,5 +1166,7 @@ export function initSiteEffects(): () => void {
   safeInit("back to top", initBackToTop);
   safeInit("contact form", initContactForm);
 
-  return () => {};
+  return () => {
+    window.removeEventListener("pageshow", resetNavigationUi);
+  };
 }

@@ -34,7 +34,9 @@ steps:
           --min-instances 0 \
           --max-instances 3 \
           --memory 512Mi \
-          --cpu 1
+          --cpu 1 \
+          --set-env-vars "NEXT_PUBLIC_SITE_URL=https://kaana.in,GEMINI_MODEL=gemini-3.6-flash,GEMINI_DAILY_LIMIT=50,GEMINI_IP_WINDOW_LIMIT=3,GEMINI_IP_DAILY_LIMIT=8,GEMINI_IP_MIN_INTERVAL_MS=10000" \
+          --set-secrets "GEMINI_API_KEY=${_SECRET_GEMINI}:latest"
 
   # ── Build & deploy Platform (app.kaana.in) ─────────────────────────────
   - id: build-platform
@@ -295,6 +297,7 @@ substitutions:
   _SECRET_WHATSAPP_VERIFY: kaana-whatsapp-verify-token
   _SECRET_ADMIN_EMAIL: kaana-admin-email
   _SECRET_ADMIN_PASSWORD: kaana-admin-password
+  _SECRET_GEMINI: kaana-gemini-api-key
 
 options:
   logging: CLOUD_LOGGING_ONLY
