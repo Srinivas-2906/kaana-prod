@@ -19,7 +19,7 @@ export default function CareersModal() {
                   Career Opportunities
                 </h2>
                 <p className="text-neutral-400 max-w-2xl mx-auto">
-                  We're looking for talented individuals who share our passion for creating exceptional digital experiences.
+                  We&apos;re looking for talented individuals who share our passion for creating exceptional digital experiences.
                 </p>
               </div>
       
@@ -43,7 +43,7 @@ export default function CareersModal() {
                   </p>
                   
                   <div className="mb-6">
-                    <h4 className="text-sm font-medium text-neutral-100 mb-3">What you'll learn:</h4>
+                    <h4 className="text-sm font-medium text-neutral-100 mb-3">What you&apos;ll learn:</h4>
                     <ul className="space-y-2 text-sm text-neutral-400">
                       <li className="flex items-start">
                         <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
@@ -155,7 +155,7 @@ export default function CareersModal() {
                   </p>
                   
                   <div className="mb-6">
-                    <h4 className="text-sm font-medium text-neutral-100 mb-3">What you'll work with:</h4>
+                    <h4 className="text-sm font-medium text-neutral-100 mb-3">What you&apos;ll work with:</h4>
                     <ul className="space-y-2 text-sm text-neutral-400">
                       <li className="flex items-start">
                         <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>

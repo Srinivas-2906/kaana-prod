@@ -53,7 +53,7 @@ export default function AiDemoSection() {
                     <p className="text-neutral-400 mb-4">Ask our chatbot about our services and see how it can help your customers.</p>
                     <div className="ai-chat-messages p-4 border border-neutral-800 rounded-sm bg-dark/30 h-40 overflow-y-auto mb-4" id="demoChatMessages">
                       <div className="ai-message ai-message-bot">
-                        Hello! I'm the Kāna demo chatbot. How can I help you today?
+                        Hello! I&apos;m the Kāna demo chatbot. How can I help you today?
                       </div>
                     </div>
                     <div className="ai-demo-input">

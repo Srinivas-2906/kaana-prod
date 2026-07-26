@@ -54,7 +54,7 @@ export default function AboutSection() {
                   
                   <div className="absolute -bottom-8 -left-8 md:-bottom-12 md:-left-12 bg-dark border border-neutral-800 rounded-sm p-6 max-w-xs">
                     <p className="text-neutral-300 italic mb-4">
-                      "Our mission is to create digital solutions that are as elegant in their simplicity as they are powerful in their functionality."
+                      &quot;Our mission is to create digital solutions that are as elegant in their simplicity as they are powerful in their functionality.&quot;
                     </p>
                     <div className="flex items-center">
                       <div>
