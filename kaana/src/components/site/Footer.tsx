@@ -1,6 +1,9 @@
 'use client';
 
+import Link from "next/link";
+
 export default function Footer() {
+  const year = new Date().getFullYear();
   return (
     <>
       
@@ -55,10 +58,16 @@ export default function Footer() {
             </div>
             
             <div className="pt-8 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-neutral-400 mb-4 md:mb-0">© 2023 Kāna. All rights reserved.</p>
+              <p className="text-neutral-400 mb-4 md:mb-0">
+                © {year} Kāna Digital Solutions. All rights reserved.
+              </p>
               <div className="flex gap-6">
-                <a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Privacy Policy</a>
-                <a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Terms of Service</a>
+                <Link href="/privacy-policy" className="text-neutral-400 hover:text-accent transition-colors link-trigger">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms-of-service" className="text-neutral-400 hover:text-accent transition-colors link-trigger">
+                  Terms of Service
+                </Link>
               </div>
             </div>
           </div>

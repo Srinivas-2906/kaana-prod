@@ -15,7 +15,7 @@ export default function AiChatWidget() {
             </div>
             <div className="ai-chat-messages" id="aiChatMessages">
               <div className="ai-message ai-message-bot">
-                Hello! I'm Kāna's AI assistant. How can I help you today?
+                Hello! I&apos;m Kāna&apos;s AI assistant. How can I help you today?
               </div>
             </div>
             <div className="ai-chat-input">

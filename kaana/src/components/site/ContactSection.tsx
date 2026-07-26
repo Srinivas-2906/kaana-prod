@@ -10,7 +10,7 @@ export default function ContactSection() {
                 <div>
                   <span className="text-xs uppercase tracking-widest text-neutral-400 mb-3 block reveal-up">Contact Us</span>
                   <h2 className="text-3xl text-neutral-100 md:text-5xl font-display font-medium mb-6 reveal-up" style={{ transitionDelay: "0.1s" }}>
-                    Let's start a project together
+                    Let&apos;s start a project together
                   </h2>
                   <p className="text-neutral-400 mb-8 reveal-up" style={{ transitionDelay: "0.2s" }}>
                     Reach out to discuss how our minimalist, cutting-edge solutions can transform your business.
