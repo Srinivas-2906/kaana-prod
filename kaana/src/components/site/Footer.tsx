@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import KaanaLogo from "./KaanaLogo";
-import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/seo/site";
+import { INSTAGRAM_URL, LINKEDIN_URL, WHATSAPP_URL } from "@/lib/seo/site";
 import Icon from "@/components/ui/Icon";
 
 export default function Footer() {
@@ -19,7 +19,7 @@ export default function Footer() {
                   <KaanaLogo variant="name" href="/" />
                 </div>
                 <p className="text-neutral-400 mb-6 max-w-md">
-                  We create minimalist, cutting-edge digital solutions that transform businesses and elevate user experiences in the digital landscape.
+                  Kaana is a custom software studio — web apps, mobile, AI chatbots, e-commerce, and marketing — with production case studies across WhatsApp ops, healthcare, edtech, commerce, and more.
                 </p>
                 <div className="flex gap-4">
                   <a
@@ -30,6 +30,15 @@ export default function Footer() {
                     className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
                   >
                     <Icon name="whatsapp" className="text-lg" />
+                  </a>
+                  <a
+                    href={LINKEDIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow Kaana on LinkedIn"
+                    className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
+                  >
+                    <Icon name="linkedin" className="text-lg" />
                   </a>
                   <a
                     href={INSTAGRAM_URL}
@@ -46,10 +55,10 @@ export default function Footer() {
               <div>
                 <h3 className="text-lg text-neutral-100 font-medium mb-4">Services</h3>
                 <ul className="space-y-2">
-                  <li><Link href="/services/whatsapp-business-automation" className="text-neutral-400 hover:text-accent transition-colors link-trigger">WhatsApp Automation</Link></li>
+                  <li><Link href="/#solutions" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Software</Link></li>
+                  <li><Link href="/services/whatsapp-business-automation" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Automation & AI</Link></li>
                   <li><Link href="/services/multi-tenant-saas-gcp" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Multi-Tenant SaaS</Link></li>
-                  <li><Link href="/services/healthcare-clinic-software" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Clinic Software</Link></li>
-                  <li><Link href="/services/offline-first-field-apps" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Offline Field Apps</Link></li>
+                  <li><Link href="/#solutions" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Digital Marketing</Link></li>
                   <li><Link href="/services" className="text-neutral-400 hover:text-accent transition-colors link-trigger">All services</Link></li>
                 </ul>
               </div>

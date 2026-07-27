@@ -12,18 +12,26 @@ export const INSTAGRAM_URL =
   process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() ||
   "https://www.instagram.com/kaanaaitechnologies/";
 
+export const LINKEDIN_URL =
+  process.env.NEXT_PUBLIC_LINKEDIN_URL?.trim() ||
+  "https://www.linkedin.com/company/kaana-ai-technologies-pvt-ltd/";
+
 export const DEFAULT_DESCRIPTION =
-  "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps for teams in India and beyond.";
+  "Kaana is a custom software studio in India — web apps, mobile, AI chatbots, e-commerce, and digital marketing — with production case studies in WhatsApp automation, SaaS, healthcare, edtech, commerce, and offline field ops.";
 
 export const DEFAULT_KEYWORDS = [
+  "custom software development India",
+  "web app development",
+  "mobile app development",
+  "AI chatbot development",
+  "e-commerce development",
   "WhatsApp business automation",
   "multi-tenant SaaS",
   "GCP Cloud Run",
   "clinic CRM software",
   "offline-first PWA",
-  "custom software development India",
-  "PropCRM",
-  "BotIQ inbox",
+  "edtech platform development",
+  "creator marketplace development",
 ];
 
 export function absoluteUrl(path: string): string {
@@ -81,10 +89,9 @@ export function homeMetadata(): Metadata {
       path: "/",
       keywords: [
         ...DEFAULT_KEYWORDS,
-        "WhatsApp CRM India",
-        "clinic front desk software",
-        "aquaculture field app",
         "digital product studio",
+        "software agency India",
+        "web design and development",
       ],
     }),
     title: { absolute: "Kaana" },
@@ -100,13 +107,19 @@ export function organizationJsonLd() {
     url: SITE_URL,
     logo: absoluteUrl("/portfolio/kaana-platform-desktop.png"),
     description: DEFAULT_DESCRIPTION,
-    sameAs: [INSTAGRAM_URL, WHATSAPP_URL],
+    sameAs: [LINKEDIN_URL, INSTAGRAM_URL, WHATSAPP_URL],
     areaServed: ["IN", "Worldwide"],
     knowsAbout: [
+      "Custom software development",
+      "Web and mobile applications",
+      "AI chatbots",
+      "E-commerce platforms",
       "WhatsApp Business API",
       "Multi-tenant SaaS",
       "Google Cloud Platform",
       "Healthcare clinic software",
+      "EdTech platforms",
+      "Creator commerce",
       "Offline-first mobile apps",
     ],
   };

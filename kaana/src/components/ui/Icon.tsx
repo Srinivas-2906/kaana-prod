@@ -20,6 +20,7 @@ type IconName =
   | "paper-plane"
   | "briefcase"
   | "instagram"
+  | "linkedin"
   | "whatsapp";
 
 type IconProps = Omit<ComponentProps<"svg">, "children"> & {
@@ -219,6 +220,17 @@ export default function Icon({ name, className, title, ...props }: IconProps) {
           />
           <circle cx="12" cy="12" r="3.25" stroke="currentColor" strokeWidth="1.75" />
           <circle cx="17.15" cy="6.85" r="1.1" fill="currentColor" stroke="none" />
+        </svg>
+      );
+    case "linkedin":
+      return (
+        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" {...shared}>
+          {labelled ? <title>{title}</title> : null}
+          <path
+            fill="currentColor"
+            stroke="none"
+            d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"
+          />
         </svg>
       );
     case "whatsapp":

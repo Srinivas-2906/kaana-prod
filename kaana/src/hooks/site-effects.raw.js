@@ -990,11 +990,11 @@
       function getLocalChatFallback(message) {
         const lower = message.toLowerCase();
         const workUrl = 'https://kaana.in/work';
-        if (lower.includes('strength')) {
-          return `We build multi-tenant SaaS on GCP, WhatsApp automation (BotIQ, PropCRM, clinic desk), offline-first field PWAs, and healthcare clinic platforms. Recent proof includes our Business Automation Suite (${workUrl}/kaana-business-automation-suite) and Healthcare Clinic Digital Suite (${workUrl}/healthcare-clinic-digital-suite). Full portfolio: ${workUrl}.`;
+        if (lower.includes('strength') || lower.includes('what do you') || lower.includes('what have you built') || lower.includes('your services') || lower.includes('what can you')) {
+          return `Kaana is a custom software studio — we build web apps, mobile, AI chatbots, e-commerce, and marketing, not just one vertical. Recent production work includes WhatsApp CRM suites, clinic desks, edtech platforms, creator commerce, restaurant QR menus, and offline field ops. Browse every case study with screenshots at ${workUrl}, or ask about a specific industry.`;
         }
         if (lower.includes('case stud') || lower.includes('portfolio') || lower.includes('all work')) {
-          return `We have shipped WhatsApp CRM suites, edtech platforms, creator commerce, restaurant QR menus, and aquaculture field ops. Browse every case study with screenshots at ${workUrl}.`;
+          return `We have shipped WhatsApp CRM suites, edtech platforms, creator commerce, restaurant QR menus, aquaculture field ops, retail storefronts, and more. Browse every case study with screenshots at ${workUrl}.`;
         }
         return null;
       }
@@ -1105,7 +1105,7 @@
 
       // Quick replies
       const quickReplies = [
-        { label: 'Our strengths', text: 'What are your strengths and which projects prove them?' },
+        { label: 'What have you built?', text: 'What have you built? Share examples from your portfolio.' },
         { label: 'Case studies', text: 'What case studies have you shipped? Share links.' },
         { label: 'All work', text: 'Show me your full portfolio with links to every project.' },
       ];

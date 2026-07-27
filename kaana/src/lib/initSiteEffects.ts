@@ -983,11 +983,11 @@ export function initSiteEffects(): () => void {
         function getLocalChatFallback(message) {
           const lower = message.toLowerCase();
           const workUrl = 'https://kaana.in/work';
-          if (lower.includes('strength')) {
-            return `We specialize in multi-tenant SaaS on GCP, WhatsApp business automation (BotIQ inbox, PropCRM, clinic desk), offline-first field PWAs, and healthcare clinic platforms. Proof points include our Business Automation Suite (${workUrl}/kaana-business-automation-suite) and Healthcare Clinic Digital Suite (${workUrl}/healthcare-clinic-digital-suite). Explore the full portfolio at ${workUrl} or contact us at kaana.srinivas@gmail.com.`;
+          if (lower.includes('strength') || lower.includes('what do you') || lower.includes('what have you built') || lower.includes('your services') || lower.includes('what can you')) {
+            return `Kaana is a custom software studio — we build web apps, mobile, AI chatbots, e-commerce, and marketing, not just one vertical. Recent production work includes WhatsApp CRM suites, clinic desks, edtech platforms, creator commerce, restaurant QR menus, and offline field ops. Browse every case study with screenshots at ${workUrl}, or ask about a specific industry.`;
           }
           if (lower.includes('case stud') || lower.includes('portfolio') || lower.includes('all work')) {
-            return `We have shipped WhatsApp CRM suites, edtech platforms, creator commerce, restaurant QR menus, aquaculture field ops, and more. Each case study includes screenshots and tech details at ${workUrl}. Highlights: Business Automation Suite, Student Recognition Platform, and Healthcare Clinic Digital Suite.`;
+            return `We have shipped WhatsApp CRM suites, edtech platforms, creator commerce, restaurant QR menus, aquaculture field ops, retail storefronts, and more. Each case study includes screenshots and tech details at ${workUrl}. Highlights: Business Automation Suite, Student Recognition Platform, and Healthcare Clinic Digital Suite.`;
           }
           return null;
         }
@@ -1098,7 +1098,7 @@ export function initSiteEffects(): () => void {
   
         // Quick replies
         const quickReplies = [
-          { label: 'Our strengths', text: 'What are your strengths and which projects prove them?' },
+          { label: 'What have you built?', text: 'What have you built? Share examples from your portfolio.' },
           { label: 'Case studies', text: 'What case studies have you shipped? Share links.' },
           { label: 'All work', text: 'Show me your full portfolio with links to every project.' },
         ];
