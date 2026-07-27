@@ -1249,14 +1249,21 @@
   /* Hero Swiper */
   .hero-swiper {
     width: 100%;
-    height: 100%;
+    height: auto;
     margin-top: 20px;
+    overflow: visible;
   }
 
   .hero-swiper .swiper-slide {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
+    height: auto;
+  }
+
+  .hero-swiper .card-3d,
+  .hero-swiper .card-3d-inner {
+    height: auto;
   }
 
   .hero-swiper-pagination {
@@ -1291,8 +1298,18 @@
       height: 400px;
     }
 
-    .hero-swiper {
-      height: 200px;
+    .hero-swiper .card-3d-inner {
+      padding: 1.25rem;
+    }
+
+    .hero-swiper .card-3d-inner p {
+      font-size: 0.875rem;
+      line-height: 1.55;
+    }
+
+    .hero-swiper .icon-slot {
+      min-height: 2.75rem;
+      margin-bottom: 0.75rem;
     }
     
     h1.text-4xl {
