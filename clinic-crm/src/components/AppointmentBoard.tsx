@@ -1,20 +1,24 @@
-import { Phone, MessageSquare, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Phone, MessageSquare, ChevronRight, Banknote, MoreVertical } from 'lucide-react';
 import type { Appointment, AppointmentStatus } from '../types';
 import { STATUS_LABELS } from '../types';
 import { updateAppointment } from '../lib/api';
+import { CompleteVisitDialog } from './CompleteVisitDialog';
+import { AppointmentActionsDialog } from './AppointmentActionsDialog';
 
 /* ─── Board column config ─────────────────────────────────────── */
 export const BOARD_COLUMNS: {
-  status: AppointmentStatus;
+  statuses: AppointmentStatus[];
   label: string;
   hint: string;
   color: string;
   empty: string;
 }[] = [
-  { status: 'requested',  label: 'Not confirmed', hint: 'Need to confirm',     color: '#d97706', empty: 'No one here' },
-  { status: 'confirmed',  label: 'Confirmed',     hint: 'Expected today',      color: '#1565C0', empty: 'No one here' },
-  { status: 'arrived',    label: 'In clinic',     hint: 'With the doctor',     color: '#7c3aed', empty: 'No one here' },
-  { status: 'visited',    label: 'Completed',     hint: 'Visit done today',    color: '#16a34a', empty: 'No completed visits yet' },
+  { statuses: ['requested'],            label: 'Not confirmed',      hint: 'Need to confirm',     color: '#d97706', empty: 'No one here' },
+  { statuses: ['confirmed'],            label: 'Confirmed',          hint: 'Expected today',      color: '#1565C0', empty: 'No one here' },
+  { statuses: ['arrived'],              label: 'In clinic',          hint: 'With the doctor',     color: '#7c3aed', empty: 'No one here' },
+  { statuses: ['visited'],              label: 'Completed',          hint: 'Visit done today',    color: '#16a34a', empty: 'No completed visits yet' },
+  { statuses: ['cancelled', 'no_show'], label: 'Cancelled / No-show', hint: 'Not coming today',    color: '#64748b', empty: 'Nothing here' },
 ];
 
 const NEXT: Partial<Record<AppointmentStatus, AppointmentStatus>> = {
@@ -50,10 +54,12 @@ function BoardCard({
   appt,
   onAdvance,
   onOpenPatient,
+  onActions,
 }: {
   appt: Appointment;
   onAdvance: (a: Appointment) => void;
   onOpenPatient: (id: string) => void;
+  onActions: (a: Appointment) => void;
 }) {
   const name = appt.patientName || 'Patient';
   const [fg, bg] = ava(name);
@@ -67,13 +73,19 @@ function BoardCard({
         {appt.source === 'WhatsApp' && <span className="tag tag-wa tag-xs">WA</span>}
       </div>
 
-      <button type="button" className="board-card-patient" onClick={() => appt.patientId && onOpenPatient(appt.patientId)}>
+      <button type="button" className="board-card-patient" onClick={() => onOpenPatient(appt.patientId)}>
         <div className="board-card-ava" style={{ background: bg, color: fg }}>
           {name.charAt(0).toUpperCase()}
         </div>
         <div className="board-card-info">
           <span className="board-card-name">{name}</span>
           <span className="board-card-svc">{appt.service || 'Check-up'}</span>
+          {appt.paymentAmount != null && appt.paymentAmount > 0 && (
+            <span className="board-card-payment">
+              <Banknote size={10} /> ₹{appt.paymentAmount.toLocaleString('en-IN')}
+              {appt.paymentMethod ? ` · ${appt.paymentMethod}` : ''}
+            </span>
+          )}
         </div>
         <ChevronRight size={14} className="board-card-chevron" />
       </button>
@@ -90,6 +102,9 @@ function BoardCard({
               </a>
             </div>
           )}
+          <button type="button" className="quick-action-btn" title="Actions" onClick={() => onActions(appt)}>
+            <MoreVertical size={14} />
+          </button>
           {next && (
             <button type="button" className="board-card-advance" onClick={() => onAdvance(appt)}>
               {ADVANCE_LABEL[appt.status]}
@@ -102,13 +117,16 @@ function BoardCard({
 }
 
 export function AppointmentBoard({ appointments, onRefresh, onOpenPatient, onToast }: Props) {
-  const active = appointments.filter(
-    (a) => a.status !== 'cancelled' && a.status !== 'no_show',
-  );
+  const [completeAppt, setCompleteAppt] = useState<Appointment | null>(null);
+  const [actionsAppt, setActionsAppt] = useState<Appointment | null>(null);
 
   async function advance(appt: Appointment) {
     const next = NEXT[appt.status];
     if (!next) return;
+    if (next === 'visited') {
+      setCompleteAppt(appt);
+      return;
+    }
     try {
       await updateAppointment(appt.id, { status: next });
       onRefresh();
@@ -127,12 +145,12 @@ export function AppointmentBoard({ appointments, onRefresh, onOpenPatient, onToa
 
       <div className="board-scroll">
         {BOARD_COLUMNS.map((col) => {
-          const colAppts = active
-            .filter((a) => a.status === col.status)
+          const colAppts = appointments
+            .filter((a) => col.statuses.includes(a.status))
             .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
 
           return (
-            <div key={col.status} className="board-col">
+            <div key={col.label} className="board-col">
               <div className="board-col-head" style={{ borderTopColor: col.color }}>
                 <div className="board-col-title">
                   <span className="board-col-dot" style={{ background: col.color }} />
@@ -152,6 +170,7 @@ export function AppointmentBoard({ appointments, onRefresh, onOpenPatient, onToa
                       appt={appt}
                       onAdvance={advance}
                       onOpenPatient={onOpenPatient}
+                      onActions={(a) => setActionsAppt(a)}
                     />
                   ))
                 )}
@@ -160,6 +179,24 @@ export function AppointmentBoard({ appointments, onRefresh, onOpenPatient, onToa
           );
         })}
       </div>
+
+      {completeAppt && (
+        <CompleteVisitDialog
+          appointment={completeAppt}
+          onClose={() => setCompleteAppt(null)}
+          onDone={() => { setCompleteAppt(null); onRefresh(); }}
+          onToast={onToast}
+        />
+      )}
+
+      {actionsAppt && (
+        <AppointmentActionsDialog
+          appointment={actionsAppt}
+          onClose={() => setActionsAppt(null)}
+          onDone={() => { setActionsAppt(null); onRefresh(); }}
+          onToast={onToast}
+        />
+      )}
     </div>
   );
 }

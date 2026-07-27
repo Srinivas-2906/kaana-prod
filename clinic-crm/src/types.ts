@@ -20,6 +20,11 @@ export interface Patient {
   notes?: { text: string; at: string; by: string }[];
   lastVisit?: string | null;
   source?: string;
+  photoUrl?: string;
+  prescriptionUrl?: string;
+  recordUrls?: string[];
+  totalPaid?: number;
+  lastPaymentAmount?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -37,6 +42,8 @@ export interface Appointment {
   assignedDoctor?: string;
   notes?: string;
   source?: string;
+  paymentAmount?: number | null;
+  paymentMethod?: string;
   createdAt?: string;
 }
 
@@ -68,7 +75,7 @@ export interface PaymentSummary {
   dueCount: number;
 }
 
-export type TabId = 'overview' | 'today' | 'patients' | 'book';
+export type TabId = 'overview' | 'today' | 'patients' | 'book' | 'payments' | 'reports';
 
 export const STATUS_LABELS: Record<AppointmentStatus, string> = {
   requested: 'Not confirmed',
@@ -91,6 +98,24 @@ export const SERVICES = [
   'X-ray',
   'Follow-up visit',
 ];
+
+export const GENDERS = ['Male', 'Female', 'Other'];
+
+export const PATIENT_SOURCES = ['Walk-in', 'WhatsApp', 'Phone call', 'Referral', 'Other'];
+
+export const PAYMENT_METHODS = ['Cash', 'UPI', 'Card', 'Online', 'Other'];
+
+export interface CatalogItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  category?: string;
+  price?: string;      // display price label (e.g. "₹500" or "From ₹800")
+  priceNum?: number;   // numeric price if applicable
+  meta?: string;
+  imageUrl?: string;
+  status?: string;     // e.g. "Available" (from backend)
+}
 
 export interface ToastMsg {
   id: number;

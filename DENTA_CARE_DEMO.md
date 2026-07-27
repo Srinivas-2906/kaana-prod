@@ -1,8 +1,37 @@
-# Denta Care — Quick demo (Dr. D. Ajit)
+# Denta Care — Kaana clinic tenant (`dentacare`)
 
-Simple 2-step local demo. No Kaana platform needed for the login screen.
+Dental clinic desk for **Dr. D. Ajit** — Denta Care Dental Clinic, Visakhapatnam.
 
-## 1. Start API
+## Production URLs
+
+| URL | Purpose |
+|-----|---------|
+| **https://crm.dentacare.kaana.in** | Clinic desk (preferred tenant URL) |
+| **https://dentacare.kaana.in** | Denta Care marketing website |
+| **https://dentacare.crm.kaana.in** | Legacy clinic desk URL |
+| **https://clinic.kaana.in?tenant=dentacare** | Works without tenant DNS |
+
+API: **https://api.kaana.in**
+
+## Sign in
+
+| Field | Value |
+|-------|-------|
+| **Email** | `ajitdentacare@gmail.com` |
+| **Password** | `Dentacare@123` |
+
+Alternate demo accounts (same tenant):
+
+| Email | Password |
+|-------|----------|
+| `admin@dentacare.in` | `Dentacare@2024` |
+| `demo@dentacare.in` | `demo1234` |
+
+---
+
+## Local dev
+
+### 1. Start API
 
 ```bash
 cd botiq-whatsapp-server
@@ -10,24 +39,16 @@ cd botiq-whatsapp-server
 npm run dev
 ```
 
-## 2. Start dental dashboard
+### 2. Start clinic desk
 
 ```bash
 cd clinic-crm
 npm run dev
 ```
 
-Open **http://localhost:5185**
+Open **http://localhost:5185** (defaults to tenant `dentacare`).
 
-## 3. Sign in
-
-| Email | Password |
-|-------|----------|
-| **demo@dentacare.in** | **demo1234** |
-
-The login page shows **Denta Care Dental Clinic · Dr. D. Ajit · Visakhapatnam**.
-
-After login you’ll see **3 sample appointments today** (Lakshmi, Rajesh, Priya) ready to demo Confirm → Arrived → Done.
+Or explicitly: **http://localhost:5185?tenant=dentacare**
 
 ---
 
@@ -39,17 +60,18 @@ After login you’ll see **3 sample appointments today** (Lakshmi, Rajesh, Priya
 - **Consultation:** ₹100
 - **Services:** Dentures, Cosmetic Dentistry, Conservative Dentistry, Artificial Teeth
 
+After login you'll see **3 sample appointments today** (Lakshmi, Rajesh, Priya).
+
 ---
 
 ## Optional: simulate WhatsApp booking
 
-With API running:
-
 ```bash
+cd botiq-whatsapp-server
 npm run test:clinic
 ```
 
-(from `botiq-whatsapp-server` folder)
+Or `POST /api/demo/whatsapp` with `{ "tenantSlug": "dentacare", "phone": "919876543210", "message": "hi" }`.
 
 ---
 

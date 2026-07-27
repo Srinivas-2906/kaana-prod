@@ -7,18 +7,18 @@ import {
   Clock,
   MapPin,
   Star,
-  ShieldCheck,
   GraduationCap,
   Sparkles,
   CalendarCheck,
-  HeartHandshake,
   Award,
+  ShieldCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import heroImg from "@/assets/hero-dentist.jpg";
-import smileImg from "@/assets/smile.jpg";
 import clinicImg from "@/assets/clinic-interior.jpg";
+import clinicReceptionImg from "@/assets/clinic-reception.jpg";
 import treatmentImg from "@/assets/treatment-room.jpg";
+import treatmentSessionImg from "@/assets/treatment-session.jpg";
 import toolsImg from "@/assets/tools.jpg";
 import patientImg from "@/assets/patient-smile.jpg";
 import { Reveal } from "@/components/site/Reveal";
@@ -27,17 +27,17 @@ import { services } from "@/lib/services";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Denta Care Dental Clinic | Dentist in Murali Nagar, Visakhapatnam" },
+      { title: "Denta Care Dental Clinic | Dentist in Muralinagar, Visakhapatnam" },
       {
         name: "description",
         content:
-          "Denta Care Dental Clinic in Murali Nagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Dental cleaning, fillings, RCT, dentures and cosmetic dentistry. Call to book. ₹100 consultation.",
+          "Denta Care Dental Clinic in Muralinagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Dental cleaning, fillings, RCT, dentures, aligners and cosmetic dentistry. Call to book. ₹300 consultation.",
       },
       { property: "og:title", content: "Denta Care · Dr. D. Ajit, Visakhapatnam" },
       {
         property: "og:description",
         content:
-          "Dentist in Murali Nagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Cleanings, fillings, RCT, dentures and cosmetic dentistry.",
+          "Dentist in Muralinagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Cleanings, fillings, RCT, dentures, aligners and cosmetic dentistry.",
       },
     ],
   }),
@@ -46,12 +46,11 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const gallery = [
+    { src: clinicReceptionImg, alt: "Reception and waiting area at Denta Care Dental Clinic", label: "Reception & waiting" },
+    { src: treatmentSessionImg, alt: "Dr. D. Ajit treating a patient at Denta Care Dental Clinic", label: "Dental treatment" },
     { src: clinicImg, alt: "Clinic interior at Denta Care Dental Clinic", label: "Clinic interior" },
     { src: treatmentImg, alt: "Treatment room at Denta Care Dental Clinic", label: "Treatment room" },
     { src: toolsImg, alt: "Sterilised dental tools at Denta Care", label: "Sterilised tools" },
-    { src: patientImg, alt: "Happy patient at Denta Care Dental Clinic", label: "Patient smile" },
-    { src: smileImg, alt: "Healthy smile after dental treatment", label: "Healthy smile" },
-    { src: heroImg, alt: "Dentist at Denta Care Dental Clinic", label: "Dentist" },
   ] as const;
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -69,83 +68,87 @@ function Home() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="page-container pb-12 pt-8 sm:pb-14 sm:pt-10 lg:pb-16 lg:pt-14">
-          <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-14">
+        <div className="page-container pb-10 pt-3 sm:pb-14 sm:pt-10 lg:pb-16 lg:pt-14">
+          <div className="grid items-center gap-5 sm:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-14">
             <div className="max-w-xl lg:max-w-2xl">
-              <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-[11px] font-medium text-[var(--color-teal)] backdrop-blur sm:text-xs">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-teal)]" />
-                <span className="truncate">Now accepting new patients · ₹100 consultation</span>
-              </span>
-              <h1 className="display-xl mt-5 sm:mt-6">
-                Dental care made simple.
-              </h1>
-              <p className="lead mt-4 max-w-lg sm:mt-5">
-                Visit Denta Care Dental Clinic for dental cleaning, fillings, root canal treatment
-                (RCT), dentures and cosmetic dentistry. We’re based in Murali Nagar, Visakhapatnam.
-              </p>
-              <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
-                <a
-                  href="tel:+910000000000"
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[var(--shadow-elegant)] transition-transform hover:scale-[1.02] sm:px-6 sm:py-3.5"
-                >
-                  <Phone className="h-4 w-4" /> Book a visit
-                </a>
-                <Link
-                  to="/services"
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-6 sm:py-3.5"
-                >
-                  Explore services <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
+              <Reveal immediate>
+                <h1 className="display-xl mt-0 sm:mt-6">
+                  Dental care made simple.
+                </h1>
+                <p className="lead mt-3 max-w-lg sm:mt-5">
+                  Visit Denta Care Dental Clinic for dental cleaning, fillings, root canal treatment
+                  (RCT), dentures, aligners and cosmetic dentistry. We’re based in Muralinagar,
+                  Visakhapatnam.
+                </p>
+                <div className="mt-4 text-sm text-muted-foreground">
+                  WhatsApp / Call:{" "}
+                  <a className="font-medium text-foreground hover:text-primary" href="tel:+916301433852">
+                    6301433852
+                  </a>
+                </div>
+                <div className="mt-5 flex flex-wrap items-center gap-3 sm:mt-8">
+                  <a
+                    href="tel:+916301433852"
+                    className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[var(--shadow-elegant)] transition-transform hover:scale-[1.02] sm:px-6 sm:py-3.5"
+                  >
+                    <Phone className="h-4 w-4" /> Book a visit
+                  </a>
+                  <Link
+                    to="/services"
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:bg-secondary sm:px-6 sm:py-3.5"
+                  >
+                    Explore services <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </Reveal>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[22rem] sm:max-w-md lg:mx-0 lg:max-w-none lg:justify-self-end">
+            <Reveal immediate delayMs={80} direction="left" className="relative mx-auto w-full max-w-[22rem] sm:max-w-md lg:mx-0 lg:max-w-none lg:justify-self-end">
               <div className="absolute -inset-3 -z-10 rounded-[1.75rem] bg-[var(--gradient-aqua)] opacity-30 blur-2xl sm:-inset-4 sm:rounded-[2rem]" />
               <img
                 src={heroImg}
                 alt="Dr. D. Ajit at Denta Care Dental Clinic"
                 width={1024}
                 height={1280}
-                className="aspect-[4/5] max-h-[min(72vh,520px)] w-full rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-elegant)] sm:rounded-[2rem] lg:max-h-[540px]"
+                className="aspect-[4/5] max-h-[min(52vh,360px)] w-full rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-elegant)] sm:max-h-[min(72vh,520px)] sm:rounded-[2rem] lg:max-h-[540px]"
               />
-              <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-border bg-card/95 p-3 shadow-[var(--shadow-soft)] backdrop-blur sm:inset-x-4 sm:bottom-4 sm:p-4">
-                <div className="grid grid-cols-3 divide-x divide-border text-center">
-                  {[
-                    { k: "18+", v: "Years" },
-                    { k: "10k+", v: "Patients" },
-                    { k: "4.9★", v: "Rated" },
-                  ].map((s) => (
-                    <div key={s.v} className="px-1.5 sm:px-2">
-                      <div className="font-display text-lg font-semibold text-foreground sm:text-xl">
-                        {s.k}
-                      </div>
-                      <div className="text-[9px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px] sm:tracking-[0.18em]">
-                        {s.v}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            </Reveal>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-3 border-t border-border pt-6 text-sm text-muted-foreground sm:mt-12 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-3 sm:pt-8 lg:grid-cols-4 lg:gap-x-8">
+          <Reveal immediate delayMs={120} className="mt-10 grid grid-cols-1 gap-3 border-t border-border pt-6 text-sm text-muted-foreground sm:mt-12 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-3 sm:pt-8 lg:grid-cols-4 lg:gap-x-8">
             {[
-              { icon: ShieldCheck, label: "Medical reg. verified" },
               { icon: GraduationCap, label: "BDS · MDS" },
-              { icon: Award, label: "18+ years experience" },
-              { icon: HeartHandshake, label: "Indian Dental Assoc." },
-            ].map(({ icon: Icon, label }) => (
-              <span key={label} className="flex items-center gap-2">
-                <Icon className="h-4 w-4 shrink-0 text-[var(--color-teal)]" />
-                {label}
-              </span>
-            ))}
-          </div>
+              { icon: Award, label: "18 years experience" },
+              {
+                icon: Phone,
+                label: "WhatsApp bookings",
+                href: `https://wa.me/916301433852?text=${encodeURIComponent("Hi, I'd like to book an appointment at Denta Care Dental Clinic.")}`,
+              },
+              { icon: Clock, label: "Mon–Sat clinic hours" },
+            ].map(({ icon: Icon, label, href }) =>
+              href ? (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 transition-colors hover:text-primary"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-[var(--color-teal)]" />
+                  {label}
+                </a>
+              ) : (
+                <span key={label} className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 shrink-0 text-[var(--color-teal)]" />
+                  {label}
+                </span>
+              ),
+            )}
+          </Reveal>
         </div>
       </section>
 
-      {/* COMMON REASONS */}      
+      {/* COMMON REASONS */}
       <section className="page-container section-y-sm">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="eyebrow">How we can help</span>
@@ -185,7 +188,7 @@ function Home() {
       </section>
 
       {/* BENTO: WHY DENTA CARE */}
-      <section className="page-container section-y">
+      <section className="page-container pt-12 pb-6 sm:pt-16 sm:pb-10 md:pt-20 md:pb-12 lg:pt-24 lg:pb-14">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="eyebrow">Why Denta Care</span>
           <h2 className="display-lg mt-3">Comfortable care. Clear advice.</h2>
@@ -194,12 +197,12 @@ function Home() {
         <div className="mt-10 grid gap-4 sm:gap-5 lg:mt-14 lg:grid-cols-12 lg:items-stretch">
           <Reveal className="relative min-h-[260px] overflow-hidden rounded-3xl sm:min-h-[300px] lg:col-span-5 lg:min-h-[440px]">
             <img
-              src={treatmentImg}
-              alt="Modern dental treatment room at Denta Care"
+              src={treatmentSessionImg}
+              alt="Dental treatment at Denta Care Dental Clinic"
               width={1280}
               height={1280}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.20_0.05_245_/_0.88)] via-[oklch(0.20_0.05_245_/_0.3)] to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 text-primary-foreground sm:p-7">
@@ -249,16 +252,18 @@ function Home() {
               </p>
             </Reveal>
 
-            <Reveal delayMs={120} className="relative flex min-h-[10.5rem] flex-col justify-between overflow-hidden rounded-3xl bg-[var(--gradient-aqua)] p-5 text-primary-foreground sm:min-h-[11.5rem] sm:p-7 lg:col-span-4 lg:row-start-2">
-              <CalendarCheck className="h-6 w-6 sm:h-7 sm:w-7" />
+            <Reveal delayMs={120} className="flex min-h-[10.5rem] flex-col justify-between rounded-3xl border border-border bg-card p-5 sm:min-h-[11.5rem] sm:p-6 lg:col-span-4 lg:row-start-2">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--color-aqua)]/20 text-[var(--color-deep)] sm:h-11 sm:w-11">
+                <CalendarCheck className="h-5 w-5" />
+              </div>
               <div>
-                <h3 className="font-display text-lg sm:text-xl">Easy bookings</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/90">
-                Call ahead or walk in during clinic hours.
+                <h3 className="font-display text-base text-foreground sm:text-lg">Easy bookings</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:mt-1.5">
+                  Call ahead or walk in during clinic hours.
                 </p>
                 <a
-                  href="tel:+910000000000"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-white hover:underline"
+                  href="tel:+916301433852"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                 >
                   Call the clinic <ArrowUpRight className="h-4 w-4" />
                 </a>
@@ -270,8 +275,8 @@ function Home() {
 
       {/* SERVICES */}
       <section className="bg-secondary/50">
-        <div className="page-container section-y">
-          <div className="flex flex-col items-start justify-between gap-5 sm:gap-6 md:flex-row md:items-end">
+        <div className="page-container pt-6 pb-16 sm:pt-10 md:pt-12 md:pb-20 lg:pt-14 lg:pb-24">
+          <Reveal className="flex flex-col items-start justify-between gap-5 sm:gap-6 md:flex-row md:items-end">
             <div className="max-w-2xl">
               <span className="eyebrow">Treatments</span>
             <h2 className="display-lg mt-3">Dental services under one roof.</h2>
@@ -286,12 +291,13 @@ function Home() {
             >
               See all services <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
+          </Reveal>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-5 lg:mt-12 lg:grid-cols-4">
-            {services.map((s) => (
-              <div
+            {services.map((s, i) => (
+              <Reveal
                 key={s.title}
+                delayMs={i * 50}
                 className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:border-[var(--color-teal)]/40 hover:shadow-[var(--shadow-soft)] sm:p-6"
               >
                 <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--color-aqua)]/20 text-[var(--color-deep)] transition-colors group-hover:bg-primary group-hover:text-primary-foreground sm:h-12 sm:w-12">
@@ -300,7 +306,7 @@ function Home() {
                 <h3 className="mt-4 font-display text-lg text-foreground sm:mt-5">{s.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
                 <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 sm:right-5 sm:top-5" />
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -309,14 +315,13 @@ function Home() {
       {/* DOCTOR */}
       <section className="page-container section-y">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-          <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
+          <Reveal once direction="up" className="relative mx-auto w-full max-w-md pb-6 sm:pb-8 lg:mx-0 lg:max-w-none">
             <img
-              src={smileImg}
-              alt="Bright healthy smile"
-              width={1280}
+              src={heroImg}
+              alt="Dr. D. Ajit at Denta Care Dental Clinic"
+              width={1024}
               height={1280}
-              loading="lazy"
-              className="aspect-square w-full rounded-[1.75rem] object-cover shadow-[var(--shadow-soft)] sm:rounded-[2rem]"
+              className="aspect-[4/5] w-full rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-soft)] sm:rounded-[2rem]"
             />
             <div className="absolute -bottom-4 -right-2 w-36 rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] sm:-bottom-5 sm:-right-5 sm:w-44 sm:p-4">
               <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -325,8 +330,8 @@ function Home() {
               <div className="mt-1 font-display text-lg text-foreground">A3147</div>
               <div className="text-[11px] text-muted-foreground">AP State Dental Council</div>
             </div>
-          </div>
-          <div>
+          </Reveal>
+          <Reveal once delayMs={60} direction="up">
             <span className="eyebrow">Meet your dentist</span>
             <h2 className="display-lg mt-3">Dr. D. Ajit — clear advice, careful care.</h2>
             <p className="lead mt-4 sm:mt-5">
@@ -352,7 +357,7 @@ function Home() {
             >
               More about Dr. Ajit <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -362,14 +367,14 @@ function Home() {
           <img src={toolsImg} alt="" aria-hidden="true" className="h-full w-full object-cover" />
         </div>
         <div className="page-container section-y relative">
-          <div className="mx-auto max-w-2xl text-center">
+          <Reveal className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-aqua)]">
               Your visit
             </span>
             <h2 className="display-lg mt-3 text-primary-foreground">
               Your visit, step by step.
             </h2>
-          </div>
+          </Reveal>
           <div className="mt-10 grid gap-4 sm:gap-5 md:grid-cols-3 lg:mt-14">
             {[
               {
@@ -387,9 +392,10 @@ function Home() {
                 t: "Treatment",
                 d: "If treatment is needed, we plan it clearly and proceed at your pace.",
               },
-            ].map((s) => (
-              <div
+            ].map((s, i) => (
+              <Reveal
                 key={s.n}
+                delayMs={i * 70}
                 className="flex h-full flex-col rounded-3xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur sm:p-8"
               >
                 <span className="font-display text-4xl font-semibold text-[var(--color-aqua)] sm:text-5xl">
@@ -397,7 +403,7 @@ function Home() {
                 </span>
                 <h3 className="mt-3 font-display text-lg sm:mt-4 sm:text-xl">{s.t}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/75">{s.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -406,7 +412,7 @@ function Home() {
       {/* TESTIMONIALS */}
       <section className="page-container section-y">
         <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
-          <div className="lg:col-span-5">
+          <Reveal direction="right" className="lg:col-span-5">
             <span className="eyebrow">Patient stories</span>
             <h2 className="display-lg mt-3">Trusted by patients in Visakhapatnam.</h2>
             <img
@@ -417,47 +423,44 @@ function Home() {
               loading="lazy"
               className="mt-6 aspect-[4/5] w-full max-h-[420px] rounded-[1.75rem] object-cover object-top shadow-[var(--shadow-soft)] sm:mt-8 sm:max-h-none sm:rounded-[2rem]"
             />
-          </div>
+          </Reveal>
           <div className="grid gap-4 sm:gap-5 lg:col-span-7">
             {[
               {
-                n: "Lakshmi P.",
-                r: "Cosmetic dentistry",
-                q: "I was nervous about veneers, but Dr. Ajit explained everything clearly. The result looks natural and I'm very happy.",
+                n: "Manohar Bala",
+                q: "Clean clinic and polite staff. The doctor explained the treatment clearly.",
               },
               {
-                n: "Ravi K.",
-                r: "Root canal",
-                q: "My root canal was comfortable and well explained. The clinic is clean and the staff are helpful.",
+                n: "Vijay Shankar",
+                q: "Good consultation and clear guidance. Professional treatment and affordable pricing.",
               },
               {
-                n: "Sunita M.",
-                r: "Dentures",
-                q: "My mother's dentures fit well and she's eating comfortably again. Thank you to the doctor and team.",
+                n: "Srinivas Y",
+                q: "I checked a couple of other clinics. I was recommended this clinic by a doctor friend. He treated me very well and suggested only the treatment I needed. The treatment was good, affordable, and I’m very happy with the result.",
               },
-            ].map((t) => (
-              <figure
-                key={t.n}
-                className="rounded-3xl border border-border bg-card p-5 sm:p-7"
-              >
+            ].map((t, i) => (
+              <Reveal key={t.n} delayMs={i * 60}>
+                <figure className="rounded-3xl border border-border bg-card p-5 sm:p-7">
                 <div className="flex gap-0.5 text-[var(--color-teal)]">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-current" />
                   ))}
                 </div>
-                <blockquote className="mt-3 text-base leading-relaxed text-foreground sm:mt-4">
-                  "{t.q}"
-                </blockquote>
+                {t.q ? (
+                  <blockquote className="mt-3 text-base leading-relaxed text-foreground sm:mt-4">
+                    "{t.q}"
+                  </blockquote>
+                ) : null}
                 <figcaption className="mt-4 flex items-center gap-3 text-sm sm:mt-5">
                   <div className="grid h-9 w-9 place-items-center rounded-full bg-[var(--color-aqua)]/30 font-display text-sm font-semibold text-[var(--color-deep)]">
                     {t.n.charAt(0)}
                   </div>
                   <div>
                     <div className="font-medium text-foreground">{t.n}</div>
-                    <div className="text-muted-foreground">{t.r}</div>
                   </div>
                 </figcaption>
-              </figure>
+                </figure>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -506,13 +509,16 @@ function Home() {
       {/* VISIT */}
       <section className="page-container pb-16 sm:pb-20 lg:pb-24">
         <div className="grid gap-8 overflow-hidden rounded-[1.75rem] border border-border bg-[var(--gradient-hero)] p-6 sm:rounded-[2rem] sm:p-8 lg:grid-cols-2 lg:items-center lg:gap-10 lg:p-12 xl:p-14">
-          <div>
+          <Reveal direction="right">
             <span className="eyebrow">Visit us</span>
             <h2 className="display-lg mt-3">Visit Denta Care Dental Clinic</h2>
             <p className="lead mt-3 max-w-md sm:mt-4">
-              We’re in Shankar Plaza, Murali Nagar. Call ahead to book, or visit during clinic
+              We’re in Shankar Plaza, Muralinagar. Call ahead to book, or visit during clinic
               hours.
             </p>
+            <div className="mt-4 text-sm font-medium text-foreground">
+              Consultation: <span className="text-primary">₹300</span>
+            </div>
             <ul className="mt-6 space-y-4 text-sm sm:mt-8">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-teal)]" />
@@ -520,6 +526,8 @@ function Home() {
                   #39-11-70, 1st Floor, Shankar Plaza,
                   <br />
                   Muralinagar, Visakhapatnam
+                  <br />
+                  <span className="text-muted-foreground">Landmark: Shankar Plaza</span>
                 </span>
               </li>
               <li className="flex gap-3">
@@ -535,7 +543,7 @@ function Home() {
               <li className="flex gap-3">
                 <Phone className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-teal)]" />
                 <a
-                  href="tel:+910000000000"
+                  href="tel:+916301433852"
                   className="text-foreground hover:text-[var(--color-teal)]"
                 >
                   Call the clinic
@@ -548,15 +556,17 @@ function Home() {
             >
               Request appointment <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-          <img
-            src={clinicImg}
-            alt="Denta Care clinic interior"
-            width={1280}
-            height={960}
-            loading="lazy"
-            className="aspect-[4/3] w-full rounded-2xl object-cover shadow-[var(--shadow-soft)]"
-          />
+          </Reveal>
+          <Reveal delayMs={80} direction="left">
+            <img
+              src={clinicReceptionImg}
+              alt="Reception and waiting area at Denta Care Dental Clinic"
+              width={1280}
+              height={960}
+              loading="lazy"
+              className="aspect-[4/3] w-full rounded-2xl object-cover shadow-[var(--shadow-soft)]"
+            />
+          </Reveal>
         </div>
       </section>
 

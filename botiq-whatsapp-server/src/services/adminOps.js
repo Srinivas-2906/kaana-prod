@@ -186,13 +186,23 @@ export function getTenantAdminDetail(tenantId) {
   const activity = getTenantUsage7d(tenantId);
   const settings = parseSettings(row.settings);
 
+  const root = process.env.TENANT_ROOT_DOMAIN || '';
+  const botiqBase = process.env.BOTIQ_URL || 'http://localhost:5174';
+  const crmBase = process.env.CRM_URL || 'http://localhost:5175';
+  const clinicBase = process.env.CLINIC_URL || 'http://localhost:5185';
+  const platformBase = process.env.PLATFORM_URL || 'http://localhost:5180';
+  const isProdDomains = !!root && !root.includes('localhost');
+  const slug = row.slug;
+
   return {
     tenant,
     usage,
     activity,
     links: {
-      botiq: `${process.env.BOTIQ_URL || 'http://localhost:5174'}`,
-      crm: `${process.env.CRM_URL || 'http://localhost:5175'}`,
+      platform: isProdDomains ? `https://app.${root}` : `${platformBase}`,
+      inbox: isProdDomains ? `https://${slug}.inbox.${root}` : `${botiqBase}?tenant=${slug}`,
+      crm: isProdDomains ? `https://crm.${slug}.${root}` : `${crmBase}?tenant=${slug}`,
+      clinic: isProdDomains ? `https://crm.${slug}.${root}` : `${clinicBase}?tenant=${slug}`,
       listings: `${process.env.LISTINGS_BASE_URL || process.env.PUBLIC_URL || 'http://localhost:3002/listings'}?tenant=${row.slug}`,
     },
     settings,

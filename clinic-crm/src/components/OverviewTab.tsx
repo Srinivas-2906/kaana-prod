@@ -1,7 +1,9 @@
-import { CalendarCheck, Users, AlertCircle, Phone, MessageSquare, CalendarPlus, Activity, ChevronRight } from 'lucide-react';
+import { CalendarCheck, Users, AlertCircle, Phone, MessageSquare, CalendarPlus, Activity, ChevronRight, Banknote } from 'lucide-react';
 import type { Appointment, AppointmentStatus, TodayStats } from '../types';
 import { STATUS_LABELS } from '../types';
 import { updateAppointment } from '../lib/api';
+import { CompleteVisitDialog } from './CompleteVisitDialog';
+import { useState } from 'react';
 
 const PALETTES: [string, string][] = [
   ['#1565C0','#e3f0fd'],['#0369a1','#e0f2fe'],['#7c3aed','#f5f3ff'],
@@ -32,6 +34,7 @@ function todayDate() {
 interface Props {
   today: TodayStats | null;
   totalPatients: number;
+  displayName?: string;
   onGoToToday: () => void;
   onGoToBook: () => void;
   onOpenPatient: (id: string) => void;
@@ -39,7 +42,8 @@ interface Props {
   onRefresh: () => void;
 }
 
-export function OverviewTab({ today, totalPatients, onGoToToday, onGoToBook, onOpenPatient, onToast, onRefresh }: Props) {
+export function OverviewTab({ today, totalPatients, displayName, onGoToToday, onGoToBook, onOpenPatient, onToast, onRefresh }: Props) {
+  const [completeAppt, setCompleteAppt] = useState<Appointment | null>(null);
   const appts = today?.appointments ?? [];
   const upcoming = [...appts]
     .filter(a => a.status !== 'visited' && a.status !== 'cancelled' && a.status !== 'no_show')
@@ -47,6 +51,10 @@ export function OverviewTab({ today, totalPatients, onGoToToday, onGoToBook, onO
     .slice(0, 5);
 
   async function advance(appt: Appointment, next: AppointmentStatus) {
+    if (next === 'visited') {
+      setCompleteAppt(appt);
+      return;
+    }
     try {
       await updateAppointment(appt.id, { status: next });
       onRefresh();
@@ -59,7 +67,7 @@ export function OverviewTab({ today, totalPatients, onGoToToday, onGoToBook, onO
       {/* Greeting */}
       <div className="overview-greeting">
         <div>
-          <h1 className="overview-greeting-title">{greeting()}, Dr. Ajit</h1>
+          <h1 className="overview-greeting-title">{greeting()}{displayName ? `, ${displayName}` : ''}</h1>
           <p className="overview-greeting-sub">{todayDate()}</p>
         </div>
         <button type="button" className="btn btn-primary btn-sm" onClick={onGoToBook} style={{ flexShrink: 0 }}>
@@ -136,10 +144,16 @@ export function OverviewTab({ today, totalPatients, onGoToToday, onGoToBook, onO
                     {name.charAt(0).toUpperCase()}
                   </div>
                   <div className="overview-appt-info">
-                    <button type="button" className="overview-appt-name" onClick={() => appt.patientId && onOpenPatient(appt.patientId)}>
+                    <button type="button" className="overview-appt-name" onClick={() => onOpenPatient(appt.patientId)}>
                       {name}
                     </button>
                     <span className="overview-appt-svc">{appt.service || 'Check-up'}</span>
+                    {appt.paymentAmount != null && appt.paymentAmount > 0 && (
+                      <span className="board-card-payment" style={{ marginTop: 2 }}>
+                        <Banknote size={10} /> ₹{appt.paymentAmount.toLocaleString('en-IN')}
+                        {appt.paymentMethod ? ` · ${appt.paymentMethod}` : ''}
+                      </span>
+                    )}
                   </div>
                   <span className={TAG_CLASS[appt.status]}>{STATUS_LABELS[appt.status]}</span>
                   <div className="overview-appt-actions">
@@ -192,6 +206,15 @@ export function OverviewTab({ today, totalPatients, onGoToToday, onGoToBook, onO
           </button>
         </div>
       </div>
+
+      {completeAppt && (
+        <CompleteVisitDialog
+          appointment={completeAppt}
+          onClose={() => setCompleteAppt(null)}
+          onDone={() => { setCompleteAppt(null); onRefresh(); }}
+          onToast={onToast}
+        />
+      )}
     </div>
   );
 }

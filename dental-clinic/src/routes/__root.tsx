@@ -66,18 +66,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Denta Care Dental Clinic | Dentist in Murali Nagar, Visakhapatnam" },
+      { title: "Denta Care Dental Clinic | Dentist in Muralinagar, Visakhapatnam" },
       {
         name: "description",
         content:
-          "Denta Care Dental Clinic in Murali Nagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Cleanings, fillings, RCT, dentures and cosmetic dentistry. ₹100 consultation.",
+          "Denta Care Dental Clinic in Muralinagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Cleanings, fillings, RCT, dentures, aligners and cosmetic dentistry. ₹300 consultation.",
       },
       { name: "author", content: "Denta Care" },
       { property: "og:title", content: "Denta Care Dental Clinic · Visakhapatnam" },
       {
         property: "og:description",
         content:
-          "Dentist in Murali Nagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Dental cleaning, fillings, RCT, dentures and cosmetic dentistry.",
+          "Dentist in Muralinagar, Visakhapatnam. Dr. D. Ajit (BDS, MDS). Dental cleaning, fillings, RCT, dentures, aligners and cosmetic dentistry.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -95,7 +95,58 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head><HeadContent /></head>
+      <head>
+        <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Dentist",
+              name: "Denta Care Dental Clinic",
+              telephone: "+91 6301433852",
+              email: "ajitdentacare@gmail.com",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress:
+                  "#39-11-70, 1st Floor, Shankar Plaza, Muralinagar, Visakhapatnam (Landmark: Shankar Plaza)",
+                addressLocality: "Visakhapatnam",
+                addressRegion: "Andhra Pradesh",
+                addressCountry: "IN",
+              },
+              openingHoursSpecification: [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  dayOfWeek: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ],
+                  opens: "10:00",
+                  closes: "13:00",
+                },
+                {
+                  "@type": "OpeningHoursSpecification",
+                  dayOfWeek: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ],
+                  opens: "17:00",
+                  closes: "21:00",
+                },
+              ],
+              priceRange: "₹₹",
+            }),
+          }}
+        />
+      </head>
       <body>
         {children}
         <Scripts />

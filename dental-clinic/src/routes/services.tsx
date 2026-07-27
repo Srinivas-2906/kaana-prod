@@ -1,21 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { Reveal } from "@/components/site/Reveal";
 import { services } from "@/lib/services";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Dental Services | Denta Care Clinic, Murali Nagar, Visakhapatnam" },
+      { title: "Dental Services | Denta Care Clinic, Muralinagar, Visakhapatnam" },
       {
         name: "description",
         content:
-          "Dental services at Denta Care Dental Clinic in Murali Nagar, Visakhapatnam. Cleaning, fillings, root canal treatment (RCT), dentures, crowns and cosmetic dentistry.",
+          "Dental services at Denta Care Dental Clinic in Muralinagar, Visakhapatnam. Cleaning, fillings, root canal treatment (RCT), dentures, crowns, aligners and cosmetic dentistry.",
       },
       { property: "og:title", content: "Dental Services · Denta Care" },
       {
         property: "og:description",
         content:
-          "Dental services in Murali Nagar, Visakhapatnam — cleaning, fillings, RCT, dentures and cosmetic dentistry.",
+          "Dental services in Muralinagar, Visakhapatnam — cleaning, fillings, RCT, dentures, aligners and cosmetic dentistry.",
       },
     ],
   }),
@@ -34,24 +35,24 @@ function Services() {
     <>
       <section className="border-b border-border" style={{ background: "var(--gradient-hero)" }}>
         <div className="page-container pb-14 pt-10 sm:pb-16 sm:pt-12 lg:pb-20 lg:pt-16">
-          <span className="eyebrow text-primary">Services</span>
-          <h1 className="display-xl mt-3 max-w-3xl">
-            Dental services for everyday needs — <em className="font-normal italic text-primary">done carefully.</em>
-          </h1>
-          <p className="lead mt-5 max-w-2xl sm:mt-6">
-            We offer cleaning, fillings, root canal treatment (RCT), dentures, crowns and cosmetic
-            dentistry. We’ll explain what you need and share options that fit your budget.
-          </p>
+          <Reveal immediate>
+            <span className="eyebrow text-primary">Services</span>
+            <h1 className="display-xl mt-3 max-w-3xl">
+              Dental services for everyday needs — <em className="font-normal italic text-primary">done carefully.</em>
+            </h1>
+            <p className="lead mt-5 max-w-2xl sm:mt-6">
+              We offer cleaning, fillings, root canal treatment (RCT), dentures, crowns, aligners and
+              cosmetic dentistry. We’ll explain what you need and share options that fit your budget.
+            </p>
+          </Reveal>
         </div>
       </section>
 
       <section className="page-container section-y">
         <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((s) => (
-            <article
-              key={s.title}
-              className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-soft)] sm:p-8"
-            >
+          {services.map((s, i) => (
+            <Reveal key={s.title} delayMs={i * 50}>
+              <article className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-[var(--shadow-soft)] sm:p-8">
               <div className="grid h-12 w-12 place-items-center rounded-xl bg-accent text-accent-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                 <s.icon className="h-6 w-6" />
               </div>
@@ -65,7 +66,8 @@ function Services() {
               >
                 Ask about this <ArrowRight className="h-4 w-4" />
               </Link>
-            </article>
+              </article>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -73,7 +75,7 @@ function Services() {
       <section className="bg-secondary/50">
         <div className="page-container section-y">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
-            <div>
+            <Reveal direction="right">
               <span className="eyebrow text-primary">Why Denta Care</span>
               <h2 className="display-lg mt-3">What you can expect.</h2>
               <p className="lead mt-4">
@@ -87,9 +89,10 @@ function Services() {
                   </li>
                 ))}
               </ul>
-            </div>
-            <div className="rounded-[1.75rem] border border-border bg-card p-8 sm:rounded-[2rem] sm:p-10">
-              <div className="font-display text-4xl text-primary sm:text-5xl">₹100</div>
+            </Reveal>
+            <Reveal delayMs={80} direction="left">
+              <div className="rounded-[1.75rem] border border-border bg-card p-8 sm:rounded-[2rem] sm:p-10">
+              <div className="font-display text-4xl text-primary sm:text-5xl">₹300</div>
               <div className="mt-1 text-sm uppercase tracking-[0.18em] text-muted-foreground">
                 Consultation
               </div>
@@ -103,7 +106,8 @@ function Services() {
               >
                 Book a consultation <ArrowRight className="h-4 w-4" />
               </Link>
-            </div>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>

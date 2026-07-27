@@ -10,9 +10,9 @@ import {
 import {
   getPatients, getPatientById, createPatient, updatePatient, getPatientTimeline,
   getAppointments, getAppointmentById, createAppointment, updateAppointment,
-  getTodayStats, getAvailableSlots,
+  getTodayStats, getAvailableSlots, getAppointmentsRange,
 } from './services/clinicStore.js';
-import { createPayment, getPayments, getPaymentSummary } from './services/clinicPayments.js';
+import { createPayment, getPayments, getPaymentsRange, getPaymentSummary } from './services/clinicPayments.js';
 import { logAudit, getAuditLog } from './services/clinicAudit.js';
 import { getCatalogItems, getDb, parseSettings } from './db/index.js';
 import { sendText, showTyping, delay } from './messaging.js';
@@ -24,7 +24,14 @@ import { requireLiveTenant } from './middleware/requireLiveTenant.js';
 const router = Router();
 
 function withTenant(req, res, next) {
-  const slug = req.query.tenant || req.headers['x-tenant-slug'];
+  const host = String(req.headers.host || '').split(':')[0];
+  const hostParts = host ? host.split('.') : [];
+  let hostSlug = hostParts.length >= 4 ? hostParts[0] : null;
+  if (!hostSlug && hostParts.length === 3) {
+    const left = hostParts[0];
+    if (left && left.endsWith('-chat')) hostSlug = left.slice(0, -'-chat'.length);
+  }
+  const slug = req.query.tenant || req.headers['x-tenant-slug'] || hostSlug;
   if (req.user?.tenantId) {
     setRequestTenant(req.user.tenantId);
   } else if (slug) {
@@ -310,11 +317,11 @@ router.get('/patients/:id', authMiddleware, requireLiveTenant, (req, res) => {
 
 router.post('/patients', authMiddleware, requireLiveTenant, (req, res) => {
   if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
-  const { name, phone, email, age, gender, chiefComplaint, isReturning, source } = req.body ?? {};
+  const { name, phone, email, age, gender, chiefComplaint, isReturning, source, photoUrl, prescriptionUrl, recordUrls } = req.body ?? {};
   if (!name || !phone) return res.status(400).json({ error: 'Name and phone required' });
   try {
     const patient = createPatient(req.user.tenantId, {
-      name, phone, email, age, gender, chiefComplaint, isReturning, source: source || 'Walk-in',
+      name, phone, email, age, gender, chiefComplaint, isReturning, source: source || 'Walk-in', photoUrl, prescriptionUrl, recordUrls,
     });
     logAudit(req.user.tenantId, req.user.sub, 'create', 'patient', patient.id, { name });
     res.status(201).json(patient);
@@ -373,6 +380,17 @@ router.get('/clinic/payments', authMiddleware, requireLiveTenant, (req, res) => 
     summary: getPaymentSummary(req.user.tenantId),
     payments: getPayments(req.user.tenantId, { patientId: req.query.patientId }),
   });
+});
+
+router.get('/clinic/report', authMiddleware, requireLiveTenant, (req, res) => {
+  if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant access required' });
+  const to = String(req.query.to || new Date().toISOString().slice(0, 10));
+  const from = String(req.query.from || to);
+  const appointments = getAppointmentsRange(req.user.tenantId, { from, to, limit: 5000 });
+  const payments = getPaymentsRange(req.user.tenantId, { from, to, limit: 5000 });
+  const summary = getPaymentSummary(req.user.tenantId);
+  const total = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  res.json({ from, to, appointments, payments, summary: { ...summary, total } });
 });
 
 router.post('/clinic/payments', authMiddleware, requireLiveTenant, (req, res) => {

@@ -21,6 +21,11 @@ export const services = [
     desc: "Custom teeth replacements to help you eat and smile comfortably.",
   },
   {
+    icon: ScanLine,
+    title: "Orthodontic Aligners",
+    desc: "Correction of irregular teeth using clear aligners with guided planning.",
+  },
+  {
     icon: HeartPulse,
     title: "Root Canal Treatment (RCT)",
     desc: "Relieve tooth pain and save the tooth with careful, modern treatment.",

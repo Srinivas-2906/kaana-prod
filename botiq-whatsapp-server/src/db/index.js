@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { getCatalogTemplate } from '../data/catalogTemplates.js';
+import { getCatalogTemplate } from '../templates/catalogTemplates.js';
 import { getSetupStatus } from '../services/setupStatus.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,6 +28,7 @@ export function initDatabase() {
       status TEXT DEFAULT 'active',
       trial_ends_at TEXT,
       settings TEXT DEFAULT '{}',
+      products TEXT DEFAULT '["platform","inbox","crm","clinic"]',
       whatsapp_phone_id TEXT,
       whatsapp_token TEXT,
       created_at TEXT DEFAULT (datetime('now'))
@@ -36,11 +37,13 @@ export function initDatabase() {
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       tenant_id TEXT,
+      username TEXT,
       email TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
       name TEXT NOT NULL,
       role TEXT DEFAULT 'owner',
       is_platform_admin INTEGER DEFAULT 0,
+      must_change_password INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (tenant_id) REFERENCES tenants(id)
     );
@@ -252,6 +255,8 @@ export function initDatabase() {
       last_visit TEXT,
       source TEXT DEFAULT 'WhatsApp',
       conversation_id TEXT,
+      photo_url TEXT DEFAULT '',
+      prescription_url TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
       UNIQUE(tenant_id, phone_digits),
@@ -283,12 +288,48 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
   `);
 
+  migrateTenantProductsColumn();
+  migrateUserAuthColumns();
   migrateSiteLeadsColumns();
   migrateClinicExtensions();
   syncDentaCareDemo();
   seedDefaults();
   migrateCatalogs();
   return db;
+}
+
+function migrateTenantProductsColumn() {
+  const cols = db.prepare('PRAGMA table_info(tenants)').all().map((c) => c.name);
+  if (!cols.includes('products')) {
+    try {
+      db.exec(`ALTER TABLE tenants ADD COLUMN products TEXT DEFAULT '["platform","inbox","crm","clinic"]'`);
+    } catch (e) {
+      if (!String(e?.message || '').includes('duplicate column')) throw e;
+    }
+  }
+}
+
+function migrateUserAuthColumns() {
+  const cols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+  if (!cols.includes('username')) {
+    try {
+      db.exec(`ALTER TABLE users ADD COLUMN username TEXT`);
+    } catch (e) {
+      if (!String(e?.message || '').includes('duplicate column')) throw e;
+    }
+  }
+  if (!cols.includes('must_change_password')) {
+    try {
+      db.exec(`ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0`);
+    } catch (e) {
+      if (!String(e?.message || '').includes('duplicate column')) throw e;
+    }
+  }
+  try {
+    db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_tenant_username ON users(tenant_id, username)`);
+  } catch (e) {
+    if (!String(e?.message || '').includes('no such column')) throw e;
+  }
 }
 
 function migrateClinicExtensions() {
@@ -301,6 +342,17 @@ function migrateClinicExtensions() {
   }
   if (!reminderCols.includes('patient_id')) {
     db.exec(`ALTER TABLE reminders ADD COLUMN patient_id TEXT`);
+  }
+
+  const patientCols = db.prepare('PRAGMA table_info(patients)').all().map((c) => c.name);
+  if (!patientCols.includes('photo_url')) {
+    db.exec(`ALTER TABLE patients ADD COLUMN photo_url TEXT DEFAULT ''`);
+  }
+  if (!patientCols.includes('prescription_url')) {
+    db.exec(`ALTER TABLE patients ADD COLUMN prescription_url TEXT DEFAULT ''`);
+  }
+  if (!patientCols.includes('record_urls')) {
+    db.exec(`ALTER TABLE patients ADD COLUMN record_urls TEXT DEFAULT '[]'`);
   }
 
   db.exec(`
@@ -380,6 +432,8 @@ function syncDentaCareDemo() {
     clinicHours: { start: 10, end: 21, slotMin: 30 },
   };
 
+  const tenantSlug = 'dentacare';
+
   const existing = db.prepare('SELECT id FROM tenants WHERE id = ?').get(tenantId);
   if (!existing) {
     const trialEnd = new Date();
@@ -389,7 +443,7 @@ function syncDentaCareDemo() {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       tenantId,
-      'denta-care',
+      tenantSlug,
       'Denta Care Dental Clinic',
       'clinic',
       'growth',
@@ -400,7 +454,8 @@ function syncDentaCareDemo() {
     );
     seedCatalogForTenant(tenantId, 'clinic');
   } else {
-    db.prepare('UPDATE tenants SET name = ?, settings = ? WHERE id = ?').run(
+    db.prepare('UPDATE tenants SET slug = ?, name = ?, settings = ? WHERE id = ?').run(
+      tenantSlug,
       'Denta Care Dental Clinic',
       JSON.stringify(settings),
       tenantId,
@@ -408,20 +463,23 @@ function syncDentaCareDemo() {
   }
 
   const demoAccounts = [
-    { id: 'user-denta-care', email: 'demo@dentacare.in', name: 'Dr. D. Ajit' },
-    { id: 'user-denta-care-alt', email: 'clinic@demo.kaana.in', name: 'Dr. D. Ajit' },
+    { id: 'user-dentacare-owner', email: 'ajitdentacare@gmail.com', username: 'Admin', name: 'Dr. D. Ajit', password: 'Dentacare@123' },
+    { id: 'user-denta-care-admin', email: 'admin@dentacare.in', username: null, name: 'Dr. D. Ajit', password: 'Dentacare@2024' },
+    { id: 'user-denta-care', email: 'demo@dentacare.in', username: null, name: 'Dr. D. Ajit', password: 'demo1234' },
+    { id: 'user-denta-care-alt', email: 'clinic@demo.kaana.in', username: null, name: 'Dr. D. Ajit', password: 'demo1234' },
   ];
-  const hash = bcrypt.hashSync('demo1234', 10);
+  db.prepare('UPDATE users SET username = NULL WHERE tenant_id = ?').run(tenantId);
   for (const acct of demoAccounts) {
+    const hash = bcrypt.hashSync(acct.password, 10);
     const user = db.prepare('SELECT id FROM users WHERE email = ?').get(acct.email);
     if (!user) {
       db.prepare(`
-        INSERT INTO users (id, tenant_id, email, password_hash, name, role, is_platform_admin)
-        VALUES (?, ?, ?, ?, ?, 'owner', 0)
-      `).run(acct.id, tenantId, acct.email, hash, acct.name);
+        INSERT INTO users (id, tenant_id, username, email, password_hash, name, role, is_platform_admin)
+        VALUES (?, ?, ?, ?, ?, ?, 'owner', 0)
+      `).run(acct.id, tenantId, acct.username || null, acct.email, hash, acct.name);
     } else {
-      db.prepare('UPDATE users SET tenant_id = ?, name = ?, password_hash = ? WHERE email = ?').run(
-        tenantId, acct.name, hash, acct.email,
+      db.prepare('UPDATE users SET tenant_id = ?, username = ?, name = ?, password_hash = ? WHERE email = ?').run(
+        tenantId, acct.username || null, acct.name, hash, acct.email,
       );
     }
   }
@@ -458,7 +516,7 @@ function seedDentaCareSampleData(tenantId) {
     if (!apptExists) {
       const scheduledAt = `${today}T${String(s.hour).padStart(2, '0')}:${String(s.min).padStart(2, '0')}:00`;
       db.prepare(`
-        INSERT INTO appointments (id, tenant_id, patient_id, service, scheduled_at, status, source)
+        INSERT OR IGNORE INTO appointments (id, tenant_id, patient_id, service, scheduled_at, status, source)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `).run(`appt-${s.id}`, tenantId, s.id, s.service, scheduledAt, s.status, s.source);
     }
@@ -493,17 +551,18 @@ function seedDefaults() {
     seedCatalogForTenant('prestige-properties', 'real-estate');
   }
 
+  const adminUsername = (process.env.PLATFORM_ADMIN_USERNAME || 'Admin').trim() || 'Admin';
   const adminEmail = (process.env.PLATFORM_ADMIN_EMAIL || 'admin@kaana.ai').toLowerCase();
   const adminPassword = process.env.PLATFORM_ADMIN_PASSWORD || 'kaanaadmin';
   const hash = bcrypt.hashSync(adminPassword, 10);
   const adminUser = db.prepare('SELECT id FROM users WHERE email = ?').get(adminEmail);
   if (!adminUser) {
     db.prepare(`
-      INSERT INTO users (id, tenant_id, email, password_hash, name, role, is_platform_admin)
-      VALUES (?, ?, ?, ?, ?, ?, 1)
-    `).run('user-admin', null, adminEmail, hash, 'Platform Admin', 'platform_admin');
+      INSERT INTO users (id, tenant_id, username, email, password_hash, name, role, is_platform_admin)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+    `).run('user-admin', null, adminUsername, adminEmail, hash, 'Platform Admin', 'platform_admin');
   } else {
-    db.prepare('UPDATE users SET password_hash = ?, is_platform_admin = 1 WHERE email = ?').run(hash, adminEmail);
+    db.prepare('UPDATE users SET password_hash = ?, is_platform_admin = 1, username = ? WHERE email = ?').run(hash, adminUsername, adminEmail);
   }
 }
 
@@ -523,6 +582,17 @@ export function parseSettings(raw) {
 
 export function tenantToClient(row) {
   const s = parseSettings(row.settings);
+  let products = ['platform', 'inbox', 'crm', 'clinic'];
+  try {
+    if (row.products) {
+      const parsed = JSON.parse(row.products);
+      if (Array.isArray(parsed) && parsed.every((x) => typeof x === 'string')) {
+        products = parsed;
+      }
+    }
+  } catch {
+    /* ignore invalid products */
+  }
   const intake = getDb().prepare('SELECT status, submitted_at FROM onboarding_intake WHERE tenant_id = ?').get(row.id);
   const intakeParsed = intake ? { status: intake.status, submittedAt: intake.submitted_at } : null;
   const setup = getSetupStatus(row, intakeParsed);
@@ -551,6 +621,7 @@ export function tenantToClient(row) {
     trialStarted: setup.trialStarted,
     setupStatus: setup.steps,
     setupCurrentStep: setup.currentStep,
+    products,
   };
 }
 

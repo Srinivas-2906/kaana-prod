@@ -33,6 +33,18 @@ function rowToPatient(row) {
     lastVisit: row.last_visit,
     source: row.source || 'WhatsApp',
     conversationId: row.conversation_id,
+    photoUrl: row.photo_url || '',
+    prescriptionUrl: row.prescription_url || '',
+    recordUrls: (() => {
+      try {
+        const arr = JSON.parse(row.record_urls || '[]');
+        return Array.isArray(arr) ? arr.filter(Boolean) : [];
+      } catch {
+        return [];
+      }
+    })(),
+    totalPaid: row.total_paid != null ? Number(row.total_paid) : 0,
+    lastPaymentAmount: row.last_payment_amount != null ? Number(row.last_payment_amount) : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -54,6 +66,8 @@ function rowToAppointment(row) {
     assignedDoctor: row.assigned_doctor || '',
     notes: row.notes || '',
     source: row.source || 'WhatsApp',
+    paymentAmount: row.payment_amount != null ? Number(row.payment_amount) : null,
+    paymentMethod: row.payment_method || '',
     reminderSent: !!row.reminder_sent,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -136,8 +150,8 @@ export function createPatient(tenantId, data) {
 
   const id = nanoid(12);
   getDb().prepare(`
-    INSERT INTO patients (id, tenant_id, name, phone, phone_digits, email, age, gender, chief_complaint, is_returning, tags, notes, source)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO patients (id, tenant_id, name, phone, phone_digits, email, age, gender, chief_complaint, is_returning, tags, notes, source, photo_url, prescription_url, record_urls)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     tenantId,
@@ -152,6 +166,9 @@ export function createPatient(tenantId, data) {
     JSON.stringify(data.tags || []),
     JSON.stringify(data.notes || []),
     data.source || 'Walk-in',
+    data.photoUrl || '',
+    data.prescriptionUrl || '',
+    JSON.stringify(Array.isArray(data.recordUrls) ? data.recordUrls : []),
   );
   return rowToPatient(getDb().prepare('SELECT * FROM patients WHERE id = ?').get(id));
 }
@@ -172,11 +189,16 @@ export function updatePatient(id, tenantId, patch) {
     isReturning: 'is_returning',
     lastVisit: 'last_visit',
     source: 'source',
+    photoUrl: 'photo_url',
+    prescriptionUrl: 'prescription_url',
+    recordUrls: 'record_urls',
   };
   for (const [k, col] of Object.entries(map)) {
     if (patch[k] !== undefined) {
       fields.push(`${col} = ?`);
-      values.push(k === 'isReturning' ? (patch[k] ? 1 : 0) : patch[k]);
+      if (k === 'isReturning') values.push(patch[k] ? 1 : 0);
+      else if (k === 'recordUrls') values.push(JSON.stringify(Array.isArray(patch[k]) ? patch[k] : []));
+      else values.push(patch[k]);
     }
   }
   if (patch.phone) {
@@ -207,20 +229,43 @@ export function updatePatient(id, tenantId, patch) {
 }
 
 export function getPatients(tenantId, { search, limit = 100 } = {}) {
-  let sql = 'SELECT * FROM patients WHERE tenant_id = ?';
+  let sql = `
+    SELECT p.*,
+      (SELECT COALESCE(SUM(pp.amount), 0) FROM patient_payments pp
+        WHERE pp.patient_id = p.id AND pp.tenant_id = p.tenant_id AND pp.status = 'paid') AS total_paid,
+      (SELECT pp.amount FROM patient_payments pp
+        WHERE pp.patient_id = p.id AND pp.tenant_id = p.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS last_payment_amount
+    FROM patients p
+    WHERE p.tenant_id = ?
+  `;
   const params = [tenantId];
   if (search) {
-    sql += ' AND (name LIKE ? OR phone LIKE ? OR chief_complaint LIKE ?)';
-    const q = `%${search}%`;
-    params.push(q, q, q);
+    const q = `%${search.trim()}%`;
+    sql += ` AND (
+      p.name LIKE ? OR p.phone LIKE ? OR p.phone_digits LIKE ?
+      OR p.email LIKE ? OR p.chief_complaint LIKE ? OR p.gender LIKE ?
+      OR p.source LIKE ? OR p.tags LIKE ? OR p.notes LIKE ?
+      OR CAST(p.age AS TEXT) LIKE ?
+    )`;
+    params.push(q, q, q, q, q, q, q, q, q, q);
   }
-  sql += ' ORDER BY updated_at DESC LIMIT ?';
+  sql += ' ORDER BY p.updated_at DESC LIMIT ?';
   params.push(limit);
   return getDb().prepare(sql).all(...params).map(rowToPatient);
 }
 
 export function getPatientById(id, tenantId) {
-  const row = getDb().prepare('SELECT * FROM patients WHERE id = ? AND tenant_id = ?').get(id, tenantId);
+  const row = getDb().prepare(`
+    SELECT p.*,
+      (SELECT COALESCE(SUM(pp.amount), 0) FROM patient_payments pp
+        WHERE pp.patient_id = p.id AND pp.tenant_id = p.tenant_id AND pp.status = 'paid') AS total_paid,
+      (SELECT pp.amount FROM patient_payments pp
+        WHERE pp.patient_id = p.id AND pp.tenant_id = p.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS last_payment_amount
+    FROM patients p
+    WHERE p.id = ? AND p.tenant_id = ?
+  `).get(id, tenantId);
   return rowToPatient(row);
 }
 
@@ -322,7 +367,13 @@ export function updateAppointment(id, tenantId, patch) {
 
 export function getAppointments(tenantId, { date, status, patientId, limit = 200 } = {}) {
   let sql = `
-    SELECT a.*, p.name AS patient_name, p.phone AS patient_phone
+    SELECT a.*, p.name AS patient_name, p.phone AS patient_phone,
+      (SELECT pp.amount FROM patient_payments pp
+        WHERE pp.appointment_id = a.id AND pp.tenant_id = a.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS payment_amount,
+      (SELECT pp.method FROM patient_payments pp
+        WHERE pp.appointment_id = a.id AND pp.tenant_id = a.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS payment_method
     FROM appointments a
     JOIN patients p ON p.id = a.patient_id
     WHERE a.tenant_id = ?
@@ -331,6 +382,41 @@ export function getAppointments(tenantId, { date, status, patientId, limit = 200
   if (date) {
     sql += ' AND date(a.scheduled_at) = date(?)';
     params.push(date);
+  }
+  if (status) {
+    sql += ' AND a.status = ?';
+    params.push(status);
+  }
+  if (patientId) {
+    sql += ' AND a.patient_id = ?';
+    params.push(patientId);
+  }
+  sql += ' ORDER BY a.scheduled_at ASC LIMIT ?';
+  params.push(limit);
+  return getDb().prepare(sql).all(...params).map(rowToAppointment);
+}
+
+export function getAppointmentsRange(tenantId, { from, to, status, patientId, limit = 1500 } = {}) {
+  let sql = `
+    SELECT a.*, p.name AS patient_name, p.phone AS patient_phone,
+      (SELECT pp.amount FROM patient_payments pp
+        WHERE pp.appointment_id = a.id AND pp.tenant_id = a.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS payment_amount,
+      (SELECT pp.method FROM patient_payments pp
+        WHERE pp.appointment_id = a.id AND pp.tenant_id = a.tenant_id
+        ORDER BY pp.created_at DESC LIMIT 1) AS payment_method
+    FROM appointments a
+    JOIN patients p ON p.id = a.patient_id
+    WHERE a.tenant_id = ?
+  `;
+  const params = [tenantId];
+  if (from) {
+    sql += ' AND date(a.scheduled_at) >= date(?)';
+    params.push(from);
+  }
+  if (to) {
+    sql += ' AND date(a.scheduled_at) <= date(?)';
+    params.push(to);
   }
   if (status) {
     sql += ' AND a.status = ?';

@@ -35,10 +35,19 @@ router.post('/whatsapp', async (req, res) => {
 router.get('/clinic-credentials', (_req, res) => {
   if (!DEMO_ENABLED) return res.status(403).json({ error: 'Disabled in production' });
   res.json({
-    login: { email: 'demo@dentacare.in', password: 'demo1234' },
-    tenant: 'denta-care',
+    login: {
+      email: 'ajitdentacare@gmail.com',
+      username: 'Admin',
+      password: 'Dentacare@123',
+      altEmail: 'admin@dentacare.in',
+      altPassword: 'Dentacare@2024',
+    },
+    tenant: 'dentacare',
+    url: 'http://localhost:5185?tenant=dentacare',
+    productionUrl: 'https://crm.dentacare.kaana.in',
+    siteUrl: 'https://dentacare.kaana.in',
     clinic: 'Denta Care Dental Clinic — Dr. D. Ajit',
-    simulate: 'POST /api/demo/whatsapp with { tenantSlug: "denta-care", phone, message }',
+    simulate: 'POST /api/demo/whatsapp with { tenantSlug: "dentacare", phone, message }',
   });
 });
 

@@ -17,6 +17,24 @@ hostRules:
   - hosts:
       - clinic.kaana.in
     pathMatcher: clinic
+  # Tenant CRM desk — crm.{tenant}.kaana.in (preferred)
+  - hosts:
+      - crm.dentacare.kaana.in
+      - crm.ajithdentacare.kaana.in
+    pathMatcher: clinic
+  # Legacy tenant CRM — {tenant}.crm.kaana.in
+  - hosts:
+      - dentacare.crm.kaana.in
+      - '*.crm.kaana.in'
+    pathMatcher: clinic
+  - hosts:
+      - '*.clinic.kaana.in'
+    pathMatcher: clinic
+  # Tenant marketing site — {tenant}.kaana.in
+  - hosts:
+      - dentacare.kaana.in
+      - ajithdentacare.kaana.in
+    pathMatcher: tenant-site
   - hosts:
       - api.kaana.in
     pathMatcher: api
@@ -31,6 +49,7 @@ pathMatchers:
     defaultService: global/backendServices/kaana-crm-backend
   - name: clinic
     defaultService: global/backendServices/kaana-clinic-backend
+  - name: tenant-site
+    defaultService: global/backendServices/ajitdentalclinic-backend
   - name: api
     defaultService: global/backendServices/kaana-api-backend
-

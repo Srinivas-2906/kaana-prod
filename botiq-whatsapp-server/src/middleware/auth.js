@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 import { getDb, slugify, tenantToClient, parseSettings, seedCatalogForTenant } from '../db/index.js';
-import { invalidateTenantCache } from '../tenantContext.js';
+import { invalidateTenantCache, getTenantBySlug } from '../tenantContext.js';
 import { SELF_SERVE_ENABLED, initialTenantStatus } from '../platformConfig.js';
 import { createIntake } from '../services/onboarding.js';
 import { notifySignup } from '../services/notify.js';
@@ -63,25 +63,49 @@ export function requirePlatformAdmin(req, res, next) {
   next();
 }
 
-export function loginUser(email, password) {
+export function loginUser(identifier, password, options = {}) {
   const db = getDb();
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase());
-  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
-    return { error: 'Invalid email or password' };
-  }
+  const raw = String(identifier || '').trim();
+  const tenantSlug = String(options.tenantSlug || '').trim();
+
+  let user;
   let tenant = null;
-  if (user.tenant_id) {
-    tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(user.tenant_id);
+
+  if (raw.includes('@')) {
+    user = db.prepare('SELECT * FROM users WHERE email = ?').get(raw.toLowerCase());
+    if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+      return { error: 'Invalid email or password' };
+    }
+    if (user.tenant_id) {
+      tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(user.tenant_id);
+    }
+  } else {
+    if (!tenantSlug) {
+      user = db.prepare('SELECT * FROM users WHERE tenant_id IS NULL AND is_platform_admin = 1 AND username = ?').get(raw);
+      if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+        return { error: 'Business slug required for username login' };
+      }
+      tenant = null;
+    } else {
+      tenant = getTenantBySlug(tenantSlug);
+      if (!tenant) return { error: 'Business not found' };
+      user = db.prepare('SELECT * FROM users WHERE tenant_id = ? AND username = ?').get(tenant.id, raw);
+      if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+        return { error: 'Invalid username or password' };
+      }
+    }
   }
   const token = signToken(user, tenant);
   return {
     token,
     user: {
       id: user.id,
+      username: user.username || null,
       email: user.email,
       name: user.name,
       role: user.role,
       isPlatformAdmin: !!user.is_platform_admin,
+      mustChangePassword: !!user.must_change_password,
     },
     tenant: tenant ? tenantToClient(tenant) : null,
   };
@@ -209,10 +233,12 @@ export function getUserProfile(userId) {
   return {
     user: {
       id: user.id,
+      username: user.username || null,
       email: user.email,
       name: user.name,
       role: user.role,
       isPlatformAdmin: !!user.is_platform_admin,
+      mustChangePassword: !!user.must_change_password,
     },
     tenant: tenant ? tenantToClient(tenant) : null,
   };

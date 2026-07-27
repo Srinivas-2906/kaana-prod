@@ -13,8 +13,8 @@ export function Footer() {
             <span className="font-display text-lg">Denta Care</span>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-            Compassionate, expert dental care in MuraliNagar, Visakhapatnam — led by Dr. D. Ajit, BDS,
-            MDS.
+            Compassionate, expert dental care in Muralinagar, Visakhapatnam — led by Dr. D. Ajit,
+            BDS, MDS.
           </p>
         </div>
         <div>
@@ -47,7 +47,7 @@ export function Footer() {
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li className="flex gap-2">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              #39-11-70, 1st Floor, Shankar Plaza, Muralinagar, Visakhapatnam
+              #39-11-70, 1st Floor, Shankar Plaza, Muralinagar, Visakhapatnam (Landmark: Shankar Plaza)
             </li>
             <li className="flex gap-2">
               <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -60,15 +60,17 @@ export function Footer() {
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li className="flex gap-2">
               <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <a href="tel:+910000000000" className="hover:text-primary">
+              <a href="tel:+916301433852" className="hover:text-primary">
                 Call the clinic
               </a>
             </li>
             <li className="flex gap-2">
               <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              care@dentacare.in
+              <a className="hover:text-primary" href="mailto:ajitdentacare@gmail.com">
+                ajitdentacare@gmail.com
+              </a>
             </li>
-            <li className="text-xs">Consultation fee ₹100</li>
+            <li className="text-xs">Consultation fee ₹300</li>
           </ul>
         </div>
       </div>
