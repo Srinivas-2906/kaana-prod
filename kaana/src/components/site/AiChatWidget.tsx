@@ -13,7 +13,8 @@ export default function AiChatWidget() {
               alt="Kaana"
               width={28}
               height={28}
-              className="h-7 w-7 object-contain"
+              className="object-contain"
+              style={{ width: 28, height: 28 }}
             />
           </div>
           <div className="ai-chat-panel" id="aiChatPanel">
@@ -24,7 +25,8 @@ export default function AiChatWidget() {
                   alt=""
                   width={20}
                   height={20}
-                  className="h-5 w-5 object-contain"
+                  className="object-contain"
+                  style={{ width: 20, height: 20 }}
                   aria-hidden
                 />
                 <span>Kaana AI Assistant</span>

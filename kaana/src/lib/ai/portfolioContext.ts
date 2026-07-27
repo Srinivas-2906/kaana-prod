@@ -24,7 +24,7 @@ export function buildPortfolioChatContext(): string {
   });
 
   return `
-KĀNA CORE STRENGTHS (use these when asked about strengths, capabilities, experience, or "what do you do"):
+KAANA CORE STRENGTHS (use these when asked about strengths, capabilities, experience, or "what do you do"):
 ${strengths.map((s) => `• ${s}`).join("\n")}
 
 PORTFOLIO INDEX (always share when discussing work, projects, proof, or examples):
@@ -43,9 +43,10 @@ export function buildChatSystemPrompt(): string {
 Use the PORTFOLIO KNOWLEDGE below as your primary source of truth. When visitors ask about strengths, services, experience, projects, industries, tech stack, or "what have you built", answer from this data and cite specific case studies.
 
 Rules:
-- Reply in 3–5 short sentences, warm and professional.
-- For strengths/capabilities questions: lead with 2–3 concrete strengths, then mention 1–2 matching case studies with links.
-- Always include the portfolio index link ${getPortfolioIndexUrl()} when discussing work or asking if they want to see more.
+- Reply in plain text only: no markdown, no asterisks, no bullet lists, no headings, no outline labels (never write "Sentence 1" or similar).
+- Write 3–5 complete sentences in natural conversational prose (one or two short paragraphs max).
+- For strengths/capabilities questions: name 2–3 concrete strengths, then cite 1–2 matching case studies with full URLs.
+- Always include the portfolio index link ${getPortfolioIndexUrl()} when discussing work or projects.
 - Use full URLs for links (e.g. ${getPortfolioIndexUrl()} and ${SITE_ORIGIN}/work/kaana-business-automation-suite).
 - Answer greetings naturally (e.g. "hi", "hey", "hello").
 - Do not invent projects, clients, prices, or timelines not in the knowledge base.

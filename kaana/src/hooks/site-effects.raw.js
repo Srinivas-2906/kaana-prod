@@ -970,48 +970,118 @@
         demoChatMessages.appendChild(messageElement);
         demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
       }
-      
-      function addBotMessage(message) {
-        // Add typing indicator
+
+      let chatInFlight = false;
+
+      function sanitizeChatText(text) {
+        return String(text)
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\*([^*\n]+)\*/g, '$1')
+          .replace(/^#+\s+/gm, '')
+          .replace(/Sentence\s+\d+\s*\([^)]*\):?\s*/gi, '')
+          .replace(/^\s*[-*•]\s+/gm, '')
+          .replace(/\):\*\*\s*/g, '')
+          .replace(/\* \*/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+      }
+
+      function getLocalChatFallback(message) {
+        const lower = message.toLowerCase();
+        const workUrl = 'https://kaana.in/work';
+        if (lower.includes('strength')) {
+          return `We build multi-tenant SaaS on GCP, WhatsApp automation (BotIQ, PropCRM, clinic desk), offline-first field PWAs, and healthcare clinic platforms. Recent proof includes our Business Automation Suite (${workUrl}/kaana-business-automation-suite) and Healthcare Clinic Digital Suite (${workUrl}/healthcare-clinic-digital-suite). Full portfolio: ${workUrl}.`;
+        }
+        if (lower.includes('case stud') || lower.includes('portfolio') || lower.includes('all work')) {
+          return `We have shipped WhatsApp CRM suites, edtech platforms, creator commerce, restaurant QR menus, and aquaculture field ops. Browse every case study with screenshots at ${workUrl}.`;
+        }
+        return null;
+      }
+
+      function formatChatMessage(text) {
+        const clean = sanitizeChatText(text);
+        const escaped = clean
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        return escaped.replace(
+          /(https?:\/\/[^\s<]+)/g,
+          '<a href="$1" class="text-accent hover:underline break-all" target="_blank" rel="noopener noreferrer">$1</a>',
+        );
+      }
+
+      function streamBotMessage(text) {
+        const clean = sanitizeChatText(text);
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('ai-message', 'ai-message-bot');
+        demoChatMessages.appendChild(messageElement);
+        demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+        let i = 0;
+        const interval = setInterval(() => {
+          messageElement.textContent += clean.charAt(i);
+          i++;
+          demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
+          if (i >= clean.length) {
+            clearInterval(interval);
+            messageElement.innerHTML = formatChatMessage(clean);
+          }
+        }, 12);
+      }
+
+      async function respond(message, options) {
+        if (chatInFlight) return;
+
+        const preferLocal = options && options.preferLocal;
+        if (preferLocal) {
+          const local = getLocalChatFallback(message);
+          if (local) {
+            streamBotMessage(local);
+            return;
+          }
+        }
+
+        chatInFlight = true;
+        demoChatSend.disabled = true;
+
         const typingIndicator = document.createElement('div');
         typingIndicator.classList.add('ai-typing');
-        
         for (let i = 0; i < 3; i++) {
           const dot = document.createElement('div');
           dot.classList.add('ai-typing-dot');
           typingIndicator.appendChild(dot);
         }
-        
         demoChatMessages.appendChild(typingIndicator);
         demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
-        
-        // Remove typing indicator and add message after delay with streaming
-        setTimeout(() => {
+
+        try {
+          const res = await fetch('/api/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, _hp: '' }),
+          });
+          const data = await res.json().catch(() => ({}));
           typingIndicator.remove();
-          const messageElement = document.createElement('div');
-          messageElement.classList.add('ai-message', 'ai-message-bot');
-          demoChatMessages.appendChild(messageElement);
-          demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
-          let i = 0;
-          const interval = setInterval(() => {
-            messageElement.textContent += message.charAt(i);
-            i++;
-            demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
-            if (i >= message.length) clearInterval(interval);
-          }, 12);
-        }, 500);
-      }
-      
-      function respond(message) {
-        // Find matching response
-        let response = "I'm sorry, I don't have information about that specific topic. Would you like to know about our web design, app development, chatbot, e-commerce, or Print & Digital Marketing services?";
-        for (const keyword in demoChatResponses) {
-          if (message.toLowerCase().includes(keyword)) {
-            response = demoChatResponses[keyword];
-            break;
+          if (!res.ok) {
+            throw new Error(data.error || 'Could not get a reply. Please try again.');
           }
+          streamBotMessage(
+            sanitizeChatText(data.text || '') || 'Thanks for your message! How can we help with your project?',
+          );
+        } catch (err) {
+          typingIndicator.remove();
+          const local = getLocalChatFallback(message);
+          if (local) {
+            streamBotMessage(local);
+          } else {
+            const fallback = err instanceof Error
+              ? err.message
+              : 'Something went wrong. Please try again or use the contact form.';
+            streamBotMessage(fallback);
+          }
+        } finally {
+          chatInFlight = false;
+          demoChatSend.disabled = false;
         }
-        addBotMessage(response);
       }
 
       function handleUserMessage() {
@@ -1045,8 +1115,8 @@
           btn.className = 'text-xs px-3 py-1 border border-neutral-700 rounded-sm hover:border-accent hover:text-accent transition-colors';
           btn.textContent = q.label;
           btn.addEventListener('click', () => {
-            addUserMessage(q.label);
-            respond(q.text);
+            addUserMessage(q.text);
+            respond(q.text, { preferLocal: true });
           });
           quickWrap.appendChild(btn);
         });
