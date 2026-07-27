@@ -966,8 +966,34 @@ export function initSiteEffects(): () => void {
 
         let chatInFlight = false;
 
+        function sanitizeChatText(text) {
+          return String(text)
+            .replace(/\*\*([^*]+)\*\*/g, '$1')
+            .replace(/\*([^*\n]+)\*/g, '$1')
+            .replace(/^#+\s+/gm, '')
+            .replace(/Sentence\s+\d+\s*\([^)]*\):?\s*/gi, '')
+            .replace(/^\s*[-*•]\s+/gm, '')
+            .replace(/\):\*\*\s*/g, '')
+            .replace(/\* \*/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+        }
+
+        function getLocalChatFallback(message) {
+          const lower = message.toLowerCase();
+          const workUrl = 'https://kaana.in/work';
+          if (lower.includes('strength')) {
+            return `We specialize in multi-tenant SaaS on GCP, WhatsApp business automation (BotIQ inbox, PropCRM, clinic desk), offline-first field PWAs, and healthcare clinic platforms. Proof points include our Business Automation Suite (${workUrl}/kaana-business-automation-suite) and Healthcare Clinic Digital Suite (${workUrl}/healthcare-clinic-digital-suite). Explore the full portfolio at ${workUrl} or contact us at kaana.srinivas@gmail.com.`;
+          }
+          if (lower.includes('case stud') || lower.includes('portfolio') || lower.includes('all work')) {
+            return `We have shipped WhatsApp CRM suites, edtech platforms, creator commerce, restaurant QR menus, aquaculture field ops, and more. Each case study includes screenshots and tech details at ${workUrl}. Highlights: Business Automation Suite, Student Recognition Platform, and Healthcare Clinic Digital Suite.`;
+          }
+          return null;
+        }
+
         function formatChatMessage(text) {
-          const escaped = text
+          const clean = sanitizeChatText(text);
+          const escaped = clean
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
@@ -978,24 +1004,35 @@ export function initSiteEffects(): () => void {
         }
 
         function streamBotMessage(text) {
+          const clean = sanitizeChatText(text);
           const messageElement = document.createElement('div');
           messageElement.classList.add('ai-message', 'ai-message-bot');
           demoChatMessages.appendChild(messageElement);
           demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
           let i = 0;
           const interval = setInterval(() => {
-            messageElement.textContent += text.charAt(i);
+            messageElement.textContent += clean.charAt(i);
             i++;
             demoChatMessages.scrollTop = demoChatMessages.scrollHeight;
-            if (i >= text.length) {
+            if (i >= clean.length) {
               clearInterval(interval);
-              messageElement.innerHTML = formatChatMessage(text);
+              messageElement.innerHTML = formatChatMessage(clean);
             }
           }, 12);
         }
 
-        async function respond(message) {
+        async function respond(message, options) {
           if (chatInFlight) return;
+
+          const preferLocal = options && options.preferLocal;
+          if (preferLocal) {
+            const local = getLocalChatFallback(message);
+            if (local) {
+              streamBotMessage(local);
+              return;
+            }
+          }
+
           chatInFlight = true;
           demoChatSend.disabled = true;
 
@@ -1021,14 +1058,19 @@ export function initSiteEffects(): () => void {
               throw new Error(data.error || 'Could not get a reply. Please try again.');
             }
             streamBotMessage(
-              data.text || 'Thanks for your message! How can we help with your project?',
+              sanitizeChatText(data.text || '') || 'Thanks for your message! How can we help with your project?',
             );
           } catch (err) {
             typingIndicator.remove();
-            const fallback = err instanceof Error
-              ? err.message
-              : 'Something went wrong. Please try again or use the contact form.';
-            streamBotMessage(fallback);
+            const local = getLocalChatFallback(message);
+            if (local) {
+              streamBotMessage(local);
+            } else {
+              const fallback = err instanceof Error
+                ? err.message
+                : 'Something went wrong. Please try again or use the contact form.';
+              streamBotMessage(fallback);
+            }
           } finally {
             chatInFlight = false;
             demoChatSend.disabled = false;
@@ -1066,8 +1108,8 @@ export function initSiteEffects(): () => void {
             btn.className = 'text-xs px-3 py-1 border border-neutral-700 rounded-sm hover:border-accent hover:text-accent transition-colors';
             btn.textContent = q.label;
             btn.addEventListener('click', () => {
-              addUserMessage(q.label);
-              respond(q.text);
+              addUserMessage(q.text);
+              respond(q.text, { preferLocal: true });
             });
             quickWrap.appendChild(btn);
           });

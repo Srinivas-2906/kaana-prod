@@ -9,6 +9,11 @@ type KaanaLogoProps = {
   priority?: boolean;
 };
 
+const LOGO_DIMENSIONS = {
+  name: { width: 730, height: 515 },
+  mark: { width: 256, height: 173 },
+} as const;
+
 export default function KaanaLogo({
   variant = "name",
   href = "/",
@@ -17,16 +22,22 @@ export default function KaanaLogo({
   priority = false,
 }: KaanaLogoProps) {
   const src = variant === "name" ? "/logo-name.png" : "/logo-only.png";
-  const imgHeight = height ?? (variant === "name" ? 40 : 32);
+  const base = LOGO_DIMENSIONS[variant];
+  const imgHeight = height ?? (variant === "name" ? 48 : 32);
+  const imgWidth =
+    variant === "mark"
+      ? Math.round((base.width / base.height) * imgHeight)
+      : Math.round((base.width / base.height) * imgHeight);
 
   const image = (
     <Image
       src={src}
       alt="Kaana"
-      width={variant === "name" ? 140 : imgHeight}
+      width={imgWidth}
       height={imgHeight}
       priority={priority}
-      className={`w-auto object-contain ${variant === "name" ? "h-10" : "h-8"} ${className}`}
+      className={`object-contain ${className}`}
+      style={{ width: "auto", height: imgHeight }}
     />
   );
 

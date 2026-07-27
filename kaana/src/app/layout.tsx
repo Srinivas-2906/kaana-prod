@@ -26,10 +26,6 @@ export const metadata: Metadata = {
     "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps.",
   applicationName: "Kaana",
   robots: { index: true, follow: true },
-  icons: {
-    icon: "/logo-only.png",
-    apple: "/logo-only.png",
-  },
 };
 
 export default function RootLayout({

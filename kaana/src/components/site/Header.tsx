@@ -56,7 +56,7 @@ export default function Header() {
     >
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between">
-          <KaanaLogo variant="name" href="/" priority />
+          <KaanaLogo variant="name" href="/" priority height={56} />
 
           <nav className="hidden md:flex items-center gap-8">
             {NAV_ITEMS.map((item) => {
