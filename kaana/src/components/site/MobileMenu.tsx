@@ -56,9 +56,9 @@ export default function MobileMenu() {
 
           if (href === "#") {
             return (
-              <a key={item.label} href="#" className={className}>
+              <button key={item.label} type="button" className={className}>
                 {item.label}
-              </a>
+              </button>
             );
           }
 

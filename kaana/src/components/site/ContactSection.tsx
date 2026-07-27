@@ -1,5 +1,8 @@
 'use client';
 
+import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/seo/site";
+import Icon from "@/components/ui/Icon";
+
 export default function ContactSection() {
   return (
     <>
@@ -58,17 +61,23 @@ export default function ContactSection() {
                   <div className="reveal-up" style={{ transitionDelay: "0.6s" }}>
                     <h3 className="font-medium text-neutral-100 mb-4">Follow Us</h3>
                     <div className="flex gap-4">
-                      <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                        <i className="fab fa-twitter"></i>
+                      <a
+                        href={WHATSAPP_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Chat on WhatsApp"
+                        className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
+                      >
+                        <Icon name="whatsapp" className="text-lg" />
                       </a>
-                      <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                        <i className="fab fa-linkedin-in"></i>
-                      </a>
-                      <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                        <i className="fab fa-instagram"></i>
-                      </a>
-                      <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                        <i className="fab fa-github"></i>
+                      <a
+                        href={INSTAGRAM_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Follow Kaana on Instagram"
+                        className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
+                      >
+                        <Icon name="instagram" className="text-lg" />
                       </a>
                     </div>
                   </div>
@@ -101,7 +110,7 @@ export default function ContactSection() {
                     
                     <button type="submit" className="btn btn-primary w-full">
                       Send Message
-                      <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                      <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
                     </button>
                   </form>
                 </div>

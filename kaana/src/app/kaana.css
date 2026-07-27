@@ -822,6 +822,21 @@
     box-shadow: 0 6px 25px rgba(0, 212, 255, 0.5);
   }
 
+  .ai-chat-button-mark {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+  }
+
+  .ai-chat-header-mark {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    display: block;
+  }
+
   .ai-chat-panel {
     position: absolute;
     bottom: 70px;
@@ -845,6 +860,24 @@
     opacity: 1;
   }
 
+  .ai-chat-panel-simple {
+    height: auto;
+    max-height: 420px;
+  }
+
+  .ai-chat-actions {
+    padding: 12px 15px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid #1E1E1E;
+  }
+
+  .ai-chat-action {
+    text-decoration: none;
+    color: inherit;
+  }
+
   .ai-chat-header {
     padding: 15px;
     background: linear-gradient(135deg, #00D4FF, #9D4EDD);
@@ -858,6 +891,11 @@
   .ai-chat-close {
     cursor: pointer;
     font-size: 18px;
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 0;
+    line-height: 1;
   }
 
   .ai-chat-messages {

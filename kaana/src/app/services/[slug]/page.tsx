@@ -15,6 +15,7 @@ import {
   getService,
 } from "@/lib/seo/services";
 import { buildPageMetadata } from "@/lib/seo/site";
+import Icon from "@/components/ui/Icon";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -171,7 +172,7 @@ export default async function ServicePage({ params }: Props) {
             </p>
             <Link href="/#contact" className="btn btn-outline link-trigger inline-flex">
               Get in touch
-              <i className="fas fa-arrow-right text-xs ml-2 btn-icon" />
+              <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
             </Link>
           </section>
         </div>

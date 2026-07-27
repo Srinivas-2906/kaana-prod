@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { CarouselSlide } from "@/lib/portfolio/images";
+import Icon from "@/components/ui/Icon";
 
 type AspectVariant = "card" | "hero" | "wide";
 
@@ -110,7 +111,7 @@ export default function PortfolioImageCarousel({
             className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-sm border border-neutral-700/80 bg-neutral-950/80 text-neutral-300 opacity-0 backdrop-blur-sm transition-opacity hover:border-accent hover:text-accent focus:opacity-100 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
             onClick={(e) => handleControlClick(e, () => go(-1))}
           >
-            <i className="fas fa-chevron-left text-xs" aria-hidden />
+            <Icon name="chevron-left" className="text-xs" />
           </button>
           <button
             type="button"
@@ -118,7 +119,7 @@ export default function PortfolioImageCarousel({
             className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-sm border border-neutral-700/80 bg-neutral-950/80 text-neutral-300 opacity-0 backdrop-blur-sm transition-opacity hover:border-accent hover:text-accent focus:opacity-100 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
             onClick={(e) => handleControlClick(e, () => go(1))}
           >
-            <i className="fas fa-chevron-right text-xs" aria-hidden />
+            <Icon name="chevron-right" className="text-xs" />
           </button>
 
           <div

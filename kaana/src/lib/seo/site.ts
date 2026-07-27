@@ -5,6 +5,13 @@ export const SITE_URL =
 
 export const SITE_NAME = "Kaana Digital Solutions";
 
+export const WHATSAPP_URL =
+  "https://wa.me/919008747926?text=Hi%20Kaana%2C%20I%27d%20like%20to%20discuss%20a%20project";
+
+export const INSTAGRAM_URL =
+  process.env.NEXT_PUBLIC_INSTAGRAM_URL?.trim() ||
+  "https://www.instagram.com/kaanaaitechnologies/";
+
 export const DEFAULT_DESCRIPTION =
   "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps for teams in India and beyond.";
 
@@ -69,7 +76,7 @@ export function homeMetadata(): Metadata {
 
   return {
     ...buildPageMetadata({
-      title: "WhatsApp Automation & Multi-Tenant SaaS on GCP",
+      title: "Kaana",
       description: DEFAULT_DESCRIPTION,
       path: "/",
       keywords: [
@@ -80,6 +87,7 @@ export function homeMetadata(): Metadata {
         "digital product studio",
       ],
     }),
+    title: { absolute: "Kaana" },
     verification,
   };
 }
@@ -92,7 +100,7 @@ export function organizationJsonLd() {
     url: SITE_URL,
     logo: absoluteUrl("/portfolio/kaana-platform-desktop.png"),
     description: DEFAULT_DESCRIPTION,
-    sameAs: [],
+    sameAs: [INSTAGRAM_URL, WHATSAPP_URL],
     areaServed: ["IN", "Worldwide"],
     knowsAbout: [
       "WhatsApp Business API",

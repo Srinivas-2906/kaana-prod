@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  // Avoid automatic /path/ -> /path redirects (keeps one-hop legacy redirects)
+  skipTrailingSlashRedirect: true,
   turbopack: {
     // Avoid picking parent Demos/ lockfile as workspace root in dev
     root: process.cwd(),
@@ -15,6 +17,9 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Legacy WordPress blog paths → insights (avoid double hops)
+      { source: "/blog", destination: "/insights", permanent: true },
+      { source: "/blog/:path*", destination: "/insights", permanent: true },
       { source: "/Blog", destination: "/insights", permanent: true },
       { source: "/Blog/:path*", destination: "/insights", permanent: true },
     ];

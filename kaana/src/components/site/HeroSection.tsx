@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import KaanaLogo from "./KaanaLogo";
+import Icon from "@/components/ui/Icon";
 
 export default function HeroSection() {
   return (
@@ -38,13 +39,13 @@ export default function HeroSection() {
                   <div className="magnetic-wrap">
                     <a href="#solutions" className="magnetic-area btn btn-primary link-trigger">
                       Explore Solutions
-                      <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                      <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
                     </a>
                   </div>
                   <div className="magnetic-wrap">
                     <Link href="/work" className="magnetic-area btn btn-outline link-trigger">
-                      View Case Studies
-                      <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                      View Work
+                      <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
                     </Link>
                   </div>
                 </div>
@@ -63,7 +64,7 @@ export default function HeroSection() {
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
                           <div className="text-accent text-3xl mb-4">
-                            <i className="fas fa-laptop-code"></i>
+                            <Icon name="laptop-code" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">Web Design</h3>
                          <p className="text-neutral-400">Responsive, SEO-ready websites with clean UI/UX, fast performance, accessibility best practices, and easy CMS integration—designed to convert visitors into customers across all devices.</p>
@@ -76,7 +77,7 @@ export default function HeroSection() {
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
                           <div className="text-accent text-3xl mb-4">
-                            <i className="fas fa-bullhorn"></i>
+                            <Icon name="bullhorn" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">Print & Digital Marketing</h3>
                          <p className="text-neutral-400">Instagram boosts, Google Ads, Facebook Ads, YouTube promotions, strategic SEO, content marketing, social media management, PPC, and email campaigns.</p>
@@ -91,7 +92,7 @@ export default function HeroSection() {
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
                           <div className="text-accent text-3xl mb-4">
-                            <i className="fas fa-robot"></i>
+                            <Icon name="robot" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">Chatbot Solutions</h3>
                          <p className="text-neutral-400">AI-powered chatbots with natural language understanding for 24/7 support, lead capture, FAQs, bookings, and order status—integrated with your website, WhatsApp, and CRM to reduce response time and support costs.</p>
@@ -104,7 +105,7 @@ export default function HeroSection() {
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
                           <div className="text-accent text-3xl mb-4">
-                            <i className="fas fa-shopping-cart"></i>
+                            <Icon name="cart" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">E-commerce</h3>
                          <p className="text-neutral-400">Conversion-focused storefronts with secure payments, intuitive product catalogs, inventory and shipping automation, abandoned cart recovery, and analytics for data-driven growth.</p>
@@ -117,7 +118,7 @@ export default function HeroSection() {
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
                           <div className="text-accent text-3xl mb-4">
-                            <i className="fas fa-mobile-alt"></i>
+                            <Icon name="mobile" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">App Development</h3>
                          <p className="text-neutral-400">High-performance native and cross-platform apps for iOS and Android with intuitive UX, offline support, push notifications, and scalable backends for long-term growth.</p>

@@ -1188,18 +1188,37 @@ export function initSiteEffects(): () => void {
     }
   };
 
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    "matchMedia" in window &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Performance guardrails: keep the look/feel on desktop, but avoid heavy
+  // canvas + cursor effects on mobile or reduced-motion devices.
+  const lowPowerMode = prefersReducedMotion || window.innerWidth < 768;
+
+  const runWhenIdle = (fn: () => void) => {
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void })
+      .requestIdleCallback;
+    if (typeof ric === "function") {
+      ric(fn, { timeout: 1200 });
+      return;
+    }
+    setTimeout(fn, 0);
+  };
+
   safeInit("grid lines", initGridLines);
-  safeInit("particles", initParticles);
-  safeInit("neural network", initNeuralNetwork);
+  if (!lowPowerMode) runWhenIdle(() => safeInit("particles", initParticles));
+  if (!lowPowerMode) runWhenIdle(() => safeInit("neural network", initNeuralNetwork));
   safeInit("hero swiper", initHeroSwiper);
-  safeInit("custom cursor", initCustomCursor);
+  if (!lowPowerMode) safeInit("custom cursor", initCustomCursor);
   safeInit("scroll progress", initScrollProgress);
   safeInit("reveal on scroll", initRevealOnScroll);
   safeInit("mobile menu", initMobileMenu);
   safeInit("careers modal", initCareersModal);
   safeInit("testimonial slider", initTestimonialSlider);
   safeInit("process timeline", initProcessTimeline);
-  safeInit("magnetic buttons", initMagneticButtons);
+  if (!lowPowerMode) safeInit("magnetic buttons", initMagneticButtons);
   safeInit("link click animation", initLinkClickAnimation);
   safeInit("navigation recovery", initNavigationRecovery);
   safeInit("AI chat widget", initAiChatWidget);

@@ -3,6 +3,8 @@
 import Link from "next/link";
 
 import KaanaLogo from "./KaanaLogo";
+import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/seo/site";
+import Icon from "@/components/ui/Icon";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -20,17 +22,23 @@ export default function Footer() {
                   We create minimalist, cutting-edge digital solutions that transform businesses and elevate user experiences in the digital landscape.
                 </p>
                 <div className="flex gap-4">
-                  <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                    <i className="fab fa-twitter"></i>
+                  <a
+                    href={WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat on WhatsApp"
+                    className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
+                  >
+                    <Icon name="whatsapp" className="text-lg" />
                   </a>
-                  <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                    <i className="fab fa-linkedin-in"></i>
-                  </a>
-                  <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                    <i className="fab fa-instagram"></i>
-                  </a>
-                  <a href="#" className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger">
-                    <i className="fab fa-github"></i>
+                  <a
+                    href={INSTAGRAM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow Kaana on Instagram"
+                    className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
+                  >
+                    <Icon name="instagram" className="text-lg" />
                   </a>
                 </div>
               </div>
@@ -52,7 +60,14 @@ export default function Footer() {
                   <li><Link href="/work" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Case Studies</Link></li>
                   <li><Link href="/insights" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Insights</Link></li>
                   <li><Link href="/#about" className="text-neutral-400 hover:text-accent transition-colors link-trigger">About Us</Link></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger careers-trigger">Careers</a></li>
+                  <li>
+                    <button
+                      type="button"
+                      className="text-neutral-400 hover:text-accent transition-colors link-trigger careers-trigger"
+                    >
+                      Careers
+                    </button>
+                  </li>
                   <li><Link href="/#contact" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Contact</Link></li>
                 </ul>
               </div>

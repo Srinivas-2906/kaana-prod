@@ -7,6 +7,7 @@ import MobileMenu from "@/components/site/MobileMenu";
 import Footer from "@/components/site/Footer";
 import BackToTop from "@/components/site/BackToTop";
 import GlobalOverlays from "@/components/site/GlobalOverlays";
+import Icon from "@/components/ui/Icon";
 
 export default function PortfolioShell({
   children,
@@ -70,7 +71,7 @@ export function BulletList({ items }: { items: string[] }) {
       {items.map((item) => (
         <li key={item} className="flex gap-3">
           <span className="text-accent mt-1 shrink-0">
-            <i className="fas fa-check text-xs" />
+            <Icon name="check" className="text-xs" />
           </span>
           <span>{item}</span>
         </li>

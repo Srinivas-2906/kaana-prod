@@ -23,6 +23,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { getService } from "@/lib/seo/services";
 import { buildPageMetadata } from "@/lib/seo/site";
+import Icon from "@/components/ui/Icon";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -195,7 +196,7 @@ export default async function CaseStudyPage({ params }: Props) {
             <p className="text-neutral-300 mb-6">{study.cta}</p>
             <Link href="/#contact" className="btn btn-outline link-trigger inline-flex">
               Discuss a similar project
-              <i className="fas fa-arrow-right text-xs ml-2 btn-icon" />
+              <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
             </Link>
           </section>
 

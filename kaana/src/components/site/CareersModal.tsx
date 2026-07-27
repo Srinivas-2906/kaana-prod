@@ -1,5 +1,7 @@
 'use client';
 
+import Icon from "@/components/ui/Icon";
+
 export default function CareersModal() {
   return (
     <>
@@ -9,7 +11,7 @@ export default function CareersModal() {
             <div className="container mx-auto max-w-6xl">
               
               <button className="fixed top-6 right-6 md:top-12 md:right-12 w-12 h-12 flex items-center justify-center border border-neutral-800 rounded-sm hover:border-accent hover:text-accent transition-colors z-50 careers-close-btn" id="careersCloseBtn">
-                <i className="fas fa-times text-xl"></i>
+                <Icon name="x" className="text-xl" />
               </button>
       
               
@@ -34,7 +36,7 @@ export default function CareersModal() {
                       <p className="text-neutral-400 text-sm mb-4">Remote / Visakhapatnam</p>
                     </div>
                     <div className="w-12 h-12 flex items-center justify-center bg-neutral-900 rounded-sm border border-neutral-800">
-                      <i className="fas fa-code text-accent text-xl"></i>
+                      <Icon name="code" className="text-accent text-xl" />
                     </div>
                   </div>
                   
@@ -46,23 +48,23 @@ export default function CareersModal() {
                     <h4 className="text-sm font-medium text-neutral-100 mb-3">What you&apos;ll learn:</h4>
                     <ul className="space-y-2 text-sm text-neutral-400">
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>React.js fundamentals and best practices</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Modern JavaScript (ES6+) and TypeScript</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>State management and hooks</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Responsive design and CSS frameworks</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Git workflow and collaboration</span>
                       </li>
                     </ul>
@@ -77,7 +79,7 @@ export default function CareersModal() {
                   
                   <a href="#contact" className="btn btn-primary w-full text-center link-trigger careers-apply-btn">
                     Apply Now
-                    <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                    <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
                   </a>
                 </div>
                 
@@ -90,7 +92,7 @@ export default function CareersModal() {
                       <p className="text-neutral-400 text-sm mb-4">Remote / Visakhapatnam</p>
                     </div>
                     <div className="w-12 h-12 flex items-center justify-center bg-neutral-900 rounded-sm border border-neutral-800">
-                      <i className="fas fa-code text-accent text-xl"></i>
+                      <Icon name="code" className="text-accent text-xl" />
                     </div>
                   </div>
                   
@@ -102,23 +104,23 @@ export default function CareersModal() {
                     <h4 className="text-sm font-medium text-neutral-100 mb-3">Requirements:</h4>
                     <ul className="space-y-2 text-sm text-neutral-400">
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Basic knowledge of HTML, CSS, and JavaScript</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Familiarity with React basics (or willingness to learn)</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Strong problem-solving skills</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Good communication and teamwork</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Passion for web development</span>
                       </li>
                     </ul>
@@ -133,7 +135,7 @@ export default function CareersModal() {
                   
                   <a href="#contact" className="btn btn-primary w-full text-center link-trigger careers-apply-btn">
                     Apply Now
-                    <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                    <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
                   </a>
                 </div>
                 
@@ -146,7 +148,7 @@ export default function CareersModal() {
                       <p className="text-neutral-400 text-sm mb-4">Remote / Visakhapatnam</p>
                     </div>
                     <div className="w-12 h-12 flex items-center justify-center bg-neutral-900 rounded-sm border border-neutral-800">
-                      <i className="fas fa-database text-accent text-xl"></i>
+                      <Icon name="database" className="text-accent text-xl" />
                     </div>
                   </div>
                   
@@ -158,23 +160,23 @@ export default function CareersModal() {
                     <h4 className="text-sm font-medium text-neutral-100 mb-3">What you&apos;ll work with:</h4>
                     <ul className="space-y-2 text-sm text-neutral-400">
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Prisma ORM and database migrations</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>SQL and NoSQL databases</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Database schema design and optimization</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>API development and integration</span>
                       </li>
                       <li className="flex items-start">
-                        <i className="fas fa-check text-accent mr-2 mt-1 text-xs"></i>
+                        <Icon name="check" className="text-accent mr-2 mt-1 text-xs shrink-0" />
                         <span>Backend development with Node.js</span>
                       </li>
                     </ul>
@@ -189,7 +191,7 @@ export default function CareersModal() {
                   
                   <a href="#contact" className="btn btn-primary w-full text-center link-trigger careers-apply-btn">
                     Apply Now
-                    <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                    <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
                   </a>
                 </div>
               </div>

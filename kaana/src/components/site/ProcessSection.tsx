@@ -1,5 +1,7 @@
 'use client';
 
+import Icon from "@/components/ui/Icon";
+
 export default function ProcessSection() {
   return (
     <>
@@ -28,7 +30,13 @@ export default function ProcessSection() {
                     </p>
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Discovery" className="w-full h-full object-cover" />
+                        <img
+                          src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+                          alt="Discovery"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                       <div>
                         <div className="font-medium">Collaborative Workshops</div>
@@ -37,7 +45,7 @@ export default function ProcessSection() {
                     </div>
                     <div className="border border-neutral-800 rounded-sm p-4 bg-dark/50">
                       <div className="text-sm text-neutral-400">
-                        <i className="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                        <Icon name="quote-left" className="text-accent mr-2 opacity-50 inline-block align-[-0.125em]" />
                         The discovery phase sets the foundation for success by aligning our understanding with your vision.
                       </div>
                     </div>
@@ -52,7 +60,13 @@ export default function ProcessSection() {
                     </p>
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Strategy" className="w-full h-full object-cover" />
+                        <img
+                          src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+                          alt="Strategy"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                       <div>
                         <div className="font-medium">Strategic Planning</div>
@@ -61,7 +75,7 @@ export default function ProcessSection() {
                     </div>
                     <div className="border border-neutral-800 rounded-sm p-4 bg-dark/50">
                       <div className="text-sm text-neutral-400">
-                        <i className="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                        <Icon name="quote-left" className="text-accent mr-2 opacity-50 inline-block align-[-0.125em]" />
                         A well-defined strategy ensures efficient execution and alignment with business objectives.
                       </div>
                     </div>
@@ -76,7 +90,13 @@ export default function ProcessSection() {
                     </p>
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Design" className="w-full h-full object-cover" />
+                        <img
+                          src="https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+                          alt="Design"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                       <div>
                         <div className="font-medium">UX/UI Design</div>
@@ -85,7 +105,7 @@ export default function ProcessSection() {
                     </div>
                     <div className="border border-neutral-800 rounded-sm p-4 bg-dark/50">
                       <div className="text-sm text-neutral-400">
-                        <i className="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                        <Icon name="quote-left" className="text-accent mr-2 opacity-50 inline-block align-[-0.125em]" />
                         Design is not just how it looks, but how it works. We focus on both aesthetics and functionality.
                       </div>
                     </div>
@@ -100,7 +120,13 @@ export default function ProcessSection() {
                     </p>
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Development" className="w-full h-full object-cover" />
+                        <img
+                          src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+                          alt="Development"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                       <div>
                         <div className="font-medium">Agile Development</div>
@@ -109,7 +135,7 @@ export default function ProcessSection() {
                     </div>
                     <div className="border border-neutral-800 rounded-sm p-4 bg-dark/50">
                       <div className="text-sm text-neutral-400">
-                        <i className="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                        <Icon name="quote-left" className="text-accent mr-2 opacity-50 inline-block align-[-0.125em]" />
                         We build with scalability, performance, and maintainability in mind for long-term success.
                       </div>
                     </div>
@@ -124,7 +150,13 @@ export default function ProcessSection() {
                     </p>
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-10 h-10 rounded-full overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Launch" className="w-full h-full object-cover" />
+                        <img
+                          src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80"
+                          alt="Launch"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                       </div>
                       <div>
                         <div className="font-medium">Deployment & Testing</div>
@@ -133,7 +165,7 @@ export default function ProcessSection() {
                     </div>
                     <div className="border border-neutral-800 rounded-sm p-4 bg-dark/50">
                       <div className="text-sm text-neutral-400">
-                        <i className="fas fa-quote-left text-accent mr-2 opacity-50"></i>
+                        <Icon name="quote-left" className="text-accent mr-2 opacity-50 inline-block align-[-0.125em]" />
                         Launch is just the beginning. We continuously optimize for peak performance and user satisfaction.
                       </div>
                     </div>
@@ -145,7 +177,14 @@ export default function ProcessSection() {
                   <div className="sticky top-32">
                     <div className="border border-neutral-800 rounded-sm overflow-hidden">
                       <div className="relative aspect-square">
-                        <img id="processImage" src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Discovery Phase" className="w-full h-full object-cover transition-opacity duration-500" />
+                        <img
+                          id="processImage"
+                          src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                          alt="Discovery Phase"
+                          className="w-full h-full object-cover transition-opacity duration-500"
+                          loading="lazy"
+                          decoding="async"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-dark to-transparent opacity-70"></div>
                         <div className="absolute bottom-0 left-0 p-6">
                           <span id="processStepLabel" className="inline-block text-xs uppercase tracking-widest text-accent mb-2">Step 01</span>
@@ -158,10 +197,10 @@ export default function ProcessSection() {
                     <div className="flex justify-between mt-6">
                       <div className="flex gap-2">
                         <button className="process-nav-btn w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent transition-colors" data-direction="prev">
-                          <i className="fas fa-arrow-left text-sm"></i>
+                          <Icon name="arrow-left" className="text-sm" />
                         </button>
                         <button className="process-nav-btn w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent transition-colors" data-direction="next">
-                          <i className="fas fa-arrow-right text-sm"></i>
+                          <Icon name="arrow-right" className="text-sm" />
                         </button>
                       </div>
                       

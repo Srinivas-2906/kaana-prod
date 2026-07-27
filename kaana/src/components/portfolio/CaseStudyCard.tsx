@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { CaseStudy } from "@/lib/portfolio/types";
 import { getStudySlides } from "@/lib/portfolio/images";
 import PortfolioImageCarousel from "@/components/portfolio/PortfolioImageCarousel";
+import Icon from "@/components/ui/Icon";
 
 type Props = {
   study: CaseStudy;
@@ -55,9 +56,9 @@ export default function CaseStudyCard({ study, featured }: Props) {
             </span>
           ))}
         </div>
-        <span className="text-sm text-accent flex items-center">
+        <span className="text-sm text-accent flex items-center group">
           View case study
-          <i className="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+          <Icon name="arrow-right" className="text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1" />
         </span>
       </Link>
     </article>

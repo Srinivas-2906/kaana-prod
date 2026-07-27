@@ -1,5 +1,8 @@
 'use client';
 
+import Link from "next/link";
+import Icon from "@/components/ui/Icon";
+
 export default function AboutSection() {
   return (
     <>
@@ -39,16 +42,22 @@ export default function AboutSection() {
                   </div>
                   
                   <div className="reveal-up" style={{ transitionDelay: "0.8s" }}>
-                    <a href="#" className="btn btn-primary link-trigger">
+                    <Link href="/work" className="btn btn-primary link-trigger">
                       Learn more about us
-                      <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
-                    </a>
+                      <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
+                    </Link>
                   </div>
                 </div>
                 
                 <div className="relative reveal-up" style={{ transitionDelay: "0.4s" }}>
                   <div className="border border-neutral-800 rounded-sm overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1000&q=80" alt="Our Team" className="w-full aspect-[4/5] object-cover" />
+                    <img
+                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=1000&q=80"
+                      alt="Our Team"
+                      className="w-full aspect-[4/5] object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                   
                   

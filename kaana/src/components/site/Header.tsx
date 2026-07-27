@@ -66,13 +66,13 @@ export default function Header() {
 
               if (isHashOnly) {
                 return (
-                  <a
+                  <button
                     key={item.label}
-                    href="#"
+                    type="button"
                     className={`text-base hover-line nav-link link-trigger ${item.className ?? ""}`}
                   >
                     {item.label}
-                  </a>
+                  </button>
                 );
               }
 

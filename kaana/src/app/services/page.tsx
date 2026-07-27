@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PortfolioShell from "@/components/portfolio/PortfolioShell";
 import { services } from "@/lib/seo/services";
 import { buildPageMetadata } from "@/lib/seo/site";
+import Icon from "@/components/ui/Icon";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Services — WhatsApp, SaaS, Clinic & Field Apps",
@@ -65,7 +66,7 @@ export default function ServicesIndexPage() {
             </p>
             <Link href="/work" className="btn btn-outline link-trigger inline-flex">
               View case studies
-              <i className="fas fa-arrow-right text-xs ml-2 btn-icon" />
+              <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
             </Link>
           </div>
         </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getFeaturedCaseStudies } from "@/lib/portfolio/case-studies";
 import { getStudySlides } from "@/lib/portfolio/images";
 import PortfolioImageCarousel from "@/components/portfolio/PortfolioImageCarousel";
+import Icon from "@/components/ui/Icon";
 
 const featured = getFeaturedCaseStudies().slice(0, 4);
 
@@ -65,10 +66,10 @@ export default function WorkSection() {
                 <p className="text-neutral-400 mb-4">{preview.excerpt}</p>
                 <Link
                   href={`/work/${study.slug}`}
-                  className="text-sm text-accent flex items-center link-trigger"
+                  className="text-sm text-accent flex items-center link-trigger group"
                 >
                   View case study
-                  <i className="fas fa-arrow-right text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                  <Icon name="arrow-right" className="text-xs ml-2 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
             );
@@ -81,7 +82,7 @@ export default function WorkSection() {
         >
           <Link href="/work" className="btn btn-outline link-trigger inline-flex">
             View all projects
-            <i className="fas fa-arrow-right text-xs ml-2 btn-icon" />
+            <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
           </Link>
         </div>
       </div>

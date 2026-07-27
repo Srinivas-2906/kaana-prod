@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import KaanaLogo from "./KaanaLogo";
+import Icon from "@/components/ui/Icon";
 
 export default function AiDemoSection() {
   return (
@@ -75,7 +76,7 @@ export default function AiDemoSection() {
                       className="mt-4 inline-flex items-center text-xs text-accent link-trigger hover:underline"
                     >
                       View all case studies
-                      <i className="fas fa-arrow-right text-[10px] ml-2" />
+                      <Icon name="arrow-right" className="text-[10px] ml-2" />
                     </Link>
                   </div>
                 </div>

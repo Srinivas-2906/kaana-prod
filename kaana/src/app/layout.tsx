@@ -19,13 +19,42 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Kaana | Digital Solutions",
+    default: "Kaana",
     template: "%s | Kaana",
   },
   description:
     "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps.",
   applicationName: "Kaana",
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      {
+        url: "/icon-light.png",
+        media: "(prefers-color-scheme: light)",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/icon-light-48.png",
+        media: "(prefers-color-scheme: light)",
+        sizes: "48x48",
+        type: "image/png",
+      },
+      {
+        url: "/icon-dark.png",
+        media: "(prefers-color-scheme: dark)",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/icon-dark-48.png",
+        media: "(prefers-color-scheme: dark)",
+        sizes: "48x48",
+        type: "image/png",
+      },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -36,10 +65,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
       </head>
       <body className="bg-dark text-light min-h-screen overflow-x-hidden font-sans antialiased">

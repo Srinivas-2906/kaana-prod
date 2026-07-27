@@ -4,6 +4,7 @@ import { caseStudies } from "@/lib/portfolio/case-studies";
 import CaseStudyCard from "@/components/portfolio/CaseStudyCard";
 import PortfolioShell from "@/components/portfolio/PortfolioShell";
 import { buildPageMetadata } from "@/lib/seo/site";
+import Icon from "@/components/ui/Icon";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Work & Case Studies",
@@ -68,7 +69,7 @@ export default function WorkPage() {
             </p>
             <Link href="/#contact" className="btn btn-outline link-trigger inline-flex">
               Start a conversation
-              <i className="fas fa-arrow-right text-xs ml-2 btn-icon" />
+              <Icon name="arrow-right" className="text-xs ml-2 btn-icon" />
             </Link>
           </div>
         </div>
