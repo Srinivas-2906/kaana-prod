@@ -69,7 +69,13 @@
 .hero-swiper .swiper-slide {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
+  height: auto;
+}
+
+.hero-swiper {
+  height: auto;
+  overflow: visible;
 }
 
 /* Swiper pagination dot colours */
