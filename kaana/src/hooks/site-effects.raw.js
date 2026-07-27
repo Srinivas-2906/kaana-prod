@@ -62,7 +62,7 @@
     const aiResponses = [
       "I can help you implement digital solutions for your business. What specific challenges are you facing?",
       "Our web design services can help you create a stunning online presence. Would you like to learn more?",
-      "Kāna's chatbot solutions can automate customer service tasks. Shall I explain how?",
+      "Kaana's chatbot solutions can automate customer service tasks. Shall I explain how?",
       "We specialize in creating custom e-commerce platforms tailored to your industry. What sector are you in?",
       "Our Print & Digital Marketing strategies can help increase your online visibility. Would you like a demonstration?",
       "I'd be happy to schedule a consultation with our specialists. When would work best for you?"

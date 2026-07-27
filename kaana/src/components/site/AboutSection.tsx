@@ -13,7 +13,7 @@ export default function AboutSection() {
                     We build digital solutions for tomorrow
                   </h2>
                   <p className="text-neutral-400 mb-6 reveal-up" style={{ transitionDelay: "0.2s" }}>
-                    Kāna is a technology solutions company focused on creating minimalist, cutting-edge digital experiences that solve complex business challenges.
+                    Kaana is a technology solutions company focused on creating minimalist, cutting-edge digital experiences that solve complex business challenges.
                   </p>
                   <p className="text-neutral-400 mb-8 reveal-up" style={{ transitionDelay: "0.3s" }}>
                     Our team of experts combines technical excellence with design thinking to deliver solutions that are not only functional but also aesthetically refined and future-proof.
@@ -54,7 +54,7 @@ export default function AboutSection() {
                   
                   <div className="absolute -bottom-8 -left-8 md:-bottom-12 md:-left-12 bg-dark border border-neutral-800 rounded-sm p-6 max-w-xs">
                     <p className="text-neutral-300 italic mb-4">
-                      "Our mission is to create digital solutions that are as elegant in their simplicity as they are powerful in their functionality."
+                      &quot;Our mission is to create digital solutions that are as elegant in their simplicity as they are powerful in their functionality.&quot;
                     </p>
                     <div className="flex items-center">
                       <div>

@@ -6,9 +6,9 @@ import PortfolioShell from "@/components/portfolio/PortfolioShell";
 import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Work & Case Studies | Kāna Digital Solutions",
+  title: "Work & Case Studies | Kaana Digital Solutions",
   description:
-    "Explore how Kāna designs and delivers multi-tenant SaaS, offline field ops, creator commerce platforms, healthcare suites, and more.",
+    "Explore how Kaana designs and delivers multi-tenant SaaS, offline field ops, creator commerce platforms, healthcare suites, and more.",
   path: "/work",
 });
 

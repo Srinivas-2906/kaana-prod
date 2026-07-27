@@ -19,13 +19,17 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Kāna Digital Solutions",
-    template: "%s | Kāna",
+    default: "Kaana | Digital Solutions",
+    template: "%s | Kaana",
   },
   description:
-    "Kāna designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps.",
-  applicationName: "Kāna",
+    "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps.",
+  applicationName: "Kaana",
   robots: { index: true, follow: true },
+  icons: {
+    icon: "/logo-only.png",
+    apple: "/logo-only.png",
+  },
 };
 
 export default function RootLayout({

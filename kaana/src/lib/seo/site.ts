@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://kaana.in";
 
-export const SITE_NAME = "Kāna Digital Solutions";
+export const SITE_NAME = "Kaana Digital Solutions";
 
 export const DEFAULT_DESCRIPTION =
-  "Kāna designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps for teams in India and beyond.";
+  "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps for teams in India and beyond.";
 
 export const DEFAULT_KEYWORDS = [
   "WhatsApp business automation",
@@ -69,7 +69,7 @@ export function homeMetadata(): Metadata {
 
   return {
     ...buildPageMetadata({
-      title: "WhatsApp Automation & Multi-Tenant SaaS on GCP | Kāna",
+      title: "WhatsApp Automation & Multi-Tenant SaaS on GCP | Kaana",
       description: DEFAULT_DESCRIPTION,
       path: "/",
       keywords: [

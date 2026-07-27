@@ -69,7 +69,7 @@ export const articles: Article[] = [
     excerpt:
       "Hostname routing, tenant provisioning in one API call, and why we avoid per-client Cloud Run services.",
     metaDescription:
-      "How Kāna runs unlimited SaaS tenants on one GCP project using Cloud Run, wildcard domains, and platform-admin provisioning.",
+      "How Kaana runs unlimited SaaS tenants on one GCP project using Cloud Run, wildcard domains, and platform-admin provisioning.",
     keywords: ["multi-tenant SaaS", "Cloud Run architecture", "JWT tenant isolation"],
     publishedAt: "2026-07-15",
     readMinutes: 7,

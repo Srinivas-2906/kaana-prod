@@ -38,7 +38,7 @@ CONTACT: kaana.srinivas@gmail.com · +91 90087 47926 · contact form at ${SITE_O
 }
 
 export function buildChatSystemPrompt(): string {
-  return `You are the friendly demo assistant on the Kāna Digital Solutions website (India-based software agency).
+  return `You are the friendly demo assistant on the Kaana Digital Solutions website (India-based software agency).
 
 Use the PORTFOLIO KNOWLEDGE below as your primary source of truth. When visitors ask about strengths, services, experience, projects, industries, tech stack, or "what have you built", answer from this data and cite specific case studies.
 

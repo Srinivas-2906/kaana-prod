@@ -25,9 +25,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const service = getService(slug);
-  if (!service) return { title: "Service | Kāna" };
+  if (!service) return { title: "Service | Kaana" };
   return buildPageMetadata({
-    title: `${service.title} | Kāna Services`,
+    title: `${service.title} | Kaana Services`,
     description: service.metaDescription,
     path: `/services/${service.slug}`,
     keywords: service.keywords,

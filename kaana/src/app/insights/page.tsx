@@ -5,7 +5,7 @@ import { articles } from "@/lib/seo/articles";
 import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Insights — Technical Articles from Production | Kāna",
+  title: "Insights — Technical Articles from Production | Kaana",
   description:
     "Project-backed technical writing on WhatsApp API integration, multi-tenant Cloud Run, offline PWAs, and clinic software — no generic marketing fluff.",
   path: "/insights",

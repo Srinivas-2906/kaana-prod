@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import KaanaLogo from "./KaanaLogo";
 
 type NavItem = {
   label: string;
@@ -55,12 +56,7 @@ export default function Header() {
     >
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-xl font-display font-bold tracking-normal link-trigger"
-          >
-            Kāna
-          </Link>
+          <KaanaLogo variant="name" href="/" priority />
 
           <nav className="hidden md:flex items-center gap-8">
             {NAV_ITEMS.map((item) => {

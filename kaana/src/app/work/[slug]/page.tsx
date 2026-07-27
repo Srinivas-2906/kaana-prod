@@ -33,9 +33,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const study = getCaseStudy(slug);
-  if (!study) return { title: "Case Study | Kāna" };
+  if (!study) return { title: "Case Study | Kaana" };
   return buildPageMetadata({
-    title: `${study.title} | Kāna Case Study`,
+    title: `${study.title} | Kaana Case Study`,
     description: study.summary,
     path: `/work/${study.slug}`,
     keywords: [...study.solutionTags, ...study.industryTags],

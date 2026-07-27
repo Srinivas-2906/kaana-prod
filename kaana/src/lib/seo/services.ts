@@ -19,7 +19,7 @@ export const services: ServicePage[] = [
     title: "WhatsApp Business Automation",
     headline: "Inbox, CRM, and clinic flows on the WhatsApp Business API",
     metaDescription:
-      "Kāna builds WhatsApp Business API integrations — shared inbox, lead capture, CRM pipeline, and clinic booking — on GCP with multi-tenant isolation.",
+      "Kaana builds WhatsApp Business API integrations — shared inbox, lead capture, CRM pipeline, and clinic booking — on GCP with multi-tenant isolation.",
     keywords: [
       "WhatsApp Business API integration",
       "WhatsApp CRM India",

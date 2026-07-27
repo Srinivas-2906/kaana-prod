@@ -45,7 +45,7 @@ const caseStudyEntries: CaseStudy[] = [
     summary:
       "We designed and delivered an end-to-end digital operations suite: marketing site, customer dashboard, WhatsApp inbox, CRM pipeline, clinic front-desk, and a shared API — all multi-tenant from day one.",
     context:
-      "Small and mid-sized businesses in India need WhatsApp as their primary customer channel, but stitching together inbox, CRM, appointments, and billing across disconnected tools creates chaos. Kāna needed a unified system where each client gets their own workspace without deploying separate infrastructure per tenant.",
+      "Small and mid-sized businesses in India need WhatsApp as their primary customer channel, but stitching together inbox, CRM, appointments, and billing across disconnected tools creates chaos. Kaana needed a unified system where each client gets their own workspace without deploying separate infrastructure per tenant.",
     scenario:
       "A dental clinic group wants to run marketing on their own domain, manage leads in a CRM, handle WhatsApp conversations in a shared inbox, and operate daily patient flow from a front-desk app — while the platform owner provisions new clinics in minutes from an admin console.",
     constraints: [

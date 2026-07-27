@@ -10,11 +10,11 @@ export function caseStudyJsonLd(study: CaseStudy) {
     image: absoluteUrl(study.heroImage),
     author: {
       "@type": "Organization",
-      name: "Kāna Digital Solutions",
+      name: "Kaana Digital Solutions",
     },
     publisher: {
       "@type": "Organization",
-      name: "Kāna Digital Solutions",
+      name: "Kaana Digital Solutions",
     },
     mainEntityOfPage: absoluteUrl(`/work/${study.slug}`),
     articleSection: study.category,
@@ -52,7 +52,7 @@ export function serviceJsonLd(service: {
       description: service.metaDescription,
       provider: {
         "@type": "Organization",
-        name: "Kāna Digital Solutions",
+        name: "Kaana Digital Solutions",
       },
       url: absoluteUrl(`/services/${service.slug}`),
     },
@@ -80,7 +80,7 @@ export function articleJsonLd(article: {
       image: absoluteUrl(article.heroImage),
       author: {
         "@type": "Organization",
-        name: "Kāna Digital Solutions",
+        name: "Kaana Digital Solutions",
       },
       mainEntityOfPage: absoluteUrl(`/insights/${article.slug}`),
     },
