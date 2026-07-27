@@ -1,5 +1,8 @@
 'use client';
 
+import Link from "next/link";
+import KaanaLogo from "./KaanaLogo";
+
 export default function HeroSection() {
   return (
     <>
@@ -39,11 +42,18 @@ export default function HeroSection() {
                     </a>
                   </div>
                   <div className="magnetic-wrap">
-                    <a href="#ai-demo" className="magnetic-area btn btn-outline link-trigger">
-                      Try AI Demo
-                    </a>
+                    <Link href="/work" className="magnetic-area btn btn-outline link-trigger">
+                      View Case Studies
+                      <i className="fas fa-arrow-right text-xs ml-2 btn-icon"></i>
+                    </Link>
                   </div>
                 </div>
+                <p className="mt-4 text-sm text-neutral-400 reveal-up" style={{ transitionDelay: "0.45s" }}>
+                  <a href="#ai-demo" className="text-accent hover:underline link-trigger">
+                    Try the live AI demo
+                  </a>
+                  <span className="text-neutral-500"> · scroll to explore</span>
+                </p>
                 
                 
                 <div className="swiper hero-swiper mt-10 reveal-up" style={{ transitionDelay: "0.6s" }}>
@@ -122,10 +132,10 @@ export default function HeroSection() {
                 
                 <div className="mt-10 max-w-lg mx-auto border border-neutral-800 rounded-sm p-4 bg-dark/50 backdrop-blur-md reveal-up" style={{ transitionDelay: "0.8s" }}>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center flex-shrink-0">
-                      <i className="fas fa-robot text-dark text-xs"></i>
+                    <div className="w-8 h-8 rounded-full bg-dark border border-neutral-800 flex items-center justify-center flex-shrink-0 overflow-hidden p-1">
+                      <KaanaLogo variant="mark" href={null} height={24} className="!h-6 !max-h-6" />
                     </div>
-                    <div className="text-sm font-medium">Kāna AI Assistant</div>
+                    <div className="text-sm font-medium">Kaana AI Assistant</div>
                   </div>
                   <div className="text-left text-sm text-neutral-300 overflow-hidden" style={{ minHeight: "1.25rem" }}>
                     <span className="typing" id="aiTyping">How can I help transform your business with digital solutions today?</span>

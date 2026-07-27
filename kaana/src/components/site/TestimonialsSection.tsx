@@ -20,12 +20,12 @@ export default function TestimonialsSection() {
                     <div className="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
                       <div className="text-accent mb-6">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        Kāna rebuilt our e‑commerce store end‑to‑end and optimized checkout. Within 90 days, our GMV grew 38% and cart abandonment dropped by 26%. The stack is fast, reliable, and easy for our team to manage.
+                        Kaana rebuilt our e‑commerce store end‑to‑end and optimized checkout. Within 90 days, our GMV grew 38% and cart abandonment dropped by 26%. The stack is fast, reliable, and easy for our team to manage.
                       </blockquote>
                       <div className="flex items-center">
                         <div>
@@ -41,12 +41,12 @@ export default function TestimonialsSection() {
                     <div className="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
                       <div className="text-accent mb-6">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        Kāna delivered a high‑converting site with lead capture and CRM integration. Qualified inquiries for our projects increased 2.1× in the first quarter after launch.
+                        Kaana delivered a high‑converting site with lead capture and CRM integration. Qualified inquiries for our projects increased 2.1× in the first quarter after launch.
                       </blockquote>
                       <div className="flex items-center">
                         <div>
@@ -62,12 +62,12 @@ export default function TestimonialsSection() {
                     <div className="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
                       <div className="text-accent mb-6">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        Kāna set up our Instagram promotions strategy, creatives, and tracking. We grew followers by 62% and tripled post engagement in two months with measurable ROI.
+                        Kaana set up our Instagram promotions strategy, creatives, and tracking. We grew followers by 62% and tripled post engagement in two months with measurable ROI.
                       </blockquote>
                       <div className="flex items-center">
                         <div>
@@ -83,12 +83,12 @@ export default function TestimonialsSection() {
                     <div className="max-w-3xl mx-auto border border-neutral-800 rounded-sm p-8 md:p-12">
                       <div className="text-accent mb-6">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M9.13456 9H5.37685C4.95974 9 4.62685 9.33288 4.62685 9.75V13.5C4.62685 13.9171 4.95974 14.25 5.37685 14.25H7.87685C8.29397 14.25 8.62685 14.5829 8.62685 15V17.25C8.62685 17.6642 8.29107 18 7.87685 18H5.37685C4.96264 18 4.62685 17.6642 4.62685 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M19.1346 9H15.3769C14.9598 9 14.6269 9.33288 14.6269 9.75V13.5C14.6269 13.9171 14.9598 14.25 15.3769 14.25H17.8769C18.294 14.25 18.6269 14.5829 18.6269 15V17.25C18.6269 17.6642 18.2911 18 17.8769 18H15.3769C14.9626 18 14.6269 17.6642 14.6269 17.25V15" stroke="#00D4FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        From branding to a fast website and targeted promos, Kāna helped us launch and scale. Inquiries and event bookings increased 47% within the first quarter.
+                        From branding to a fast website and targeted promos, Kaana helped us launch and scale. Inquiries and event bookings increased 47% within the first quarter.
                       </blockquote>
                       <div className="flex items-center">
                         <div>

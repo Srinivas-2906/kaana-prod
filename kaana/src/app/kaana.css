@@ -231,6 +231,27 @@
     transform: scale(1.05);
   }
 
+  .image-hover .portfolio-carousel img,
+  .image-hover:hover .portfolio-carousel img {
+    transform: none;
+  }
+
+  .portfolio-carousel {
+    min-height: 12rem;
+  }
+
+  @media (min-width: 640px) {
+    .portfolio-carousel {
+      min-height: 14rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .portfolio-carousel {
+      min-height: 16rem;
+    }
+  }
+
   /* Text Split Animation */
   .split-text .char {
     display: inline-block;

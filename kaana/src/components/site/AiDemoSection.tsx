@@ -1,5 +1,8 @@
 'use client';
 
+import Link from "next/link";
+import KaanaLogo from "./KaanaLogo";
+
 export default function AiDemoSection() {
   return (
     <>
@@ -21,8 +24,8 @@ export default function AiDemoSection() {
                 <div className="ai-demo-container reveal-up" style={{ transitionDelay: "0.3s" }}>
                   <div className="ai-demo-header">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
-                        <i className="fas fa-robot text-dark text-xs"></i>
+                      <div className="w-8 h-8 rounded-full bg-dark border border-neutral-800 flex items-center justify-center overflow-hidden p-1">
+                        <KaanaLogo variant="mark" href={null} height={24} className="!h-6 !max-h-6" />
                       </div>
                       <div className="font-medium">AI Text Generator</div>
                     </div>
@@ -30,9 +33,15 @@ export default function AiDemoSection() {
                   <div className="ai-demo-content">
                     <p className="text-neutral-400 mb-4">Enter a topic or prompt, and our AI will generate content for you.</p>
                     <div className="ai-demo-input">
-                      <input type="text" id="textGeneratorInput" placeholder="Enter a topic (e.g., 'Benefits of responsive web design')" />
-                      <button id="textGeneratorButton">Generate</button>
+                      <input
+                        type="text"
+                        id="textGeneratorInput"
+                        maxLength={400}
+                        placeholder="Enter a topic (e.g., 'Benefits of responsive web design')"
+                      />
+                      <button id="textGeneratorButton" type="button">Generate</button>
                     </div>
+                    <p className="text-neutral-500 text-xs mt-2">Demo limit: a few generations per visitor per day.</p>
                     <div className="ai-demo-output" id="textGeneratorOutput">
                       <p className="text-neutral-400 text-sm">Your AI-generated content will appear here...</p>
                     </div>
@@ -43,8 +52,8 @@ export default function AiDemoSection() {
                 <div className="ai-demo-container reveal-up" style={{ transitionDelay: "0.4s" }}>
                   <div className="ai-demo-header">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
-                        <i className="fas fa-comments text-dark text-xs"></i>
+                      <div className="w-8 h-8 rounded-full bg-dark border border-neutral-800 flex items-center justify-center overflow-hidden p-1">
+                        <KaanaLogo variant="mark" href={null} height={24} className="!h-6 !max-h-6" />
                       </div>
                       <div className="font-medium">AI Chatbot Demo</div>
                     </div>
@@ -53,7 +62,7 @@ export default function AiDemoSection() {
                     <p className="text-neutral-400 mb-4">Ask our chatbot about our services and see how it can help your customers.</p>
                     <div className="ai-chat-messages p-4 border border-neutral-800 rounded-sm bg-dark/30 h-40 overflow-y-auto mb-4" id="demoChatMessages">
                       <div className="ai-message ai-message-bot">
-                        Hello! I'm the Kāna demo chatbot. How can I help you today?
+                        Hello! I&apos;m the Kaana demo chatbot. How can I help you today?
                       </div>
                     </div>
                     <div className="ai-demo-input">
@@ -61,6 +70,13 @@ export default function AiDemoSection() {
                       <button id="demoChatSend">Send</button>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2" id="demoQuickReplies"></div>
+                    <Link
+                      href="/work"
+                      className="mt-4 inline-flex items-center text-xs text-accent link-trigger hover:underline"
+                    >
+                      View all case studies
+                      <i className="fas fa-arrow-right text-[10px] ml-2" />
+                    </Link>
                   </div>
                 </div>
               </div>
