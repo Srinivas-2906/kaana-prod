@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationJsonLd, SITE_URL, websiteJsonLd } from "@/lib/seo/site";
 import "./globals.css";
+import "./kaana.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,10 +17,15 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Kaana | Digital Solutions",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Kaana | Digital Solutions",
+    template: "%s | Kaana",
+  },
   description:
-    "Creating cutting-edge digital experiences and technology solutions for forward-thinking businesses.",
-  metadataBase: new URL("https://kaana.in"),
+    "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps.",
+  applicationName: "Kaana",
+  robots: { index: true, follow: true },
   icons: {
     icon: "/logo-only.png",
     apple: "/logo-only.png",
@@ -36,6 +44,7 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
       </head>
       <body className="bg-dark text-light min-h-screen overflow-x-hidden font-sans antialiased">
         {children}

@@ -9,6 +9,26 @@ const body = raw
   )
   .trim();
 
+const resetNavigationUiFn = `
+/** Reset overlay + reveal state after back/forward navigation */
+export function resetNavigationUi(): void {
+  const pageTransition = document.getElementById("pageTransition");
+  if (pageTransition) {
+    pageTransition.classList.remove("active");
+    pageTransition.style.transform = "translateY(100%)";
+  }
+
+  const revealSelectors =
+    ".reveal-up, .reveal-left, .reveal-right, .scale-in, .rotate-in, .blur-in, .clip-reveal, .stagger-item";
+  document.querySelectorAll(revealSelectors).forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add("active");
+    }
+  });
+}
+`;
+
 const output = `// @ts-nocheck
 "use client";
 
@@ -16,6 +36,7 @@ import Swiper from "swiper";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+${resetNavigationUiFn}
 
 export function initSiteEffects(): () => void {
 ${body
@@ -98,6 +119,7 @@ ${body
   safeInit("process timeline", initProcessTimeline);
   safeInit("magnetic buttons", initMagneticButtons);
   safeInit("link click animation", initLinkClickAnimation);
+  safeInit("navigation recovery", initNavigationRecovery);
   safeInit("AI chat widget", initAiChatWidget);
   safeInit("AI text generator", initAiTextGenerator);
   safeInit("demo chat", initDemoChat);
@@ -105,7 +127,9 @@ ${body
   safeInit("back to top", initBackToTop);
   safeInit("contact form", initContactForm);
 
-  return () => {};
+  return () => {
+    window.removeEventListener("pageshow", resetNavigationUi);
+  };
 }
 `;
 

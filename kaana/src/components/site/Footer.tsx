@@ -36,25 +36,24 @@ export default function Footer() {
               </div>
               
               <div>
-                <h3 className="text-lg text-neutral-100 font-medium mb-4">Solutions</h3>
+                <h3 className="text-lg text-neutral-100 font-medium mb-4">Services</h3>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Web Design</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">App Development</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">E-commerce</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Chatbots</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Print & Digital Marketing</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Analytics</a></li>
+                  <li><Link href="/services/whatsapp-business-automation" className="text-neutral-400 hover:text-accent transition-colors link-trigger">WhatsApp Automation</Link></li>
+                  <li><Link href="/services/multi-tenant-saas-gcp" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Multi-Tenant SaaS</Link></li>
+                  <li><Link href="/services/healthcare-clinic-software" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Clinic Software</Link></li>
+                  <li><Link href="/services/offline-first-field-apps" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Offline Field Apps</Link></li>
+                  <li><Link href="/services" className="text-neutral-400 hover:text-accent transition-colors link-trigger">All services</Link></li>
                 </ul>
               </div>
               
               <div>
                 <h3 className="text-lg text-neutral-100 font-medium mb-4">Company</h3>
                 <ul className="space-y-2">
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">About Us</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Our Team</a></li>
+                  <li><Link href="/work" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Case Studies</Link></li>
+                  <li><Link href="/insights" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Insights</Link></li>
+                  <li><Link href="/#about" className="text-neutral-400 hover:text-accent transition-colors link-trigger">About Us</Link></li>
                   <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger careers-trigger">Careers</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Blog</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Contact</a></li>
+                  <li><Link href="/#contact" className="text-neutral-400 hover:text-accent transition-colors link-trigger">Contact</Link></li>
                 </ul>
               </div>
             </div>

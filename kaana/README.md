@@ -43,6 +43,15 @@ legacy/
 ## API
 
 - `POST /api/contact` — Contact form submission (logs payload; wire to Resend/SendGrid in production)
+- `POST /api/ai/generate` — Gemini-powered AI text demo (rate-limited, server-side key)
+
+### AI demo environment
+
+Copy `.env.example` to `.env.local` and set `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey).
+
+Production uses Secret Manager secret `kaana-gemini-api-key` on Cloud Run (`kaana-web`).
+
+Rate limits (defaults): 50 global/day, 3 per IP per 15 min, 8 per IP/day, 10s minimum between requests.
 
 ## Deployment
 
