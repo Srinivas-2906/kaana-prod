@@ -69,7 +69,7 @@ export function homeMetadata(): Metadata {
 
   return {
     ...buildPageMetadata({
-      title: "WhatsApp Automation & Multi-Tenant SaaS on GCP | Kaana",
+      title: "WhatsApp Automation & Multi-Tenant SaaS on GCP",
       description: DEFAULT_DESCRIPTION,
       path: "/",
       keywords: [

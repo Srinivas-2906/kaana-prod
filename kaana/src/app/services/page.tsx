@@ -5,7 +5,7 @@ import { services } from "@/lib/seo/services";
 import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Services — WhatsApp, SaaS, Clinic & Field Apps | Kaana",
+  title: "Services — WhatsApp, SaaS, Clinic & Field Apps",
   description:
     "WhatsApp Business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps — built from production case studies.",
   path: "/services",

@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticle(slug);
-  if (!article) return { title: "Insights | Kaana" };
+  if (!article) return { title: "Insights" };
   return buildPageMetadata({
     title: article.title,
     description: article.metaDescription,

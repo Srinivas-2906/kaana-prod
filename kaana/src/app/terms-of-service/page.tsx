@@ -3,11 +3,15 @@ import Link from "next/link";
 
 import Footer from "@/components/site/Footer";
 import KaanaLogo from "@/components/site/KaanaLogo";
+import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Kaana",
-  description:
-    "Terms of Service for Kaana services, including WhatsApp automation and chatbot solutions.",
+  ...buildPageMetadata({
+    title: "Terms of Service",
+    description:
+      "Terms of Service for Kaana services, including WhatsApp automation and chatbot solutions.",
+    path: "/terms-of-service",
+  }),
 };
 
 export default function TermsOfServicePage() {
