@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import Footer from "@/components/site/Footer";
+import KaanaLogo from "@/components/site/KaanaLogo";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Kāna",
+  title: "Terms of Service | Kaana",
   description:
-    "Terms of Service for Kāna services, including WhatsApp automation and chatbot solutions.",
+    "Terms of Service for Kaana services, including WhatsApp automation and chatbot solutions.",
 };
 
 export default function TermsOfServicePage() {
@@ -16,9 +17,7 @@ export default function TermsOfServicePage() {
     <div className="min-h-screen bg-dark text-light">
       <header className="border-b border-neutral-800">
         <div className="container mx-auto px-6 py-6 flex items-center justify-between">
-          <Link href="/" className="text-xl font-display font-bold tracking-normal">
-            Kāna
-          </Link>
+          <KaanaLogo variant="name" href="/" />
           <nav className="flex items-center gap-4 text-sm">
             <Link
               href="/terms-of-service"
@@ -49,7 +48,7 @@ export default function TermsOfServicePage() {
           <section className="space-y-4 mb-10">
             <p className="text-neutral-300">
               These Terms of Service (“Terms”) govern your access to and use of
-              Kāna’s website, products, and services (the “Services”). By using
+              Kaana’s website, products, and services (the “Services”). By using
               the Services, you agree to these Terms.
             </p>
           </section>
@@ -62,7 +61,7 @@ export default function TermsOfServicePage() {
               Our Services are primarily offered to businesses (for example,
               clinics) to help manage customer interactions, automations, and
               digital experiences. If you are an end-customer messaging a business
-              that uses Kāna, your relationship for that conversation is with the
+              that uses Kaana, your relationship for that conversation is with the
               business you are contacting.
             </p>
           </section>
@@ -147,7 +146,7 @@ export default function TermsOfServicePage() {
             <p className="text-neutral-300">
               The Services may integrate with third-party products and platforms
               (such as WhatsApp/Meta). Those third parties’ terms and policies may
-              apply to your use of their services. Kāna is not responsible for
+              apply to your use of their services. Kaana is not responsible for
               third-party services.
             </p>
           </section>
@@ -162,7 +161,7 @@ export default function TermsOfServicePage() {
               Services will be uninterrupted or error-free.
             </p>
             <p className="text-neutral-300">
-              To the fullest extent permitted by law, Kāna will not be liable for
+              To the fullest extent permitted by law, Kaana will not be liable for
               indirect, incidental, special, consequential, or punitive damages, or
               for any loss of profits, revenues, data, or goodwill arising out of
               or related to your use of the Services.

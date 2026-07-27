@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import Footer from "@/components/site/Footer";
+import KaanaLogo from "@/components/site/KaanaLogo";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Kāna",
+  title: "Privacy Policy | Kaana",
   description:
-    "Privacy Policy for Kāna website, products, and services.",
+    "Privacy Policy for Kaana website, products, and services.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -16,9 +17,7 @@ export default function PrivacyPolicyPage() {
     <div className="min-h-screen bg-dark text-light">
       <header className="border-b border-neutral-800">
         <div className="container mx-auto px-6 py-6 flex items-center justify-between">
-          <Link href="/" className="text-xl font-display font-bold tracking-normal">
-            Kāna
-          </Link>
+          <KaanaLogo variant="name" href="/" />
           <nav className="flex items-center gap-4 text-sm">
             <Link
               href="/terms-of-service"
@@ -48,15 +47,15 @@ export default function PrivacyPolicyPage() {
 
           <section className="space-y-4 mb-10">
             <p className="text-neutral-300">
-              This Privacy Policy explains how Kāna (“we”, “us”, “our”) collects,
+              This Privacy Policy explains how Kaana (“we”, “us”, “our”) collects,
               uses, and shares information when you visit our website or use our
               products and services (the “Services”), including websites, apps,
               chat/AI experiences, automation workflows, and integrations.
             </p>
             <p className="text-neutral-300">
-              If you are an end-customer messaging a business that uses Kāna to
+              If you are an end-customer messaging a business that uses Kaana to
               communicate with you, that business is responsible for its customer
-              communications, notices, and consents. Kāna may process information
+              communications, notices, and consents. Kaana may process information
               on that business’s behalf to deliver the Services.
             </p>
           </section>
@@ -117,7 +116,7 @@ export default function PrivacyPolicyPage() {
             </h2>
             <p className="text-neutral-300">
               Some Services support messaging channels such as WhatsApp. Businesses
-              using Kāna are responsible for obtaining any required user
+              using Kaana are responsible for obtaining any required user
               permissions/opt-in before messaging, and for honoring opt-out
               requests. If you no longer wish to receive messages from a business,
               you can typically reply with “STOP” (or follow the business’s

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import KaanaLogo from "./KaanaLogo";
+
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
@@ -11,9 +13,9 @@ export default function Footer() {
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
               <div className="md:col-span-2">
-                <a href="#" className="text-xl font-display font-medium mb-4 inline-block link-trigger">
-                  Kāna<span className="text-accent">.</span>
-                </a>
+                <div className="mb-4">
+                  <KaanaLogo variant="name" href="/" />
+                </div>
                 <p className="text-neutral-400 mb-6 max-w-md">
                   We create minimalist, cutting-edge digital solutions that transform businesses and elevate user experiences in the digital landscape.
                 </p>
@@ -59,7 +61,7 @@ export default function Footer() {
             
             <div className="pt-8 border-t border-neutral-900 flex flex-col md:flex-row justify-between items-center">
               <p className="text-neutral-400 mb-4 md:mb-0">
-                © {year} Kāna Digital Solutions. All rights reserved.
+                © {year} Kaana Digital Solutions. All rights reserved.
               </p>
               <div className="flex gap-6">
                 <Link href="/privacy-policy" className="text-neutral-400 hover:text-accent transition-colors link-trigger">

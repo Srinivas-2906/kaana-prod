@@ -1,5 +1,7 @@
 'use client';
 
+import KaanaLogo from "./KaanaLogo";
+
 export default function Header() {
   return (
     <>
@@ -7,9 +9,7 @@ export default function Header() {
         <header className="fixed top-0 left-0 w-full py-6 z-50 transition-all duration-300" id="header">
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between">
-              <a href="#" className="text-xl font-display font-bold tracking-normal link-trigger">
-                Kāna
-              </a>
+              <KaanaLogo variant="name" href="/" priority />
       
               <nav className="hidden md:flex items-center gap-8">
                 <a href="#home" className="text-base hover-line nav-link link-trigger">Home</a>
