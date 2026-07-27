@@ -97,7 +97,10 @@ export const services: ServicePage[] = [
       "kaana-business-automation-suite",
       "student-recognition-platform",
     ],
-    relatedArticleSlugs: ["multi-tenant-cloud-run-architecture"],
+    relatedArticleSlugs: [
+      "instagram-influencer-collaboration-platform",
+      "multi-tenant-cloud-run-architecture",
+    ],
     faqs: [
       {
         question: "Which GCP services do you typically use?",

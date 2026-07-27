@@ -31,6 +31,11 @@ const ACTIONS = [
   },
 ] as const;
 
+const BRAND_ICON_CLASS: Partial<Record<(typeof ACTIONS)[number]["icon"], string>> = {
+  whatsapp: "ai-chat-icon-whatsapp",
+  instagram: "ai-chat-icon-instagram",
+};
+
 export default function AiChatWidget() {
   const [open, setOpen] = useState(false);
 
@@ -47,8 +52,8 @@ export default function AiChatWidget() {
         <img
           src={MARK_SRC}
           alt=""
-          width={34}
-          height={34}
+          width={30}
+          height={30}
           className="ai-chat-button-mark"
           aria-hidden
         />
@@ -60,8 +65,8 @@ export default function AiChatWidget() {
             <img
               src={MARK_SRC}
               alt=""
-              width={22}
-              height={22}
+              width={20}
+              height={20}
               className="ai-chat-header-mark"
               aria-hidden
             />
@@ -90,8 +95,15 @@ export default function AiChatWidget() {
               "ai-chat-action link-trigger flex items-center gap-3 w-full text-left px-4 py-3 rounded-sm border border-neutral-800 hover:border-accent hover:text-accent transition-colors";
             const content = (
               <>
-                <span className="w-9 h-9 flex items-center justify-center rounded-sm bg-neutral-900 text-accent shrink-0">
-                  <Icon name={action.icon} className="text-lg" />
+                <span
+                  className={[
+                    "icon-slot ai-chat-action-icon rounded-sm bg-neutral-900 shrink-0",
+                    BRAND_ICON_CLASS[action.icon] ?? "text-accent",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  <Icon name={action.icon} className="text-[1.125rem]" />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-neutral-100">{action.label}</span>

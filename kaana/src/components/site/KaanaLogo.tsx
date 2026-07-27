@@ -21,10 +21,7 @@ export default function KaanaLogo({
   height,
   priority = false,
 }: KaanaLogoProps) {
-  const src =
-    variant === "name"
-      ? "/Kaana%20logo%20black%20bg.png"
-      : "/Kaana%20logo%20black%20bg%20trans.png";
+  const src = variant === "name" ? "/logo-name.png" : "/logo-only.png";
   const base = LOGO_DIMENSIONS[variant];
   const imgHeight = height ?? (variant === "name" ? 48 : 32);
   const imgWidth =

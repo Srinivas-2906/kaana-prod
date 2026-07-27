@@ -63,7 +63,7 @@ export default function HeroSection() {
                     <div className="swiper-slide">
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
-                          <div className="text-accent text-3xl mb-4">
+                          <div className="icon-slot text-accent text-3xl mb-4 mx-auto">
                             <Icon name="laptop-code" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">Web Design</h3>
@@ -76,7 +76,7 @@ export default function HeroSection() {
                      <div className="swiper-slide">
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
-                          <div className="text-accent text-3xl mb-4">
+                          <div className="icon-slot text-accent text-3xl mb-4 mx-auto">
                             <Icon name="bullhorn" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">Print & Digital Marketing</h3>
@@ -91,7 +91,7 @@ export default function HeroSection() {
                     <div className="swiper-slide">
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
-                          <div className="text-accent text-3xl mb-4">
+                          <div className="icon-slot text-accent text-3xl mb-4 mx-auto">
                             <Icon name="robot" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">Chatbot Solutions</h3>
@@ -104,7 +104,7 @@ export default function HeroSection() {
                     <div className="swiper-slide">
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
-                          <div className="text-accent text-3xl mb-4">
+                          <div className="icon-slot text-accent text-3xl mb-4 mx-auto">
                             <Icon name="cart" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">E-commerce</h3>
@@ -117,7 +117,7 @@ export default function HeroSection() {
                     <div className="swiper-slide">
                       <div className="card-3d w-full max-w-md">
                         <div className="card-3d-inner border border-neutral-800 rounded-sm p-6 text-center hover-lift bg-dark/50 backdrop-blur-md">
-                          <div className="text-accent text-3xl mb-4">
+                          <div className="icon-slot text-accent text-3xl mb-4 mx-auto">
                             <Icon name="mobile" className="text-3xl" />
                           </div>
                           <h3 className="text-xl text-neutral-100 font-display font-medium mb-2">App Development</h3>

@@ -7,13 +7,14 @@ import { buildPageMetadata } from "@/lib/seo/site";
 export const metadata: Metadata = buildPageMetadata({
   title: "Insights — Technical Articles from Production",
   description:
-    "Project-backed technical writing on WhatsApp API integration, multi-tenant Cloud Run, offline PWAs, and clinic software — no generic marketing fluff.",
+    "Project-backed notes on creator and influencer collaboration platforms, WhatsApp automation, multi-tenant SaaS, offline PWAs, and clinic software — focused on architecture, not marketing fluff.",
   path: "/insights",
   keywords: [
+    "Instagram influencer platform engineering",
+    "creator marketplace architecture",
     "WhatsApp API technical guide",
     "Cloud Run multi-tenant",
     "offline PWA architecture",
-    "clinic software engineering",
   ],
 });
 
@@ -34,8 +35,9 @@ export default function InsightsIndexPage() {
               Technical notes from shipped work
             </h1>
             <p className="text-neutral-400 max-w-2xl text-lg">
-              Architecture decisions, integration patterns, and field constraints —
-              drawn from case studies we&apos;ve actually built and deployed.
+              Architecture decisions, integration patterns, and production constraints —
+              from influencer collaboration platforms and multi-tenant SaaS to field apps
+              and messaging automation.
             </p>
           </div>
 

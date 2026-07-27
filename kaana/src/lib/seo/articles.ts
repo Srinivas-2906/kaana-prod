@@ -15,12 +15,80 @@ export type Article = {
 
 export const articles: Article[] = [
   {
+    slug: "instagram-influencer-collaboration-platform",
+    title: "Building a Brand–Influencer Collaboration Platform",
+    excerpt:
+      "A technical look at marketplace architecture for Instagram-led campaigns — social OAuth, creator verification, payments, and in-app collaboration in one stack.",
+    metaDescription:
+      "How to architect an Instagram brand and influencer collaboration platform: Meta social APIs, campaign checkout, KYC, wallet ledger, chat, and voice on production cloud infra.",
+    keywords: [
+      "Instagram influencer platform",
+      "creator marketplace architecture",
+      "Meta Graph API",
+      "brand creator collaboration",
+      "influencer campaign software",
+    ],
+    publishedAt: "2026-07-25",
+    readMinutes: 10,
+    heroImage:
+      "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=1200&h=800&q=80",
+    relatedServiceSlug: "multi-tenant-saas-gcp",
+    relatedCaseStudySlug: "creator-commerce-operations-platform",
+    sections: [
+      {
+        heading: "What a collaboration platform actually needs",
+        paragraphs: [
+          "Brands want to discover creators, run campaigns, buy packages, and track delivery. Creators need onboarding, social account linking, portfolio visibility, and reliable payouts. That is not a landing page problem — it is a multi-surface product with auth, payments, messaging, and compliance from day one.",
+          "We approach these builds as a single marketplace loop: discover → package or campaign → checkout → requirements → fulfillment → chat or voice → settlement. Each step needs its own API module, but one shared user, wallet, and notification model.",
+        ],
+      },
+      {
+        heading: "Social API layer (Instagram-first, multi-network ready)",
+        paragraphs: [
+          "Instagram is usually the primary channel, but production platforms also connect YouTube, LinkedIn, and other networks. OAuth flows must encrypt tokens at rest, refresh them safely, and expose audience insights only after explicit user consent.",
+          "Meta webhooks, signed-request verification, and data-deletion callbacks are not optional — they are part of the core backend, not a post-launch add-on. Treat social account linking as a first-class domain with its own audit trail and revocation paths.",
+        ],
+      },
+      {
+        heading: "Payments, KYC, and trust",
+        paragraphs: [
+          "Marketplaces break when money and identity are bolted on late. A typical stack includes cart checkout, order milestones, a wallet ledger, and identity verification before creators receive paid work.",
+          "Keep payment webhooks idempotent, separate platform fees from creator earnings in the ledger, and gate high-value actions behind verification status — not just a profile photo upload.",
+        ],
+      },
+      {
+        heading: "Collaboration inside the product",
+        paragraphs: [
+          "Brands and creators should not jump to WhatsApp or email for every brief. In-app chat, optional voice for support or disputes, and push notifications keep operations inside the platform you can measure and secure.",
+          "Admin tooling for disputes, manual review, and campaign moderation belongs in the same system — otherwise operations teams live in spreadsheets while the app claims to be all-in-one.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Do you need native mobile apps on day one?",
+        answer:
+          "Not always. A responsive web app plus a solid API can launch campaigns quickly. Native apps matter when creators need push, offline drafts, or camera-first workflows at high volume.",
+      },
+      {
+        question: "Instagram-only or multi-platform?",
+        answer:
+          "Start Instagram-first if that is where the audience lives, but design packages, campaigns, and social linking as network-agnostic data models so YouTube or LinkedIn can be added without rewriting checkout.",
+      },
+      {
+        question: "GCP or AWS for this kind of product?",
+        answer:
+          "Either works. We choose based on existing infra, team familiarity, and integration footprint — payment gateways, SMS/voice providers, and chat SDKs matter more than cloud brand in most marketplace builds.",
+      },
+    ],
+  },
+  {
     slug: "whatsapp-business-api-crm-gcp",
     title: "Connecting WhatsApp Business API to a CRM on GCP",
     excerpt:
       "How we wire Meta webhooks, a shared inbox, and a lead pipeline on Cloud Run — without a separate deploy per client.",
     metaDescription:
-      "Technical guide: WhatsApp Business API webhooks, BotIQ inbox, PropCRM pipeline, and multi-tenant auth on Google Cloud Run.",
+      "Technical guide: WhatsApp Business API webhooks, shared inbox, CRM pipeline, and multi-tenant auth on Google Cloud Run.",
     keywords: ["WhatsApp Business API", "GCP Cloud Run", "CRM integration", "webhook verification"],
     publishedAt: "2026-07-20",
     readMinutes: 8,
@@ -32,7 +100,7 @@ export const articles: Article[] = [
         heading: "Why WhatsApp needs a backend, not just a phone",
         paragraphs: [
           "When a business outgrows a single WhatsApp number, conversations scatter across devices. The Business API centralises messaging, but you still need routing, lead capture, and agent workflows.",
-          "We built the Kaana suite so Meta webhooks hit one Express API, conversations land in BotIQ, and enquiries sync to PropCRM — all behind tenant-scoped JWT auth.",
+          "We typically route Meta webhooks to one API layer, land conversations in a shared inbox, and sync enquiries to a CRM pipeline — all behind tenant-scoped authentication.",
         ],
       },
       {
@@ -59,7 +127,7 @@ export const articles: Article[] = [
       {
         question: "Can agents reply from a web inbox?",
         answer:
-          "Yes. BotIQ supports agent takeover with live WhatsApp send via the API, plus demo threads for sales environments.",
+          "Yes. A web inbox with agent takeover and live WhatsApp send via the API is the usual pattern, with optional demo threads for sales environments.",
       },
     ],
   },
@@ -69,7 +137,7 @@ export const articles: Article[] = [
     excerpt:
       "Hostname routing, tenant provisioning in one API call, and why we avoid per-client Cloud Run services.",
     metaDescription:
-      "How Kaana runs unlimited SaaS tenants on one GCP project using Cloud Run, wildcard domains, and platform-admin provisioning.",
+      "How to run multi-tenant SaaS on one cloud project using hostname routing, JWT isolation, and admin provisioning.",
     keywords: ["multi-tenant SaaS", "Cloud Run architecture", "JWT tenant isolation"],
     publishedAt: "2026-07-15",
     readMinutes: 7,
@@ -80,21 +148,20 @@ export const articles: Article[] = [
       {
         heading: "One deploy, many tenants",
         paragraphs: [
-          "Per-client Cloud Run services do not scale operationally. We use hostname and JWT context to resolve tenants at request time — dentacare.inbox.kaana.in and prestige-properties.crm.kaana.in hit the same container image.",
-          "Platform admins provision tenants via POST /api/platform/admin/provision, which creates the tenant row, default Admin user, and deep links to inbox, CRM, and clinic products.",
+          "Per-client container services do not scale operationally. Hostname and JWT context resolve tenants at request time — many subdomains can hit the same deployment image.",
+          "Platform admins provision tenants through an admin API that creates the tenant record, default admin access, and product deep links in one step.",
         ],
       },
       {
         heading: "Load balancer and SSL",
         paragraphs: [
-          "Google-managed certificates cover kaana.in subdomains and selected wildcards. The URL map routes by Host header to serverless NEGs backed by Cloud Run revisions.",
-          "This pattern also works for aquafarm.kaana.in, faralin.kaana.in, and tenant marketing sites on the same project.",
+          "Managed certificates and load-balancer URL maps route by host header to the right backend service. The same pattern works for product subdomains, tenant marketing sites, and API gateways on one project.",
         ],
       },
       {
         heading: "When to split databases",
         paragraphs: [
-          "Early-stage suites use SQLite with GCS backup or a shared PostgreSQL instance with separate schemas or databases per product. Faralin and Aquafarm share a Cloud SQL instance with separate database names — cost-effective at moderate scale.",
+          "Early-stage products often use SQLite with backup or a shared PostgreSQL instance with separate schemas or databases per product. Split databases when traffic, compliance, or backup policies require it — not on day one.",
         ],
       },
     ],
@@ -110,9 +177,9 @@ export const articles: Article[] = [
     slug: "offline-first-pwa-field-operations",
     title: "Offline-First PWAs for Field Teams in Low-Connectivity Areas",
     excerpt:
-      "Phone + PIN auth, idempotent sync, and owner approvals — lessons from aquaculture feeding apps in rural India.",
+      "Phone + PIN auth, idempotent sync, and approval workflows — patterns for field apps where connectivity is unreliable.",
     metaDescription:
-      "Building offline-first PWAs for shrimp farms and field ops: local persistence, sync rules, and approval workflows on GCP.",
+      "Building offline-first PWAs for field teams: local persistence, sync rules, and approval workflows on cloud backends.",
     keywords: ["offline-first PWA", "field operations", "aquaculture app", "idempotent sync"],
     publishedAt: "2026-07-10",
     readMinutes: 9,
@@ -123,7 +190,7 @@ export const articles: Article[] = [
       {
         heading: "The connectivity reality",
         paragraphs: [
-          "Supervisors walk pond-to-pond with intermittent 4G. An online-only form fails silently or frustrates users. We built Aquafarm as an installable PWA with local storage and background sync when signal returns.",
+          "Field staff often move through areas with intermittent mobile signal. An online-only form fails silently or frustrates users. Offline-first PWAs with local storage and background sync when signal returns are the practical default.",
         ],
       },
       {
@@ -136,7 +203,7 @@ export const articles: Article[] = [
       {
         heading: "Stack choices",
         paragraphs: [
-          "React PWA front end, NestJS API on Cloud Run, PostgreSQL on Cloud SQL. Phone + 6-digit PIN keeps auth simple for field staff who do not use email daily.",
+          "React PWA front end, API on container hosting, PostgreSQL for persistence. Phone + short PIN keeps auth simple for staff who do not use email daily.",
         ],
       },
     ],
@@ -165,7 +232,7 @@ export const articles: Article[] = [
       {
         heading: "Three surfaces, one tenant",
         paragraphs: [
-          "Denta Care runs crm.dentacare.kaana.in for front-desk staff, dentacare.kaana.in for public marketing, and WhatsApp for booking confirmations — all authenticated against api.kaana.in with tenant-scoped JWT.",
+          "Clinic products usually need three surfaces: a staff desk app, a public marketing site, and messaging for booking confirmations — all authenticated against one multi-tenant API with tenant-scoped tokens.",
         ],
       },
       {

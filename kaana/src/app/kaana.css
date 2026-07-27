@@ -133,7 +133,30 @@
 
   .btn-icon {
     margin-left: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: transform 0.3s ease;
+  }
+
+  /* Inline SVG icons (Font Awesome replacement) */
+  .ui-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .icon-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    flex-shrink: 0;
+  }
+
+  .flex.items-center.justify-center > .ui-icon {
+    display: block;
   }
 
   .btn:hover .btn-icon {
@@ -812,6 +835,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -823,18 +847,37 @@
   }
 
   .ai-chat-button-mark {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
+    object-position: center;
     display: block;
     pointer-events: none;
   }
 
   .ai-chat-header-mark {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
+    object-position: center;
     display: block;
+  }
+
+  .ai-chat-action .icon-slot {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .ai-chat-action-icon {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .ai-chat-icon-whatsapp {
+    color: #25d366;
+  }
+
+  .ai-chat-icon-instagram {
+    color: #e4405f;
   }
 
   .ai-chat-panel {
@@ -1027,6 +1070,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 0;
     margin-bottom: 20px;
   }
 

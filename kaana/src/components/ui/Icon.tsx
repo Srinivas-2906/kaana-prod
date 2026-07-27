@@ -37,8 +37,9 @@ const common = {
 
 export default function Icon({ name, className, title, ...props }: IconProps) {
   const labelled = Boolean(title);
+  const mergedClassName = ["ui-icon", className].filter(Boolean).join(" ");
   const shared = {
-    className,
+    className: mergedClassName,
     role: labelled ? "img" : "presentation",
     "aria-hidden": labelled ? undefined : true,
     "aria-label": labelled ? title : undefined,
@@ -205,24 +206,29 @@ export default function Icon({ name, className, title, ...props }: IconProps) {
       );
     case "instagram":
       return (
-        <svg viewBox="0 0 24 24" width="1em" height="1em" {...shared}>
+        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" {...shared}>
           {labelled ? <title>{title}</title> : null}
-          <rect {...common} x="6" y="6" width="12" height="12" rx="3" />
-          <path {...common} d="M14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" />
-          <path {...common} d="M16.5 7.5h.01" />
+          <rect
+            x="4"
+            y="4"
+            width="16"
+            height="16"
+            rx="4.5"
+            stroke="currentColor"
+            strokeWidth="1.75"
+          />
+          <circle cx="12" cy="12" r="3.25" stroke="currentColor" strokeWidth="1.75" />
+          <circle cx="17.15" cy="6.85" r="1.1" fill="currentColor" stroke="none" />
         </svg>
       );
     case "whatsapp":
       return (
-        <svg viewBox="0 0 24 24" width="1em" height="1em" {...shared}>
+        <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" {...shared}>
           {labelled ? <title>{title}</title> : null}
           <path
-            {...common}
-            d="M20 11.5a7.5 7.5 0 0 1-11.7 6.2L4 19l1.3-4.1A7.5 7.5 0 1 1 20 11.5Z"
-          />
-          <path
-            {...common}
-            d="M9.2 9.2c.2-.4.3-.4.6-.4h.5c.2 0 .4 0 .5.3l.7 1.7c.1.2.1.5 0 .6l-.4.5c-.1.1-.2.3-.1.5.2.4.6 1 1.1 1.4.5.5 1.2.9 1.6 1 .2.1.3 0 .4-.1l.6-.7c.1-.1.4-.2.6-.1l1.7.8c.3.1.3.3.3.5v.6c0 .2 0 .4-.3.6-.3.3-1 .8-2 .8-1 0-2.2-.4-3.6-1.6-1.4-1.2-2.3-2.7-2.6-3.6-.3-1 .2-1.7.5-2.1Z"
+            fill="currentColor"
+            stroke="none"
+            d="M12.04 2c-5.43 0-9.85 4.41-9.85 9.84 0 1.74.46 3.43 1.33 4.92L2 22l5.39-1.41a9.86 9.86 0 0 0 4.65 1.18h.01c5.43 0 9.86-4.41 9.86-9.84C21.9 6.41 17.47 2 12.04 2zm5.58 13.86c-.29.82-1.48 1.56-2.05 1.66-.52.09-1.2.13-1.94-.12-.45-.15-.99-.35-1.71-.68-3.01-1.3-4.97-4.35-5.12-4.56-.15-.2-1.22-1.62-1.22-3.09 0-1.47.77-2.19 1.04-2.49.27-.3.59-.38.79-.38.2 0 .4 0 .57.01.18 0 .43-.07.67.51.24.59.82 2.01.89 2.16.07.15.12.33.02.53-.1.2-.15.33-.3.51-.15.18-.32.4-.46.54-.15.15-.31.32-.13.62.18.31.81 1.34 1.74 2.17 1.2 1.07 2.21 1.4 2.52 1.56.31.16.49.14.67-.08.18-.22.77-.9.98-1.21.21-.31.42-.26.71-.16.29.1 1.84.87 2.16 1.03.32.16.53.24.61.37.08.13.08.76-.21 1.58z"
           />
         </svg>
       );
