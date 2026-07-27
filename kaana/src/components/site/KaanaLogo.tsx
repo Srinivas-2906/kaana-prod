@@ -10,8 +10,8 @@ type KaanaLogoProps = {
 };
 
 const LOGO_DIMENSIONS = {
-  name: { width: 730, height: 515 },
-  mark: { width: 256, height: 173 },
+  name: { width: 1600, height: 1128 },
+  mark: { width: 512, height: 346 },
 } as const;
 
 export default function KaanaLogo({
@@ -21,7 +21,10 @@ export default function KaanaLogo({
   height,
   priority = false,
 }: KaanaLogoProps) {
-  const src = variant === "name" ? "/logo-name.png" : "/logo-only.png";
+  const src =
+    variant === "name"
+      ? "/Kaana%20logo%20black%20bg.png"
+      : "/Kaana%20logo%20black%20bg%20trans.png";
   const base = LOGO_DIMENSIONS[variant];
   const imgHeight = height ?? (variant === "name" ? 48 : 32);
   const imgWidth =
