@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { buildChatSystemPrompt } from "./portfolioContext";
 import { sanitizeChatReply } from "./sanitizeReply";
 
-const COPY_SYSTEM_PROMPT = `You are a concise marketing copy assistant for Kaana Digital Solutions, an India-based software agency (web apps, WhatsApp automation, CRM, healthcare, e-commerce).
+const COPY_SYSTEM_PROMPT = `You are a concise marketing copy assistant for Kaana Digital Solutions, an India-based custom software studio (web apps, mobile, AI chatbots, e-commerce, digital marketing, WhatsApp automation, CRM, healthcare, edtech, and marketplaces).
 
 Rules:
 - Write 2–4 short paragraphs in plain text only (no markdown, asterisks, or outline labels).

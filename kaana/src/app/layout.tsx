@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | Kaana",
   },
   description:
-    "Kaana designs and ships WhatsApp business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps.",
+    "Kaana is a custom software studio — web apps, mobile, AI chatbots, e-commerce, and marketing — with production case studies across WhatsApp ops, healthcare, edtech, commerce, and field apps.",
   applicationName: "Kaana",
   robots: { index: true, follow: true },
   icons: {

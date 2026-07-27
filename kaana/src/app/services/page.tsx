@@ -6,15 +6,17 @@ import { buildPageMetadata } from "@/lib/seo/site";
 import Icon from "@/components/ui/Icon";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Services — WhatsApp, SaaS, Clinic & Field Apps",
+  title: "Services — Software, Automation, SaaS & Marketing",
   description:
-    "WhatsApp Business automation, multi-tenant SaaS on GCP, healthcare clinic software, and offline-first field apps — built from production case studies.",
+    "Custom software, automation and AI chatbots, multi-tenant SaaS on GCP, and digital marketing — with production case studies across healthcare, edtech, commerce, and more.",
   path: "/services",
   keywords: [
+    "custom software development",
     "WhatsApp automation services",
     "SaaS development GCP",
     "clinic software development",
     "offline PWA development",
+    "edtech platform development",
   ],
 });
 
@@ -28,12 +30,13 @@ export default function ServicesIndexPage() {
               Services
             </span>
             <h1 className="text-3xl md:text-5xl text-neutral-100 font-display font-medium mb-6">
-              What we build — from production systems
+              Software, automation, and digital growth
             </h1>
             <p className="text-neutral-400 max-w-2xl text-lg">
-              Each service maps to shipped work on GCP: WhatsApp inboxes, tenant
-              provisioning, clinic desks, and offline field ops. No generic agency
-              menus — only what we&apos;ve proven in production.
+              We build custom software, intelligent automation, multi-tenant SaaS, and
+              digital marketing — backed by production case studies in WhatsApp ops,
+              healthcare, edtech, commerce, and field operations. Explore highlights
+              below or see the full portfolio.
             </p>
           </div>
 
@@ -62,7 +65,8 @@ export default function ServicesIndexPage() {
 
           <div className="mt-20 text-center p-10 border border-neutral-800 rounded-sm">
             <p className="text-neutral-400 mb-6 max-w-xl mx-auto">
-              See the full portfolio behind these services.
+              These are production-proven specialties from our work — browse case studies
+              for edtech, hospitality, commerce, and more.
             </p>
             <Link href="/work" className="btn btn-outline link-trigger inline-flex">
               View case studies

@@ -1,6 +1,6 @@
 'use client';
 
-import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/seo/site";
+import { INSTAGRAM_URL, LINKEDIN_URL, WHATSAPP_URL } from "@/lib/seo/site";
 import Icon from "@/components/ui/Icon";
 
 export default function ContactSection() {
@@ -69,6 +69,15 @@ export default function ContactSection() {
                         className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
                       >
                         <Icon name="whatsapp" className="text-lg" />
+                      </a>
+                      <a
+                        href={LINKEDIN_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Follow Kaana on LinkedIn"
+                        className="w-10 h-10 border border-neutral-800 rounded-sm flex items-center justify-center hover:border-accent hover:text-accent transition-colors link-trigger"
+                      >
+                        <Icon name="linkedin" className="text-lg" />
                       </a>
                       <a
                         href={INSTAGRAM_URL}

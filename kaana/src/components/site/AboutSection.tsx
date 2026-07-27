@@ -16,7 +16,7 @@ export default function AboutSection() {
                     We build digital solutions for tomorrow
                   </h2>
                   <p className="text-neutral-400 mb-6 reveal-up" style={{ transitionDelay: "0.2s" }}>
-                    Kaana is a technology solutions company focused on creating minimalist, cutting-edge digital experiences that solve complex business challenges.
+                    Kaana is a custom software studio — web apps, mobile, AI chatbots, e-commerce, and digital marketing — with production case studies across WhatsApp ops, healthcare, edtech, commerce, and field operations.
                   </p>
                   <p className="text-neutral-400 mb-8 reveal-up" style={{ transitionDelay: "0.3s" }}>
                     Our team of experts combines technical excellence with design thinking to deliver solutions that are not only functional but also aesthetically refined and future-proof.
