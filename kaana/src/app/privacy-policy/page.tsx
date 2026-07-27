@@ -3,11 +3,14 @@ import Link from "next/link";
 
 import Footer from "@/components/site/Footer";
 import KaanaLogo from "@/components/site/KaanaLogo";
+import { buildPageMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Kaana",
-  description:
-    "Privacy Policy for Kaana website, products, and services.",
+  ...buildPageMetadata({
+    title: "Privacy Policy",
+    description: "Privacy Policy for Kaana website, products, and services.",
+    path: "/privacy-policy",
+  }),
 };
 
 export default function PrivacyPolicyPage() {

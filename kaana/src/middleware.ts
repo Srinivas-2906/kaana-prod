@@ -9,15 +9,15 @@ export function middleware(request: NextRequest) {
 
   // Canonical host: apex only (fixes www duplicate in Search Console)
   if (host === `www.${APEX_HOST}`) {
-    url.host = APEX_HOST;
-    url.protocol = "https:";
-    return NextResponse.redirect(url, 301);
+    // Important: do not preserve any internal port (e.g. :8080) in redirects.
+    const dest = new URL(`${url.pathname}${url.search}`, `https://${APEX_HOST}`);
+    return NextResponse.redirect(dest, 301);
   }
 
   // Legacy WordPress blog paths → insights
   if (/^\/blog(\/|$)/i.test(url.pathname)) {
-    url.pathname = "/insights";
-    return NextResponse.redirect(url, 301);
+    const dest = new URL("/insights", `https://${APEX_HOST}`);
+    return NextResponse.redirect(dest, 301);
   }
 
   return NextResponse.next();
