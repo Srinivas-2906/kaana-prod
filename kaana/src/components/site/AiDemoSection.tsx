@@ -1,5 +1,7 @@
 'use client';
 
+import KaanaLogo from "./KaanaLogo";
+
 export default function AiDemoSection() {
   return (
     <>
@@ -21,8 +23,8 @@ export default function AiDemoSection() {
                 <div className="ai-demo-container reveal-up" style={{ transitionDelay: "0.3s" }}>
                   <div className="ai-demo-header">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
-                        <i className="fas fa-robot text-dark text-xs"></i>
+                      <div className="w-8 h-8 rounded-full bg-dark border border-neutral-800 flex items-center justify-center overflow-hidden p-1">
+                        <KaanaLogo variant="mark" href={null} height={24} className="!h-6 !max-h-6" />
                       </div>
                       <div className="font-medium">AI Text Generator</div>
                     </div>
@@ -43,8 +45,8 @@ export default function AiDemoSection() {
                 <div className="ai-demo-container reveal-up" style={{ transitionDelay: "0.4s" }}>
                   <div className="ai-demo-header">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-accent to-accent-secondary flex items-center justify-center">
-                        <i className="fas fa-comments text-dark text-xs"></i>
+                      <div className="w-8 h-8 rounded-full bg-dark border border-neutral-800 flex items-center justify-center overflow-hidden p-1">
+                        <KaanaLogo variant="mark" href={null} height={24} className="!h-6 !max-h-6" />
                       </div>
                       <div className="font-medium">AI Chatbot Demo</div>
                     </div>
@@ -53,7 +55,7 @@ export default function AiDemoSection() {
                     <p className="text-neutral-400 mb-4">Ask our chatbot about our services and see how it can help your customers.</p>
                     <div className="ai-chat-messages p-4 border border-neutral-800 rounded-sm bg-dark/30 h-40 overflow-y-auto mb-4" id="demoChatMessages">
                       <div className="ai-message ai-message-bot">
-                        Hello! I&apos;m the Kāna demo chatbot. How can I help you today?
+                        Hello! I&apos;m the Kaana demo chatbot. How can I help you today?
                       </div>
                     </div>
                     <div className="ai-demo-input">

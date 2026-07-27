@@ -1,6 +1,6 @@
-# Kāna — Digital Solutions
+# Kaana — Digital Solutions
 
-Next.js marketing site for [Kāna](https://kaana.in). Converted from the original single-page HTML for reliable deployment and scaling.
+Next.js marketing site for [Kaana](https://kaana.in). Converted from the original single-page HTML for reliable deployment and scaling.
 
 ## Stack
 

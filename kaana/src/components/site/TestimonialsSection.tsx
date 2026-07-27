@@ -25,7 +25,7 @@ export default function TestimonialsSection() {
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        Kāna rebuilt our e‑commerce store end‑to‑end and optimized checkout. Within 90 days, our GMV grew 38% and cart abandonment dropped by 26%. The stack is fast, reliable, and easy for our team to manage.
+                        Kaana rebuilt our e‑commerce store end‑to‑end and optimized checkout. Within 90 days, our GMV grew 38% and cart abandonment dropped by 26%. The stack is fast, reliable, and easy for our team to manage.
                       </blockquote>
                       <div className="flex items-center">
                         <div>
@@ -46,7 +46,7 @@ export default function TestimonialsSection() {
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        Kāna delivered a high‑converting site with lead capture and CRM integration. Qualified inquiries for our projects increased 2.1× in the first quarter after launch.
+                        Kaana delivered a high‑converting site with lead capture and CRM integration. Qualified inquiries for our projects increased 2.1× in the first quarter after launch.
                       </blockquote>
                       <div className="flex items-center">
                         <div>
@@ -67,7 +67,7 @@ export default function TestimonialsSection() {
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        Kāna set up our Instagram promotions strategy, creatives, and tracking. We grew followers by 62% and tripled post engagement in two months with measurable ROI.
+                        Kaana set up our Instagram promotions strategy, creatives, and tracking. We grew followers by 62% and tripled post engagement in two months with measurable ROI.
                       </blockquote>
                       <div className="flex items-center">
                         <div>
@@ -88,7 +88,7 @@ export default function TestimonialsSection() {
                         </svg>
                       </div>
                       <blockquote className="text-xl md:text-2xl font-display mb-8">
-                        From branding to a fast website and targeted promos, Kāna helped us launch and scale. Inquiries and event bookings increased 47% within the first quarter.
+                        From branding to a fast website and targeted promos, Kaana helped us launch and scale. Inquiries and event bookings increased 47% within the first quarter.
                       </blockquote>
                       <div className="flex items-center">
                         <div>

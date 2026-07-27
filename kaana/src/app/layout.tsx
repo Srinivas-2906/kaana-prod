@@ -14,10 +14,14 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Kāna | Digital Solutions",
+  title: "Kaana | Digital Solutions",
   description:
     "Creating cutting-edge digital experiences and technology solutions for forward-thinking businesses.",
   metadataBase: new URL("https://kaana.in"),
+  icons: {
+    icon: "/logo-only.png",
+    apple: "/logo-only.png",
+  },
 };
 
 export default function RootLayout({
