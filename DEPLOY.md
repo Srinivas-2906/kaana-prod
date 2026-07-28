@@ -41,9 +41,15 @@ Map **kaana.in** in Cloud Run → **Manage custom domains** (SSL included).
 gcloud builds submit --config cloudbuild.yaml .
 ```
 
-## Deploy only the clinic desk (kaana-clinic)
+## Deploy only the clinic stack (recommended)
 
-If you want to deploy *just* the clinic desk without redeploying everything else:
+Standalone **clinic-api** + **clinic-crm** — see **[CLINIC_PRODUCTION.md](./CLINIC_PRODUCTION.md)** for DB migration and domain mapping.
+
+```bash
+gcloud builds submit --config cloudbuild.clinic.yaml .
+```
+
+## Deploy only the clinic desk UI (legacy single-service)
 
 ```bash
 gcloud builds submit --config cloudbuild.kaana-clinic.yaml .

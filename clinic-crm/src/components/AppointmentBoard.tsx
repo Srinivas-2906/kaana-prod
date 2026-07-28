@@ -3,6 +3,8 @@ import { Phone, MessageSquare, ChevronRight, Banknote, MoreVertical } from 'luci
 import type { Appointment, AppointmentStatus } from '../types';
 import { STATUS_LABELS } from '../types';
 import { updateAppointment } from '../lib/api';
+import { toTelUrl, toWhatsAppUrl } from '../lib/phone';
+import { formatApptDayLabel, formatApptTime, isApptToday } from '../lib/appointmentDisplay';
 import { CompleteVisitDialog } from './CompleteVisitDialog';
 import { AppointmentActionsDialog } from './AppointmentActionsDialog';
 
@@ -16,9 +18,9 @@ export const BOARD_COLUMNS: {
 }[] = [
   { statuses: ['requested'],            label: 'Not confirmed',      hint: 'Need to confirm',     color: '#d97706', empty: 'No one here' },
   { statuses: ['confirmed'],            label: 'Confirmed',          hint: 'Expected today',      color: '#1565C0', empty: 'No one here' },
-  { statuses: ['arrived'],              label: 'In clinic',          hint: 'With the doctor',     color: '#7c3aed', empty: 'No one here' },
+  { statuses: ['arrived'],              label: 'Arrived',            hint: 'With doctor',         color: '#7c3aed', empty: 'No one here' },
   { statuses: ['visited'],              label: 'Completed',          hint: 'Visit done today',    color: '#16a34a', empty: 'No completed visits yet' },
-  { statuses: ['cancelled', 'no_show'], label: 'Cancelled / No-show', hint: 'Not coming today',    color: '#64748b', empty: 'Nothing here' },
+  { statuses: ['cancelled', 'no_show'], label: 'Cancelled / No show', hint: 'Not coming today',    color: '#64748b', empty: 'Nothing here' },
 ];
 
 const NEXT: Partial<Record<AppointmentStatus, AppointmentStatus>> = {
@@ -40,7 +42,7 @@ const PALETTES: [string, string][] = [
 function ava(name: string): [string, string] { return PALETTES[name.charCodeAt(0) % PALETTES.length]; }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return formatApptTime(iso);
 }
 
 interface Props {
@@ -63,14 +65,21 @@ function BoardCard({
 }) {
   const name = appt.patientName || 'Patient';
   const [fg, bg] = ava(name);
-  const phone = appt.patientPhone?.replace(/\D/g, '') || '';
+  const telUrl = toTelUrl(appt.patientPhone);
+  const waUrl = toWhatsAppUrl(appt.patientPhone);
   const next = NEXT[appt.status];
 
   return (
     <div className="board-card">
       <div className="board-card-top">
-        <span className="board-card-time">{fmtTime(appt.scheduledAt)}</span>
+        <div className="board-card-when">
+          {!isApptToday(appt.scheduledAt) && (
+            <span className="board-card-day">{formatApptDayLabel(appt.scheduledAt)}</span>
+          )}
+          <span className="board-card-time">{fmtTime(appt.scheduledAt)}</span>
+        </div>
         {appt.source === 'WhatsApp' && <span className="tag tag-wa tag-xs">WA</span>}
+        {appt.source === 'Website' && <span className="tag tag-web tag-xs">Web</span>}
       </div>
 
       <button type="button" className="board-card-patient" onClick={() => onOpenPatient(appt.patientId)}>
@@ -90,16 +99,20 @@ function BoardCard({
         <ChevronRight size={14} className="board-card-chevron" />
       </button>
 
-      {(phone || next) && (
+      {(telUrl || waUrl || next) && (
         <div className="board-card-foot">
-          {phone && (
+          {(telUrl || waUrl) && (
             <div className="board-card-contact">
-              <a href={`tel:+91${phone}`} className="quick-action-btn" title="Call" onClick={(e) => e.stopPropagation()}>
-                <Phone size={12} />
-              </a>
-              <a href={`https://wa.me/91${phone}`} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp" onClick={(e) => e.stopPropagation()}>
-                <MessageSquare size={12} />
-              </a>
+              {telUrl && (
+                <a href={telUrl} className="quick-action-btn" title="Call" onClick={(e) => e.stopPropagation()}>
+                  <Phone size={12} />
+                </a>
+              )}
+              {waUrl && (
+                <a href={waUrl} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp" onClick={(e) => e.stopPropagation()}>
+                  <MessageSquare size={12} />
+                </a>
+              )}
             </div>
           )}
           <button type="button" className="quick-action-btn" title="Actions" onClick={() => onActions(appt)}>
@@ -133,7 +146,7 @@ export function AppointmentBoard({ appointments, onRefresh, onOpenPatient, onToa
       onToast(`${appt.patientName || 'Patient'} is now ${STATUS_LABELS[next].toLowerCase()}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Could not save';
-      onToast(msg.includes('API server') ? msg : 'Could not save — is the API running on port 3002?', 'err');
+      onToast(msg.includes('clinic-api') || msg.includes('API') ? msg : 'Could not save — is clinic-api running on port 3010?', 'err');
     }
   }
 

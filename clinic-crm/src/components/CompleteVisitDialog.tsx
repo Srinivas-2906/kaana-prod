@@ -69,7 +69,7 @@ export function CompleteVisitDialog({ appointment, onClose, onDone, onToast }: P
         <div className="modal-body complete-visit-body">
           <p className="complete-visit-intro">
             Mark <strong>{name}</strong> as done for <strong>{appointment.service || 'visit'}</strong>.
-            Payment is optional but helps you track collections.
+            Payment is optional but helps you track payments.
           </p>
 
           <div className="form-field">

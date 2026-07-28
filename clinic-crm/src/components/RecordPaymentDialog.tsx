@@ -1,33 +1,43 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import type { Patient } from '../types';
+import type { Patient, Payment } from '../types';
 import { PAYMENT_METHODS } from '../types';
-import { recordPayment } from '../lib/api';
+import { recordPayment, updatePayment } from '../lib/api';
 import { useScrollLock } from '../hooks/useScrollLock';
 
 interface Props {
   patients: Patient[];
   prefillPatientId?: string;
+  payment?: Payment | null;
   onClose: () => void;
   onSaved: () => void;
   onToast?: (msg: string, type?: 'ok' | 'err') => void;
 }
 
-export function RecordPaymentDialog({ patients, prefillPatientId, onClose, onSaved, onToast }: Props) {
-  const [patientId, setPatientId] = useState(prefillPatientId || '');
-  const [amount, setAmount] = useState('');
-  const [method, setMethod] = useState(PAYMENT_METHODS[0]);
-  const [reference, setReference] = useState('');
-  const [notes, setNotes] = useState('');
+export function RecordPaymentDialog({ patients, prefillPatientId, payment, onClose, onSaved, onToast }: Props) {
+  const isEdit = Boolean(payment);
+  const [patientId, setPatientId] = useState(payment?.patientId || prefillPatientId || '');
+  const [amount, setAmount] = useState(payment?.amount != null ? String(payment.amount) : '');
+  const [method, setMethod] = useState(payment?.method || PAYMENT_METHODS[0]);
+  const [reference, setReference] = useState(payment?.reference || '');
+  const [notes, setNotes] = useState(payment?.notes || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useScrollLock(true);
 
   useEffect(() => {
+    if (payment) {
+      setPatientId(payment.patientId || '');
+      setAmount(payment.amount != null ? String(payment.amount) : '');
+      setMethod(payment.method || PAYMENT_METHODS[0]);
+      setReference(payment.reference || '');
+      setNotes(payment.notes || '');
+      return;
+    }
     if (prefillPatientId) setPatientId(prefillPatientId);
-  }, [prefillPatientId]);
+  }, [prefillPatientId, payment]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,18 +47,28 @@ export function RecordPaymentDialog({ patients, prefillPatientId, onClose, onSav
     setLoading(true);
     setError('');
     try {
-      await recordPayment({
-        patientId,
-        amount: value,
-        method,
-        reference,
-        notes: notes.trim() || undefined,
-      });
-      onToast?.('Payment recorded', 'ok');
+      if (payment) {
+        await updatePayment(payment.id, {
+          amount: value,
+          method,
+          reference,
+          notes: notes.trim(),
+        });
+        onToast?.('Payment updated', 'ok');
+      } else {
+        await recordPayment({
+          patientId,
+          amount: value,
+          method,
+          reference,
+          notes: notes.trim() || undefined,
+        });
+        onToast?.('Payment recorded', 'ok');
+      }
       onSaved();
       onClose();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Could not record payment';
+      const msg = err instanceof Error ? err.message : (isEdit ? 'Could not update payment' : 'Could not record payment');
       setError(msg);
       onToast?.(msg, 'err');
     } finally {
@@ -61,7 +81,7 @@ export function RecordPaymentDialog({ patients, prefillPatientId, onClose, onSav
       <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
         <div className="modal-header">
-          <h3>Record payment</h3>
+          <h3>{isEdit ? 'Edit payment' : 'Record payment'}</h3>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
             <X size={18} />
           </button>
@@ -75,7 +95,7 @@ export function RecordPaymentDialog({ patients, prefillPatientId, onClose, onSav
                 value={patientId}
                 onChange={(e) => setPatientId(e.target.value)}
                 required
-                disabled={Boolean(prefillPatientId)}
+                disabled={Boolean(prefillPatientId) || isEdit}
               >
                 <option value="">Select patient</option>
                 {patients.map((p) => (
@@ -93,7 +113,7 @@ export function RecordPaymentDialog({ patients, prefillPatientId, onClose, onSav
                 onChange={(e) => setAmount(e.target.value)}
                 required
                 min="1"
-                autoFocus={Boolean(prefillPatientId)}
+                autoFocus={Boolean(prefillPatientId) || isEdit}
               />
             </div>
             <div className="form-field">
@@ -119,7 +139,7 @@ export function RecordPaymentDialog({ patients, prefillPatientId, onClose, onSav
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn btn-primary modal-submit-btn" disabled={loading || !patientId || !amount}>
-              {loading ? 'Saving…' : 'Save'}
+              {loading ? 'Saving…' : isEdit ? 'Save changes' : 'Save'}
             </button>
           </div>
         </form>

@@ -1,16 +1,10 @@
 import { useMemo, useState } from 'react';
-import { BarChart3, CalendarDays, Download, Printer, RefreshCw, Share2, Users } from 'lucide-react';
+import { Download, Printer, Share2 } from 'lucide-react';
 import type { Appointment, Patient, Payment, TodayStats } from '../types';
 import { STATUS_LABELS } from '../types';
 
 function isoDate(d: Date) {
   return d.toISOString().slice(0, 10);
-}
-
-function startOfMonth(d: Date) {
-  const x = new Date(d);
-  x.setDate(1);
-  return x;
 }
 
 function daysAgo(n: number) {
@@ -27,6 +21,39 @@ function safeDate(iso?: string) {
   if (!iso) return null;
   const d = new Date(iso);
   return Number.isFinite(d.getTime()) ? d : null;
+}
+
+function isoLocal(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function dayKey(iso: string) {
+  if (typeof iso === 'string' && iso.length >= 10) return iso.slice(0, 10);
+  return iso;
+}
+
+function escapeHtml(input: unknown): string {
+  const s = String(input ?? '');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function formatDisplayDate(iso: string) {
+  const d = safeDate(iso);
+  if (!d) return iso;
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function formatRangeLabel(from: string, to: string) {
+  if (from === to) return formatDisplayDate(from);
+  return `${formatDisplayDate(from)} – ${formatDisplayDate(to)}`;
 }
 
 function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]) {
@@ -55,175 +82,120 @@ function openPrintWindow(title: string, htmlBody: string) {
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>${title}</title>
+    <title>${escapeHtml(title)}</title>
     <style>
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; color: #0f172a; }
-      h1 { font-size: 18px; margin: 0 0 10px; }
-      .sub { color:#475569; margin: 0 0 16px; font-size: 12px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 24px; color: #0f172a; }
+      h1 { font-size: 18px; margin: 0 0 8px; }
+      .sub { color:#64748b; margin: 0 0 16px; font-size: 12px; }
+      table { width: 100%; border-collapse: collapse; }
       th, td { border: 1px solid #e2e8f0; padding: 8px; font-size: 12px; text-align: left; }
-      th { background: #f8fafc; }
-      .muted { color:#64748b; }
-      @media print { body { margin: 10mm; } }
+      th { background: #e3f0fd; }
     </style>
   </head>
-  <body>
-    ${htmlBody}
-    <script>setTimeout(()=>{ window.print(); }, 50);</script>
-  </body>
+  <body>${htmlBody}</body>
+  <script>setTimeout(()=>window.print(),50);</script>
 </html>`);
   w.document.close();
 }
 
-function groupCount<T>(items: T[], keyFn: (t: T) => string) {
-  const m = new Map<string, number>();
-  items.forEach((it) => {
-    const k = keyFn(it) || '—';
-    m.set(k, (m.get(k) || 0) + 1);
-  });
-  return [...m.entries()].sort((a, b) => b[1] - a[1]);
-}
-
-function groupSum<T>(items: T[], keyFn: (t: T) => string, valFn: (t: T) => number) {
-  const m = new Map<string, number>();
-  items.forEach((it) => {
-    const k = keyFn(it) || '—';
-    m.set(k, (m.get(k) || 0) + (valFn(it) || 0));
-  });
-  return [...m.entries()].sort((a, b) => b[1] - a[1]);
-}
-
 export function ReportsView({
-  from,
-  to,
+  appliedFrom,
+  appliedTo,
   report,
-  today,
+  loading,
   patients,
-  onChangeRange,
-  onRefresh,
-  onOpenPatient,
-  onGoToToday,
+  onLoadReport,
   onToast,
 }: {
-  from: string;
-  to: string;
-  report: null | { from: string; to: string; appointments: Appointment[]; payments: Payment[]; summary: { todayTotal: number; monthTotal: number; dueCount: number; total?: number } };
-  today: TodayStats | null;
+  appliedFrom?: string;
+  appliedTo?: string;
+  report: null | {
+    from: string;
+    to: string;
+    appointments: Appointment[];
+    payments: Payment[];
+    summary: { todayTotal: number; monthTotal: number; dueCount: number; total?: number };
+  };
+  loading?: boolean;
+  today?: TodayStats | null;
   patients: Patient[];
-  onChangeRange: (from: string, to: string) => void;
+  onLoadReport: (from: string, to: string) => void;
   onRefresh: () => void;
   onOpenPatient: (id: string) => void;
   onGoToToday: () => void;
   onToast: (msg: string, type?: 'ok' | 'err') => void;
 }) {
-  const [customFrom, setCustomFrom] = useState(from);
-  const [customTo, setCustomTo] = useState(to);
+  const todayIso = isoDate(new Date());
+  const last7From = isoDate(daysAgo(6));
+  const last30From = isoDate(daysAgo(29));
+
+  const [dateFrom, setDateFrom] = useState(appliedFrom || last30From);
+  const [dateTo, setDateTo] = useState(appliedTo || todayIso);
+  const [showAllAppts, setShowAllAppts] = useState(false);
+  const [showAllPayments, setShowAllPayments] = useState(false);
+  const [previewTab, setPreviewTab] = useState<'appointments' | 'payments'>('appointments');
+
+  const isDateRangeValid = dateFrom <= dateTo;
+  const hasPreview = !!report && !!appliedFrom && !!appliedTo && !loading;
 
   const appointments = report?.appointments ?? [];
   const payments = report?.payments ?? [];
 
   const totals = useMemo(() => {
-    const totalAppts = appointments.length;
-    const byStatus = new Map<string, number>();
-    appointments.forEach((a) => byStatus.set(a.status, (byStatus.get(a.status) || 0) + 1));
-    const completed = byStatus.get('visited') || 0;
-    const requested = byStatus.get('requested') || 0;
-    const confirmed = byStatus.get('confirmed') || 0;
-    const arrived = byStatus.get('arrived') || 0;
-    const cancelled = byStatus.get('cancelled') || 0;
-    const noShow = byStatus.get('no_show') || 0;
-
-    const collectionsTotal = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
-    return { totalAppts, completed, requested, confirmed, arrived, cancelled, noShow, collectionsTotal };
+    const completed = appointments.filter((a) => a.status === 'visited').length;
+    const paymentsTotal = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    return {
+      totalAppts: appointments.length,
+      completed,
+      paymentsTotal,
+      paymentCount: payments.length,
+    };
   }, [appointments, payments]);
 
-  const byMethod = useMemo(
-    () => groupSum(payments, (p) => (p.method || 'Other').toUpperCase(), (p) => p.amount || 0).slice(0, 8),
-    [payments],
-  );
-  const byService = useMemo(
-    () => groupCount(appointments, (a) => a.service || 'Visit').slice(0, 8),
-    [appointments],
-  );
-  const bySource = useMemo(
-    () => groupCount(appointments, (a) => a.source || 'Unknown').slice(0, 8),
-    [appointments],
-  );
-  const byDoctor = useMemo(
-    () => groupCount(appointments, (a) => a.assignedDoctor || '—').slice(0, 8),
-    [appointments],
-  );
-
-  const peakHours = useMemo(() => {
-    const hours = appointments.map((a) => new Date(a.scheduledAt).getHours());
-    const m = new Map<number, number>();
-    hours.forEach((h) => m.set(h, (m.get(h) || 0) + 1));
-    return [...m.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([h, c]) => ({
-        label: `${h % 12 || 12} ${h >= 12 ? 'PM' : 'AM'}`,
-        count: c,
-      }));
-  }, [appointments]);
-
   const newPatientsInRange = useMemo(() => {
-    const fromTs = safeDate(`${from}T00:00:00`)?.getTime() ?? 0;
-    const toTs = (safeDate(`${to}T23:59:59`)?.getTime() ?? 0) || Date.now();
+    if (!appliedFrom || !appliedTo) return 0;
+    const fromTs = safeDate(`${appliedFrom}T00:00:00`)?.getTime() ?? 0;
+    const toTs = (safeDate(`${appliedTo}T23:59:59`)?.getTime() ?? 0) || Date.now();
     return patients.filter((p) => {
       const d = safeDate(p.createdAt);
       if (!d) return false;
-      const ts = d.getTime();
-      return ts >= fromTs && ts <= toTs;
+      return d.getTime() >= fromTs && d.getTime() <= toTs;
     }).length;
-  }, [patients, from, to]);
+  }, [patients, appliedFrom, appliedTo]);
 
-  const recall = useMemo(() => {
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 180);
-    const cutoffTs = cutoff.getTime();
-    return [...patients]
-      .filter((p) => {
-        const d = safeDate(p.lastVisit || undefined);
-        if (!d) return true; // never visited
-        return d.getTime() < cutoffTs;
-      })
-      .sort((a, b) => {
-        const da = safeDate(a.lastVisit || undefined)?.getTime() ?? 0;
-        const db = safeDate(b.lastVisit || undefined)?.getTime() ?? 0;
-        return da - db;
-      })
-      .slice(0, 25);
-  }, [patients]);
+  const sortedAppointments = useMemo(
+    () => [...appointments].sort(
+      (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime(),
+    ),
+    [appointments],
+  );
 
-  function setPreset(days: number) {
-    const t = isoDate(new Date());
-    const f = isoDate(daysAgo(days - 1));
-    onChangeRange(f, t);
-    setCustomFrom(f);
-    setCustomTo(t);
-  }
+  const sortedPayments = useMemo(
+    () => [...payments].sort(
+      (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime(),
+    ),
+    [payments],
+  );
 
-  function setThisMonth() {
-    const t = isoDate(new Date());
-    const f = isoDate(startOfMonth(new Date()));
-    onChangeRange(f, t);
-    setCustomFrom(f);
-    setCustomTo(t);
-  }
+  const visibleAppointments = showAllAppts ? sortedAppointments : sortedAppointments.slice(0, 50);
+  const visiblePayments = showAllPayments ? sortedPayments : sortedPayments.slice(0, 50);
 
-  function applyCustomRange() {
-    if (!customFrom || !customTo) return;
-    if (customFrom > customTo) {
-      onToast('From date must be before To date', 'err');
-      return;
-    }
-    onChangeRange(customFrom, customTo);
+  const presetClass = (active: boolean) =>
+    `reports-preset${active ? ' active' : ''}`;
+
+  function handleLoad() {
+    if (!isDateRangeValid) return;
+    setShowAllAppts(false);
+    setShowAllPayments(false);
+    onLoadReport(dateFrom, dateTo);
   }
 
   function exportPaymentsCsv() {
-    downloadCsv(`payments_${from}_to_${to}.csv`, [
+    if (payments.length === 0) {
+      onToast('No payments to download', 'err');
+      return;
+    }
+    downloadCsv(`payments_${appliedFrom}_to_${appliedTo}.csv`, [
       ['Date', 'Patient', 'Amount', 'Method', 'Reference', 'Notes'],
       ...payments.map((p) => [
         p.createdAt ? new Date(p.createdAt).toLocaleString('en-IN') : '',
@@ -234,240 +206,348 @@ export function ReportsView({
         p.notes || '',
       ]),
     ]);
-    onToast('Payments CSV downloaded');
+    onToast('Payments downloaded');
   }
 
   function exportAppointmentsCsv() {
-    downloadCsv(`appointments_${from}_to_${to}.csv`, [
-      ['Scheduled at', 'Patient', 'Phone', 'Service', 'Status', 'Source'],
+    if (appointments.length === 0) {
+      onToast('No appointments to download', 'err');
+      return;
+    }
+    downloadCsv(`appointments_${appliedFrom}_to_${appliedTo}.csv`, [
+      ['Date', 'Patient', 'Phone', 'Treatment', 'Status', 'Source'],
       ...appointments.map((a) => [
         new Date(a.scheduledAt).toLocaleString('en-IN'),
         a.patientName || '',
         a.patientPhone || '',
         a.service || '',
-        a.status,
+        STATUS_LABELS[a.status] || a.status,
         a.source || '',
       ]),
     ]);
-    onToast('Appointments CSV downloaded');
+    onToast('Appointments downloaded');
+  }
+
+  function exportDailySummaryCsv() {
+    if (!appliedFrom || !appliedTo) return;
+    const fromD = safeDate(`${appliedFrom}T00:00:00`);
+    const toD = safeDate(`${appliedTo}T00:00:00`);
+    if (!fromD || !toD) return;
+
+    const apptsByDay = new Map<string, { total: number; done: number; cancelled: number; noShow: number }>();
+    const paysByDay = new Map<string, { total: number; count: number }>();
+    const newPtsByDay = new Map<string, number>();
+
+    appointments.forEach((a) => {
+      const k = dayKey(a.scheduledAt);
+      const row = apptsByDay.get(k) || { total: 0, done: 0, cancelled: 0, noShow: 0 };
+      row.total += 1;
+      if (a.status === 'visited') row.done += 1;
+      if (a.status === 'cancelled') row.cancelled += 1;
+      if (a.status === 'no_show') row.noShow += 1;
+      apptsByDay.set(k, row);
+    });
+
+    payments.forEach((p) => {
+      const k = p.createdAt ? dayKey(p.createdAt) : '';
+      if (!k) return;
+      const row = paysByDay.get(k) || { total: 0, count: 0 };
+      row.total += Number(p.amount) || 0;
+      row.count += 1;
+      paysByDay.set(k, row);
+    });
+
+    patients.forEach((p) => {
+      if (!p.createdAt) return;
+      const k = dayKey(p.createdAt);
+      newPtsByDay.set(k, (newPtsByDay.get(k) || 0) + 1);
+    });
+
+    const rows: (string | number)[][] = [
+      ['Date', 'Appointments', 'Done', 'Cancelled', 'No show', 'Payments', 'Payments count', 'New patients'],
+    ];
+
+    const cur = new Date(fromD);
+    const end = new Date(toD);
+    while (cur.getTime() <= end.getTime()) {
+      const k = isoLocal(cur);
+      const a = apptsByDay.get(k) || { total: 0, done: 0, cancelled: 0, noShow: 0 };
+      const pay = paysByDay.get(k) || { total: 0, count: 0 };
+      const newPts = newPtsByDay.get(k) || 0;
+      rows.push([k, a.total, a.done, a.cancelled, a.noShow, Math.round(pay.total), pay.count, newPts]);
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    downloadCsv(`daily_summary_${appliedFrom}_to_${appliedTo}.csv`, rows);
+    onToast('Daily summary downloaded');
   }
 
   function shareSummary() {
+    if (!appliedFrom || !appliedTo) return;
     const text =
-      `Clinic summary (${from} → ${to})\n` +
+      `Clinic report\n${formatRangeLabel(appliedFrom, appliedTo)}\n` +
       `Appointments: ${totals.totalAppts} (Done ${totals.completed})\n` +
-      `Pending: Requested ${totals.requested}, Confirmed ${totals.confirmed}, In-clinic ${totals.arrived}\n` +
-      `No-show: ${totals.noShow}, Cancelled: ${totals.cancelled}\n` +
-      `Collections: ${formatRs(totals.collectionsTotal)}`;
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank', 'noreferrer');
+      `Payments: ${formatRs(totals.paymentsTotal)} (${totals.paymentCount})\n` +
+      `New patients: ${newPatientsInRange}`;
+    if (navigator.share) {
+      navigator.share({ title: 'Clinic report', text }).catch(() => {});
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noreferrer');
+    }
   }
 
-  function printTodaySheet() {
-    const appts = today?.appointments ?? [];
-    const rows = appts
-      .slice()
-      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
-      .map((a) => ({
-        time: new Date(a.scheduledAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }),
-        patient: a.patientName || 'Patient',
-        phone: a.patientPhone || '',
-        service: a.service || '',
-        status: STATUS_LABELS[a.status],
-      }));
-    const html = `
-      <h1>Today sheet</h1>
-      <p class="sub">Date: ${today?.date || isoDate(new Date())} · Total: ${appts.length}</p>
+  function printReport() {
+    if (!appliedFrom || !appliedTo) return;
+    const apptRows = sortedAppointments.map((a) => ({
+      date: new Date(a.scheduledAt).toLocaleString('en-IN'),
+      patient: a.patientName || 'Patient',
+      treatment: a.service || '',
+      status: STATUS_LABELS[a.status],
+    }));
+    const payRows = sortedPayments.map((p) => ({
+      date: p.createdAt ? new Date(p.createdAt).toLocaleString('en-IN') : '',
+      patient: p.patientName || 'Patient',
+      amount: formatRs(p.amount || 0),
+      method: p.method || '',
+    }));
+    const safeAppts = apptRows.map((r) => ({
+      date: escapeHtml(r.date),
+      patient: escapeHtml(r.patient),
+      treatment: escapeHtml(r.treatment),
+      status: escapeHtml(r.status),
+    }));
+    const safePays = payRows.map((r) => ({
+      date: escapeHtml(r.date),
+      patient: escapeHtml(r.patient),
+      amount: escapeHtml(r.amount),
+      method: escapeHtml(r.method),
+    }));
+    openPrintWindow('Clinic report', `
+      <h1>Clinic report</h1>
+      <p class="sub">${escapeHtml(formatRangeLabel(appliedFrom, appliedTo))}</p>
+      <p class="sub">${totals.totalAppts} appointments · ${formatRs(totals.paymentsTotal)} payments · ${newPatientsInRange} new patients</p>
+      <h1 style="font-size:14px;margin-top:20px">Appointments</h1>
       <table>
-        <thead><tr><th>Time</th><th>Patient</th><th>Phone</th><th>Service</th><th>Status</th></tr></thead>
+        <thead><tr><th>Date</th><th>Patient</th><th>Treatment</th><th>Status</th></tr></thead>
         <tbody>
-          ${rows.map((r) => `<tr><td>${r.time}</td><td>${r.patient}</td><td>${r.phone}</td><td>${r.service}</td><td>${r.status}</td></tr>`).join('')}
+          ${safeAppts.map((r) => `<tr><td>${r.date}</td><td>${r.patient}</td><td>${r.treatment}</td><td>${r.status}</td></tr>`).join('')}
         </tbody>
       </table>
-      <p class="muted">Generated from clinic CRM</p>
-    `;
-    openPrintWindow('Today sheet', html);
+      <h1 style="font-size:14px;margin-top:20px">Payments</h1>
+      <table>
+        <thead><tr><th>Date</th><th>Patient</th><th>Amount</th><th>Method</th></tr></thead>
+        <tbody>
+          ${safePays.map((r) => `<tr><td>${r.date}</td><td>${r.patient}</td><td>${r.amount}</td><td>${r.method}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    `);
   }
 
   return (
     <div className="view reports-view">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Reports</p>
-          <h1 className="page-title">Clinic reports</h1>
-          <p className="page-subtitle">Pick a range, export CSV, print daily sheet, and share summary</p>
-        </div>
-        <div className="page-header-actions">
-          <button type="button" className="icon-btn" onClick={onRefresh} aria-label="Refresh">
-            <RefreshCw size={15} />
-          </button>
-        </div>
-      </header>
+      <h1 className="page-title reports-page-title">Reports</h1>
 
-      <div className="panel" style={{ marginBottom: 14 }}>
-        <div className="panel-body" style={{ display: 'grid', gap: 10 }}>
-          <div className="report-presets">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPreset(7)}>Last 7 days</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPreset(30)}>Last 30 days</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={setThisMonth}>This month</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onGoToToday}><CalendarDays size={12} /> Today</button>
-          </div>
-
-          <div className="report-range">
-            <div className="form-field">
-              <label className="form-label">From</label>
-              <input type="date" className="form-input" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} />
-            </div>
-            <div className="form-field">
-              <label className="form-label">To</label>
-              <input type="date" className="form-input" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
-            </div>
-            <div className="form-field" style={{ alignSelf: 'end' }}>
-              <button type="button" className="btn btn-primary btn-sm" onClick={applyCustomRange}>Apply</button>
-            </div>
-          </div>
-
-          <div className="report-actions">
-            <button type="button" className="btn btn-ghost btn-sm" onClick={exportPaymentsCsv}><Download size={12} /> Payments CSV</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={exportAppointmentsCsv}><Download size={12} /> Appointments CSV</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={printTodaySheet}><Printer size={12} /> Print today</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={shareSummary}><Share2 size={12} /> Share summary</button>
+      {/* Step 1: pick dates + load (Aquafarm-style setup card) */}
+      <div className="reports-setup-card">
+        <div className="reports-setup-section">
+          <label className="reports-label">Period</label>
+          <div className="reports-presets">
+            <button
+              type="button"
+              className={presetClass(dateFrom === todayIso && dateTo === todayIso)}
+              onClick={() => { setDateFrom(todayIso); setDateTo(todayIso); }}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              className={presetClass(dateFrom === last7From && dateTo === todayIso)}
+              onClick={() => { setDateFrom(last7From); setDateTo(todayIso); }}
+            >
+              Last 7 days
+            </button>
+            <button
+              type="button"
+              className={presetClass(dateFrom === last30From && dateTo === todayIso)}
+              onClick={() => { setDateFrom(last30From); setDateTo(todayIso); }}
+            >
+              Last 30 days
+            </button>
           </div>
         </div>
+
+        <div className="reports-date-grid">
+          <div>
+            <label className="reports-label">From</label>
+            <input
+              type="date"
+              className="form-input reports-date-input"
+              value={dateFrom}
+              max={dateTo}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="reports-label">To</label>
+            <input
+              type="date"
+              className="form-input reports-date-input"
+              value={dateTo}
+              min={dateFrom}
+              max={todayIso}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {!isDateRangeValid && (
+          <div className="reports-error">Start date must be before end date.</div>
+        )}
+
+        <button
+          type="button"
+          className="btn btn-primary reports-load-btn"
+          onClick={handleLoad}
+          disabled={loading || !isDateRangeValid}
+        >
+          {loading ? 'Loading…' : 'Load report'}
+        </button>
       </div>
 
-      <div className="stat-strip">
-        <div className="stat-card">
-          <div className="stat-icon blue"><BarChart3 size={16} /></div>
-          <div className="stat-val">{totals.totalAppts}</div>
-          <div className="stat-lbl">Appointments</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon green"><BarChart3 size={16} /></div>
-          <div className="stat-val">{totals.completed}</div>
-          <div className="stat-lbl">Completed</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon amber"><BarChart3 size={16} /></div>
-          <div className="stat-val">{formatRs(totals.collectionsTotal)}</div>
-          <div className="stat-lbl">Collections</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon purple"><Users size={16} /></div>
-          <div className="stat-val">{recall.length}</div>
-          <div className="stat-lbl">Recall (6m)</div>
-        </div>
-      </div>
+      {!hasPreview && !loading && (
+        <p className="reports-tap-hint">Pick dates and tap Load report to see preview.</p>
+      )}
 
-      <div className="panel">
-        <div className="panel-head">
-          <BarChart3 size={14} color="var(--brand)" />
-          <span className="panel-title">Breakdown</span>
-        </div>
-        <div className="panel-body report-breakdown">
-          <div>
-            <p className="section-hd-title">Appointment funnel</p>
-            <ul className="report-list">
-              <li><span>Requested</span><strong>{totals.requested}</strong></li>
-              <li><span>Confirmed</span><strong>{totals.confirmed}</strong></li>
-              <li><span>In clinic</span><strong>{totals.arrived}</strong></li>
-              <li><span>No-show</span><strong>{totals.noShow}</strong></li>
-              <li><span>Cancelled</span><strong>{totals.cancelled}</strong></li>
-              <li><span>New patients</span><strong>{newPatientsInRange}</strong></li>
-            </ul>
+      {/* Step 2: preview after load */}
+      {hasPreview && (
+        <>
+          <div className="reports-summary-card">
+            <p className="reports-summary-meta">
+              {totals.totalAppts} appointments · {totals.completed} done · {newPatientsInRange} new patients
+            </p>
+            <p className="reports-summary-big">{formatRs(totals.paymentsTotal)}</p>
+            <p className="reports-summary-sub">
+              {formatRangeLabel(appliedFrom!, appliedTo!)} · {totals.paymentCount} payments
+            </p>
           </div>
-          <div>
-            <p className="section-hd-title">Collections by method</p>
-            {byMethod.length === 0 ? (
-              <p className="muted">No payments in this range.</p>
-            ) : (
-              <ul className="report-list">
-                {byMethod.map(([k, v]) => (
-                  <li key={k}><span>{k}</span><strong>{formatRs(v)}</strong></li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div>
-            <p className="section-hd-title">Top services</p>
-            {byService.length === 0 ? (
-              <p className="muted">No appointments in this range.</p>
-            ) : (
-              <ul className="report-list">
-                {byService.map(([k, v]) => (
-                  <li key={k}><span>{k}</span><strong>{v}</strong></li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div>
-            <p className="section-hd-title">Top sources</p>
-            {bySource.length === 0 ? (
-              <p className="muted">No appointments in this range.</p>
-            ) : (
-              <ul className="report-list">
-                {bySource.map(([k, v]) => (
-                  <li key={k}><span>{k}</span><strong>{v}</strong></li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div>
-            <p className="section-hd-title">Doctors</p>
-            {byDoctor.length === 0 ? (
-              <p className="muted">No appointments in this range.</p>
-            ) : (
-              <ul className="report-list">
-                {byDoctor.map(([k, v]) => (
-                  <li key={k}><span>{k}</span><strong>{v}</strong></li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div>
-            <p className="section-hd-title">Peak hours</p>
-            {peakHours.length === 0 ? (
-              <p className="muted">No appointments in this range.</p>
-            ) : (
-              <ul className="report-list">
-                {peakHours.map((h) => (
-                  <li key={h.label}><span>{h.label}</span><strong>{h.count}</strong></li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <div className="panel" style={{ marginTop: 14 }}>
-        <div className="panel-head">
-          <Users size={14} color="var(--brand)" />
-          <span className="panel-title">Recall list</span>
-          <span className="muted" style={{ fontSize: 12 }}>Not visited in 6 months (or never)</span>
-        </div>
-        <div className="panel-body">
-          {recall.length === 0 ? (
-            <p className="muted">No recall patients right now.</p>
-          ) : (
-            <ul className="payment-list">
-              {recall.map((p) => (
-                <li key={p.id}>
-                  <button type="button" className="payment-row payment-row-btn" onClick={() => onOpenPatient(p.id)}>
-                    <div style={{ minWidth: 0 }}>
-                      <strong>{p.name}</strong>
-                      <span>{p.phone}{p.lastVisit ? ` · last visit ${new Date(p.lastVisit).toLocaleDateString('en-IN')}` : ' · never visited'}</span>
-                    </div>
-                    <div className="payment-row-end">
-                      <small className="muted">Open</small>
-                    </div>
+          <div className="reports-preview-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={previewTab === 'appointments'}
+              className={`reports-preview-tab${previewTab === 'appointments' ? ' active' : ''}`}
+              onClick={() => setPreviewTab('appointments')}
+            >
+              Appointments ({appointments.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={previewTab === 'payments'}
+              className={`reports-preview-tab${previewTab === 'payments' ? ' active' : ''}`}
+              onClick={() => setPreviewTab('payments')}
+            >
+              Payments ({payments.length})
+            </button>
+          </div>
+
+          {previewTab === 'appointments' ? (
+            appointments.length === 0 ? (
+              <div className="reports-empty-card">No appointments in this period.</div>
+            ) : (
+              <>
+                <div className="reports-table-wrap">
+                  <table className="reports-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Patient</th>
+                        <th>Treatment</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleAppointments.map((a) => (
+                        <tr key={a.id}>
+                          <td>{new Date(a.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td>
+                          <td>{a.patientName || 'Patient'}</td>
+                          <td>{a.service || 'Check-up'}</td>
+                          <td>{STATUS_LABELS[a.status]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {sortedAppointments.length > 50 && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm reports-show-all"
+                    onClick={() => setShowAllAppts((v) => !v)}
+                  >
+                    {showAllAppts ? 'Show less' : `Show all (${sortedAppointments.length})`}
                   </button>
-                </li>
-              ))}
-            </ul>
+                )}
+              </>
+            )
+          ) : payments.length === 0 ? (
+            <div className="reports-empty-card">No payments in this period.</div>
+          ) : (
+            <>
+              <div className="reports-table-wrap">
+                <table className="reports-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Patient</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visiblePayments.map((p) => (
+                      <tr key={p.id}>
+                        <td>{p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}</td>
+                        <td>{p.patientName || 'Patient'}</td>
+                        <td>{formatRs(p.amount || 0)}</td>
+                        <td>{p.method || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {sortedPayments.length > 50 && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm reports-show-all"
+                  onClick={() => setShowAllPayments((v) => !v)}
+                >
+                  {showAllPayments ? 'Show less' : `Show all (${sortedPayments.length})`}
+                </button>
+              )}
+            </>
           )}
-        </div>
-      </div>
+
+          {/* Step 3: download grid (Aquafarm-style) */}
+          <div className="reports-download-grid">
+            <button type="button" className="btn btn-ghost reports-download-btn" onClick={exportAppointmentsCsv}>
+              <Download size={18} /> Appointments CSV
+            </button>
+            <button type="button" className="btn btn-ghost reports-download-btn" onClick={exportPaymentsCsv}>
+              <Download size={18} /> Payments CSV
+            </button>
+            <button type="button" className="btn btn-ghost reports-download-btn" onClick={exportDailySummaryCsv}>
+              <Download size={18} /> Daily summary CSV
+            </button>
+            <button type="button" className="btn btn-ghost reports-download-btn" onClick={shareSummary}>
+              <Share2 size={18} /> Share
+            </button>
+            <button type="button" className="btn btn-ghost reports-download-btn" onClick={printReport}>
+              <Printer size={18} /> Print
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-

@@ -1,7 +1,9 @@
-import { CalendarCheck, Users, AlertCircle, Phone, MessageSquare, CalendarPlus, Activity, ChevronRight, Banknote } from 'lucide-react';
+import { CalendarCheck, AlertCircle, Phone, MessageSquare, CalendarPlus, Activity, ChevronRight, Banknote } from 'lucide-react';
 import type { Appointment, AppointmentStatus, TodayStats } from '../types';
 import { STATUS_LABELS } from '../types';
 import { updateAppointment } from '../lib/api';
+import { toTelUrl, toWhatsAppUrl } from '../lib/phone';
+import { formatApptDayLabel, formatApptTime, isApptToday } from '../lib/appointmentDisplay';
 import { CompleteVisitDialog } from './CompleteVisitDialog';
 import { useState } from 'react';
 
@@ -24,7 +26,7 @@ function greeting() {
 }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return formatApptTime(iso);
 }
 
 function todayDate() {
@@ -33,7 +35,6 @@ function todayDate() {
 
 interface Props {
   today: TodayStats | null;
-  totalPatients: number;
   displayName?: string;
   onGoToToday: () => void;
   onGoToBook: () => void;
@@ -42,13 +43,26 @@ interface Props {
   onRefresh: () => void;
 }
 
-export function OverviewTab({ today, totalPatients, displayName, onGoToToday, onGoToBook, onOpenPatient, onToast, onRefresh }: Props) {
+export function OverviewTab({ today, displayName, onGoToToday, onGoToBook, onOpenPatient, onToast, onRefresh }: Props) {
   const [completeAppt, setCompleteAppt] = useState<Appointment | null>(null);
   const appts = today?.appointments ?? [];
+  const upcomingLater = today?.upcomingLater ?? today?.pendingRequests ?? [];
+  const pendingLater = upcomingLater.filter((a) => a.status === 'requested');
+  const unconfirmedToday = today?.unconfirmedToday ?? appts.filter((a) => a.status === 'requested').length;
   const upcoming = [...appts]
-    .filter(a => a.status !== 'visited' && a.status !== 'cancelled' && a.status !== 'no_show')
+    .filter((a) => isApptToday(a.scheduledAt))
+    .filter((a) => a.status !== 'visited' && a.status !== 'cancelled' && a.status !== 'no_show')
     .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
     .slice(0, 5);
+
+  const confirmBanner =
+    unconfirmedToday + pendingLater.length > 0
+      ? unconfirmedToday > 0 && pendingLater.length > 0
+        ? `${unconfirmedToday + pendingLater.length} bookings need confirmation — ${unconfirmedToday} today, ${pendingLater.length} later`
+        : unconfirmedToday > 0
+          ? `${unconfirmedToday} booking${unconfirmedToday !== 1 ? 's' : ''} need confirmation today`
+          : `${pendingLater.length} online booking${pendingLater.length !== 1 ? 's' : ''} for later days need confirmation`
+      : '';
 
   async function advance(appt: Appointment, next: AppointmentStatus) {
     if (next === 'visited') {
@@ -75,20 +89,18 @@ export function OverviewTab({ today, totalPatients, displayName, onGoToToday, on
         </button>
       </div>
 
-      {/* Alert banner — pending confirmations */}
-      {(today?.unconfirmed ?? 0) > 0 && (
-        <button type="button" className="alert-banner" onClick={onGoToToday}>
+      {confirmBanner && (
+        <div className="alert-banner alert-banner-static">
           <span className="alert-banner-icon"><AlertCircle size={16} /></span>
           <span className="alert-banner-text">
-            <strong>{today!.unconfirmed} booking{today!.unconfirmed > 1 ? 's' : ''} need confirmation</strong>
-            <span> — please call or WhatsApp the patient</span>
+            <strong>{confirmBanner}</strong>
+            <span> — call or WhatsApp the patient</span>
           </span>
-          <ChevronRight size={15} className="alert-banner-chevron" />
-        </button>
+        </div>
       )}
 
-      {/* Stats grid */}
-      <div className="stat-strip">
+      {/* Stats grid — today only; later requests have their own section below */}
+      <div className="stat-strip stat-strip-3">
         <div className="stat-card">
           <div className="stat-icon blue"><CalendarCheck size={16} /></div>
           <div className="stat-val">{today?.total ?? 0}</div>
@@ -96,20 +108,15 @@ export function OverviewTab({ today, totalPatients, displayName, onGoToToday, on
         </div>
         <div className="stat-card">
           <div className="stat-icon amber"><Activity size={16} /></div>
-          <div className="stat-val">{today?.unconfirmed ?? 0}</div>
+          <div className="stat-val">{unconfirmedToday}</div>
           <div className="stat-lbl">Need confirm</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon green"><Users size={16} /></div>
-          <div className="stat-val">{totalPatients}</div>
-          <div className="stat-lbl">All patients</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon purple">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div className="stat-val">{today?.arrived ?? 0}</div>
-          <div className="stat-lbl">In clinic now</div>
+          <div className="stat-lbl">Arrived now</div>
         </div>
       </div>
 
@@ -136,7 +143,8 @@ export function OverviewTab({ today, totalPatients, displayName, onGoToToday, on
             {upcoming.map((appt) => {
               const name = appt.patientName || 'Patient';
               const [fg, bg] = ava(name);
-              const phone = appt.patientPhone?.replace(/\D/g, '') || '';
+              const telUrl = toTelUrl(appt.patientPhone);
+              const waUrl = toWhatsAppUrl(appt.patientPhone);
               return (
                 <div key={appt.id} className="overview-appt-row">
                   <span className="overview-appt-time">{fmtTime(appt.scheduledAt)}</span>
@@ -157,13 +165,13 @@ export function OverviewTab({ today, totalPatients, displayName, onGoToToday, on
                   </div>
                   <span className={TAG_CLASS[appt.status]}>{STATUS_LABELS[appt.status]}</span>
                   <div className="overview-appt-actions">
-                    {phone && (
-                      <a href={`tel:+91${phone}`} className="quick-action-btn" title="Call patient">
+                    {telUrl && (
+                      <a href={telUrl} className="quick-action-btn" title="Call patient">
                         <Phone size={13} />
                       </a>
                     )}
-                    {phone && (
-                      <a href={`https://wa.me/91${phone}`} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp">
+                    {waUrl && (
+                      <a href={waUrl} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp">
                         <MessageSquare size={13} />
                       </a>
                     )}
@@ -190,9 +198,68 @@ export function OverviewTab({ today, totalPatients, displayName, onGoToToday, on
         )}
       </div>
 
+      {upcomingLater.length > 0 && (
+        <div className="overview-section">
+          <div className="section-hd">
+            <div>
+              <p className="section-hd-title">Coming up later</p>
+              <p className="section-hd-sub">
+                {upcomingLater.length} on other day{upcomingLater.length !== 1 ? 's' : ''}
+                {pendingLater.length > 0 && pendingLater.length < upcomingLater.length
+                  ? ` · ${pendingLater.length} need confirm`
+                  : ''}
+              </p>
+            </div>
+          </div>
+          <div className="panel" style={{ overflow: 'hidden' }}>
+            {upcomingLater.map((appt) => {
+              const name = appt.patientName || 'Patient';
+              const [fg, bg] = ava(name);
+              const telUrl = toTelUrl(appt.patientPhone);
+              const waUrl = toWhatsAppUrl(appt.patientPhone);
+              return (
+                <div key={appt.id} className="overview-appt-row overview-appt-row-future">
+                  <div className="overview-appt-when">
+                    <span className="overview-appt-day">{formatApptDayLabel(appt.scheduledAt)}</span>
+                    <span className="overview-appt-time">{fmtTime(appt.scheduledAt)}</span>
+                  </div>
+                  <div className="overview-appt-ava" style={{ background: bg, color: fg }}>
+                    {name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="overview-appt-info">
+                    <button type="button" className="overview-appt-name" onClick={() => onOpenPatient(appt.patientId)}>
+                      {name}
+                    </button>
+                    <span className="overview-appt-svc">{appt.service || 'Check-up'}</span>
+                  </div>
+                  <span className={TAG_CLASS[appt.status]}>{STATUS_LABELS[appt.status]}</span>
+                  <div className="overview-appt-actions">
+                    {telUrl && (
+                      <a href={telUrl} className="quick-action-btn" title="Call patient">
+                        <Phone size={13} />
+                      </a>
+                    )}
+                    {waUrl && (
+                      <a href={waUrl} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp">
+                        <MessageSquare size={13} />
+                      </a>
+                    )}
+                    {appt.status === 'requested' && (
+                      <button type="button" className="action-btn action-confirm" onClick={() => advance(appt, 'confirmed')}>
+                        Confirm
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Quick actions */}
       <div className="overview-section">
-        <p className="section-hd-title" style={{ marginBottom: 12 }}>Quick links</p>
+        <p className="section-hd-title" style={{ marginBottom: 12 }}>Shortcuts</p>
         <div className="quick-cards-grid">
           <button type="button" className="quick-card" onClick={onGoToBook}>
             <div className="quick-card-icon blue"><CalendarPlus size={20} /></div>

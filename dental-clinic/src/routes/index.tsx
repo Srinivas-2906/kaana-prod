@@ -536,7 +536,7 @@ function Home() {
                   Mon – Sat
                   <br />
                   <span className="text-muted-foreground">
-                    10:00 AM – 1:00 PM · 5:00 PM – 9:00 PM
+                    10:00 AM – 2:00 PM · 5:00 PM – 9:00 PM
                   </span>
                 </span>
               </li>

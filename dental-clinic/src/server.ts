@@ -3,6 +3,42 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
+const CLINIC_API_ORIGIN = (process.env.CLINIC_API_ORIGIN || "http://127.0.0.1:3010").replace(
+  /\/$/,
+  "",
+);
+
+async function proxyClinicPlatformApi(request: Request): Promise<Response> {
+  const url = new URL(request.url);
+  const target = `${CLINIC_API_ORIGIN}${url.pathname}${url.search}`;
+
+  const headers = new Headers(request.headers);
+  headers.delete("host");
+  headers.delete("connection");
+  headers.delete("content-length");
+
+  const init: RequestInit = {
+    method: request.method,
+    headers,
+    redirect: "manual",
+  };
+
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    // Buffer body — Node fetch rejects ReadableStream bodies without duplex: "half".
+    init.body = await request.arrayBuffer();
+  }
+
+  try {
+    return await fetch(target, init);
+  } catch (error) {
+    console.error("clinic-api proxy failed:", target, error);
+    return Response.json(
+      { error: "Booking is temporarily unavailable. Please call the clinic or try again later." },
+      { status: 503 },
+    );
+  }
+}
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
@@ -39,6 +75,11 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const { pathname } = new URL(request.url);
+    if (pathname === "/api/platform" || pathname.startsWith("/api/platform/")) {
+      return proxyClinicPlatformApi(request);
+    }
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

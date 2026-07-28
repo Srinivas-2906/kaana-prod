@@ -7,11 +7,12 @@ Dental clinic desk for **Dr. D. Ajit** — Denta Care Dental Clinic, Visakhapatn
 | URL | Purpose |
 |-----|---------|
 | **https://crm.dentacare.kaana.in** | Clinic desk (preferred tenant URL) |
+| **https://clinic-api.kaana.in** | Standalone clinic API (patients, bookings, payments) |
 | **https://dentacare.kaana.in** | Denta Care marketing website |
 | **https://dentacare.crm.kaana.in** | Legacy clinic desk URL |
 | **https://clinic.kaana.in?tenant=dentacare** | Works without tenant DNS |
 
-API: **https://api.kaana.in**
+API (legacy, being replaced): **https://api.kaana.in**
 
 ## Sign in
 

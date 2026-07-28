@@ -2,7 +2,7 @@ import { authHeaders, clearToken } from './auth';
 import type { Appointment, Patient, TodayStats, Payment, PaymentSummary, CatalogItem } from '../types';
 import { resolveTenantSlug } from './tenant';
 
-const API = import.meta.env.VITE_WHATSAPP_API || '/api';
+const API = import.meta.env.VITE_CLINIC_API || import.meta.env.VITE_WHATSAPP_API || '/api';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -18,7 +18,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     });
   } catch {
     throw new Error(
-      'Cannot reach the API server. Start botiq-whatsapp-server (npm run dev in botiq-whatsapp-server).',
+      'Cannot reach server. Start clinic-api.',
     );
   }
   if (res.status === 401) throw new Error('Unauthorized');
@@ -27,7 +27,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const msg = (err as { error?: string }).error || res.statusText;
     if (/tenant access required/i.test(msg)) {
       clearToken();
-      throw new Error('Session expired or wrong clinic account. Sign in again with your clinic login.');
+      throw new Error('Session expired or wrong clinic account. Sign in again.');
     }
     throw new Error(msg);
   }
@@ -98,7 +98,14 @@ export function fetchAppointments(params?: { date?: string }) {
 }
 
 export function fetchClient() {
-  return request<{ name: string; emoji: string; agentPhone: string }>('/client');
+  return request<{
+    name: string;
+    emoji: string;
+    slug?: string;
+    agentPhone?: string;
+    city?: string;
+    doctorName?: string;
+  }>('/client');
 }
 
 export function fetchMe() {
@@ -148,3 +155,39 @@ export function recordPayment(data: {
     body: JSON.stringify(data),
   });
 }
+
+export function updatePayment(id: string, patch: Partial<Payment> & { amount?: number }) {
+  return request<Payment>(`/clinic/payments/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+}
+
+export function fetchAccessRequests(status?: string) {
+  const q = status ? `?status=${encodeURIComponent(status)}` : '';
+  return request<{ requests: import('../types').AccessRequest[] }>(`/clinic/access-requests${q}`);
+}
+
+export function approveAccessRequest(id: string) {
+  return request<{
+    request: import('../types').AccessRequest;
+    user: { id: string; email: string; name: string; role: string };
+    setPasswordUrl: string;
+    expiresInDays: number;
+  }>(`/clinic/access-requests/${id}/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+}
+
+export function rejectAccessRequest(id: string) {
+  return request<{ request: import('../types').AccessRequest }>(`/clinic/access-requests/${id}/reject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+}
+
+export type { AccessRequest } from '../types';

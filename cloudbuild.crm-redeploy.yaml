@@ -1,0 +1,51 @@
+steps:
+  - id: build-clinic-crm
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic-crm:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic-crm:latest
+      - --build-arg
+      - VITE_CLINIC_API=/api
+      - --build-arg
+      - VITE_TENANT_SLUG=dentacare
+      - ./clinic-crm
+
+  - id: push-clinic-crm
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic-crm
+
+  - id: deploy-clinic-crm
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic-crm:$BUILD_ID"
+        ORIGIN="$$(gcloud run services describe clinic-api --region ${_REGION} --format='value(status.url)')"
+        gcloud run deploy kaana-clinic \
+          --image "$$IMAGE" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --memory 256Mi \
+          --cpu 1 \
+          --set-env-vars "CLINIC_API_ORIGIN=$$ORIGIN"
+
+substitutions:
+  _REGION: asia-south1
+  _ARTIFACT_REPO: kaana
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic-crm:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/clinic-crm:latest

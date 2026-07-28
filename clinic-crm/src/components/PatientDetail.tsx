@@ -1,11 +1,14 @@
 import { useState, useEffect, Fragment, useMemo } from 'react';
-import { ChevronLeft, MessageSquare, UserCheck, Clock, FileText, PlusCircle, Phone, Stethoscope, Search, X, Pencil, Banknote } from 'lucide-react';
+import { ChevronLeft, MessageSquare, UserCheck, Clock, FileText, PlusCircle, Phone, Stethoscope, Search, X, Pencil, Banknote, Share2 } from 'lucide-react';
 import type { Appointment, Patient, Payment } from '../types';
 import { STATUS_LABELS } from '../types';
 import type { CatalogItem } from '../types';
 import { updatePatient, updateAppointment, createPatient, createAppointment, fetchPatients, fetchAvailableSlots, fetchCatalog, fetchPatientPayments } from '../lib/api';
+import { toTelUrl, toWhatsAppUrl } from '../lib/phone';
 import { PatientFormDialog } from './PatientFormDialog';
 import { RecordPaymentDialog } from './RecordPaymentDialog';
+import { SharePaymentDialog } from './SharePaymentDialog';
+import type { ClinicProfile } from '../lib/clinicBranding';
 import {
   formatPhone10,
   isValidAge,
@@ -14,8 +17,6 @@ import {
   sanitizeAge,
   sanitizePhoneDigits,
 } from '../lib/patientInput';
-
-const INBOX = import.meta.env.VITE_INBOX_URL || 'http://localhost:5173';
 
 const PALETTES: [string, string][] = [
   ['#1565C0','#e3f0fd'],['#0369a1','#e0f2fe'],['#7c3aed','#f5f3ff'],
@@ -48,22 +49,24 @@ type DetailTab = 'overview' | 'history' | 'notes';
 interface Props {
   patient: Patient;
   appointments: Appointment[];
+  clinicProfile: ClinicProfile;
   onBack: () => void;
   onUpdated: () => void;
   onToast: (msg: string, type?: 'ok' | 'err') => void;
   onBookFollowup?: (patient: Patient) => void;
 }
 
-export function PatientDetail({ patient, appointments, onBack, onUpdated, onToast, onBookFollowup }: Props) {
+export function PatientDetail({ patient, appointments, clinicProfile, onBack, onUpdated, onToast, onBookFollowup }: Props) {
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [note,    setNote]    = useState('');
   const [saving,  setSaving]  = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showPay, setShowPay] = useState(false);
+  const [sharePayment, setSharePayment] = useState<Payment | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [fg, bg] = ava(patient.name);
-  const phone = patient.phone.replace(/\D/g, '');
-  const chatUrl = `${INBOX}?thread=wa-${phone}`;
+  const telUrl = toTelUrl(patient.phone);
+  const waUrl = toWhatsAppUrl(patient.phone);
 
   const visited = appointments
     .filter((a) => a.status === 'visited')
@@ -141,8 +144,8 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
         {/* Quick contact */}
         <div className="detail-hero-contact">
           <button type="button" className="quick-action-btn quick-action-light" title="Edit" onClick={() => setShowEdit(true)}><Pencil size={14} /></button>
-          {phone && <a href={`tel:+91${phone}`} className="quick-action-btn quick-action-light" title="Call"><Phone size={14} /></a>}
-          {phone && <a href={`https://wa.me/91${phone}`} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp"><MessageSquare size={14} /></a>}
+          {telUrl && <a href={telUrl} className="quick-action-btn quick-action-light" title="Call"><Phone size={14} /></a>}
+          {waUrl && <a href={waUrl} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp"><MessageSquare size={14} /></a>}
         </div>
       </div>
 
@@ -161,6 +164,17 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
           prefillPatientId={patient.id}
           onClose={() => setShowPay(false)}
           onSaved={refreshPayments}
+          onToast={onToast}
+        />
+      )}
+
+      {sharePayment && (
+        <SharePaymentDialog
+          payment={sharePayment}
+          patientName={patient.name}
+          patientPhone={patient.phone}
+          clinic={clinicProfile}
+          onClose={() => setSharePayment(null)}
           onToast={onToast}
         />
       )}
@@ -224,9 +238,11 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
                 </div>
 
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <a href={chatUrl} target="_blank" rel="noreferrer" className="chat-btn" style={{ flex: 1 }}>
-                    <MessageSquare size={14} /> WhatsApp
-                  </a>
+                  {waUrl && (
+                    <a href={waUrl} target="_blank" rel="noreferrer" className="chat-btn" style={{ flex: 1 }}>
+                      <MessageSquare size={14} /> WhatsApp
+                    </a>
+                  )}
                   {onBookFollowup && (
                     <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => onBookFollowup(patient)}>
                       <PlusCircle size={13} /> Book again
@@ -271,7 +287,18 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
                           {pay.notes && <span>{pay.notes}</span>}
                           {pay.reference && <span className="ref">{pay.reference}</span>}
                         </div>
-                        <small>{pay.createdAt ? new Date(pay.createdAt).toLocaleDateString('en-IN') : ''}</small>
+                        <div className="payment-row-end">
+                          <small>{pay.createdAt ? new Date(pay.createdAt).toLocaleDateString('en-IN') : ''}</small>
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            aria-label="Share payment on WhatsApp"
+                            title="Share receipt"
+                            onClick={() => setSharePayment(pay)}
+                          >
+                            <Share2 size={16} />
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -449,7 +476,7 @@ export function PatientDetail({ patient, appointments, onBack, onUpdated, onToas
    BOOK / WALK-IN FORM  (with patient search)
 ═══════════════════════════════════════════ */
 interface BookProps {
-  onBooked: () => void;
+  onBooked: (scheduledAt: string) => void;
   onToast: (msg: string, type?: 'ok' | 'err') => void;
   prefillPatient?: Patient | null;
   onCancelPrefill?: () => void;
@@ -635,6 +662,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
         status: 'confirmed',
         source: 'Walk-in',
       });
+      const when = `${date}T${time}:00`;
       onToast(`Booked for ${patient.name}`);
       setStep('lookup');
       setName('');
@@ -643,7 +671,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
       setFoundPatient(null);
       setSearchPhone('');
       setChiefComplaint('');
-      onBooked();
+      onBooked(when);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Could not book. Try again.';
       setError(msg);
@@ -671,7 +699,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
         <div>
           <p className="eyebrow">Book</p>
           <h1 className="page-title">New booking</h1>
-          <p className="page-subtitle">{steps.length} easy steps</p>
+          <p className="page-subtitle">{steps.length} steps</p>
         </div>
       </header>
 
@@ -691,7 +719,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
       {step === 'lookup' && (
         <div className="book-card">
           <p className="book-card-title">Find patient</p>
-          <p className="book-card-sub">Type phone number to see if they are already saved.</p>
+          <p className="book-card-sub">Type phone number to check if already saved.</p>
           <div className="form-field" style={{ marginTop: 16 }}>
             <label className="form-label">Phone number</label>
             <div className="search-field-row">
@@ -818,27 +846,22 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
             {servicesList.length > 0 ? (
               <>
                 <div className="service-grid">
-                  {servicesList.map((s) => {
-                    const priceLabel = (s.price && String(s.price).trim()) || (s.priceNum && s.priceNum > 0 ? `₹${Number(s.priceNum).toLocaleString('en-IN')}` : '');
-                    return (
+                  {servicesList.map((s) => (
                       <button
                         key={s.id}
                         type="button"
                         className={`service-chip${serviceId === s.id ? ' selected' : ''}`}
                         onClick={() => { setService(s.title); setServiceId(s.id); }}
-                        title={priceLabel ? `${s.title} · ${priceLabel}` : s.title}
+                        title={s.title}
                       >
                         <span className="service-chip-title">{s.title}</span>
-                        {(priceLabel || s.category) && (
+                        {s.category && (
                           <span className="service-chip-sub">
-                            {priceLabel ? priceLabel : ''}
-                            {priceLabel && s.category ? ' · ' : ''}
-                            {s.category ? s.category : ''}
+                            {s.category}
                           </span>
                         )}
                       </button>
-                    );
-                  })}
+                    ))}
                 </div>
                 {selectedCatalog?.subtitle && (
                   <p className="form-hint" style={{ marginTop: 10 }}>
@@ -904,7 +927,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
                 </div>
               ) : (
                 <div className="time-grid">
-                  {['10:00','10:30','11:00','11:30','12:00','12:30','17:00','17:30','18:00','18:30','19:00','19:30'].map((t) => (
+                  {['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00'].map((t) => (
                     <button key={t} type="button" className={`time-chip${time === t ? ' selected' : ''}`} onClick={() => setTime(t)}>
                       {fmtSlot(t)}
                     </button>

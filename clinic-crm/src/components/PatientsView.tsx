@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { LayoutGrid, LayoutList, Search, UserX, Phone, Users, UserPlus, Plus, Banknote, ChevronRight } from 'lucide-react';
+import { LayoutGrid, LayoutList, UserX, Phone, Plus, Banknote, ChevronRight } from 'lucide-react';
 import type { Patient } from '../types';
 import { PatientFormDialog } from './PatientFormDialog';
 import { RecordPaymentDialog } from './RecordPaymentDialog';
@@ -34,7 +34,6 @@ const FILTERS: { id: FilterId; label: string }[] = [
 
 interface Props {
   patients: Patient[];
-  onSearch: (q?: string) => void;
   onSelect: (id: string) => void;
   onToast: (msg: string, type?: 'ok' | 'err') => void;
   onPatientSaved: () => void;
@@ -51,27 +50,29 @@ function paymentSummary(p: Patient) {
   return { label: null, hasHistory: false };
 }
 
-export function PatientsView({ patients, onSearch, onSelect, onToast, onPatientSaved, onPaymentRecorded }: Props) {
-  const [query,  setQuery]  = useState('');
+export function PatientsView({ patients, onSelect, onToast, onPatientSaved, onPaymentRecorded }: Props) {
   const [filter, setFilter] = useState<FilterId>('all');
   const [showAdd, setShowAdd] = useState(false);
   const [payPatient, setPayPatient] = useState<Patient | null>(null);
+  const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
   const [viewMode, setViewMode] = useState<'cards' | 'list'>(() => {
+    if (isMobile()) return 'list';
     const saved = window.localStorage.getItem('clinicPatientsView');
     if (saved === 'list' || saved === 'cards') return saved;
-    return window.matchMedia('(max-width: 767px)').matches ? 'list' : 'cards';
+    return 'cards';
   });
 
   useEffect(() => {
-    window.localStorage.setItem('clinicPatientsView', viewMode);
-  }, [viewMode]);
+    const mq = window.matchMedia('(max-width: 767px)');
+    const sync = () => { if (mq.matches) setViewMode('list'); };
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      onSearch(query.trim() || undefined);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [query, onSearch]);
+    if (!isMobile()) window.localStorage.setItem('clinicPatientsView', viewMode);
+  }, [viewMode]);
 
   const filtered = useMemo(() => {
     let list = [...patients];
@@ -87,22 +88,14 @@ export function PatientsView({ patients, onSearch, onSelect, onToast, onPatientS
     new:       patients.filter((p) => !p.isReturning && !p.lastVisit).length,
   }), [patients]);
 
-  function handleSearch(value: string) {
-    setQuery(value);
-  }
-
   return (
     <div className="view patients-view">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Patients</p>
-          <h1 className="page-title">All patients</h1>
-          <p className="page-subtitle">
-            Showing {filtered.length} of {patients.length}
-          </p>
+      <header className="page-header page-header-compact patients-header">
+        <div className="page-header-main">
+          <h1 className="page-title">Patients</h1>
         </div>
-        <div className="page-header-actions">
-          <div className="view-toggle" role="tablist" aria-label="Patients view">
+        <div className="page-header-actions page-header-actions-inline patients-header-actions">
+          <div className="view-toggle view-toggle-desktop" role="tablist" aria-label="Patients view">
             <button
               type="button"
               role="tab"
@@ -130,56 +123,32 @@ export function PatientsView({ patients, onSearch, onSelect, onToast, onPatientS
         </div>
       </header>
 
-      <div className="patients-summary">
-        <div className="patients-summary-item">
-          <Users size={14} />
-          <span><strong>{patients.length}</strong> total</span>
+      <div className="patients-toolbar patients-toolbar-filters-only">
+        <div className="filter-chips patients-filter-chips">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              className={`filter-chip${filter === f.id ? ' active' : ''}`}
+              onClick={() => setFilter(f.id)}
+            >
+              {f.label}
+              <span className="filter-chip-count">{counts[f.id]}</span>
+            </button>
+          ))}
         </div>
-        <div className="patients-summary-item">
-          <span className="dot dot-green" />
-          <span><strong>{counts.returning}</strong> returning</span>
-        </div>
-        <div className="patients-summary-item">
-          <UserPlus size={14} />
-          <span><strong>{counts.new}</strong> new</span>
-        </div>
-      </div>
-
-      <div className="search-wrap">
-        <span className="search-icon"><Search size={15} /></span>
-        <input
-          type="search"
-          className="search-input"
-          placeholder="Search name, phone, email, age, problem, source, notes…"
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="filter-chips">
-        {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            className={`filter-chip${filter === f.id ? ' active' : ''}`}
-            onClick={() => setFilter(f.id)}
-          >
-            {f.label}
-            <span className="filter-chip-count">{counts[f.id]}</span>
-          </button>
-        ))}
       </div>
 
       {filtered.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon"><UserX size={28} strokeWidth={1.5} /></div>
-          <h2>{query || filter !== 'all' ? 'No patients found' : 'No patients yet'}</h2>
+          <h2>{filter !== 'all' ? 'No patients in this group' : 'No patients yet'}</h2>
           <p>
-            {query
-              ? 'Try another keyword — name, phone, email, problem, source, or notes.'
-              : 'Add your first patient, or they will show up after a WhatsApp booking.'}
+            {filter !== 'all'
+              ? 'Try another filter, or use search (top bar) to find someone.'
+              : 'Add your first patient, or they will show up after a booking.'}
           </p>
-          {!query && filter === 'all' && (
+          {filter === 'all' && (
             <button type="button" className="btn btn-primary" style={{ marginTop: 14 }} onClick={() => setShowAdd(true)}>
               <Plus size={15} /> Add patient
             </button>
@@ -315,7 +284,6 @@ export function PatientsView({ patients, onSearch, onSelect, onToast, onPatientS
         </div>
       )}
 
-      {/* Mobile FAB */}
       <button type="button" className="fab" onClick={() => setShowAdd(true)} aria-label="Add patient">
         <Plus size={22} />
       </button>
