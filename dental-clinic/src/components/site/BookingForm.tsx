@@ -7,7 +7,7 @@ import {
   minBookingDate,
   submitBooking,
 } from "@/lib/clinicBooking";
-import { services as fallbackServices } from "@/lib/services";
+import { bookingServiceTitles, DEFAULT_BOOKING_SERVICE } from "@/lib/services";
 
 /** 16px minimum — prevents iOS Safari from zooming when focusing inputs */
 const FIELD =
@@ -16,7 +16,7 @@ const FIELD =
 export function BookingForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [service, setService] = useState("");
+  const [service, setService] = useState(DEFAULT_BOOKING_SERVICE);
   const [date, setDate] = useState(minBookingDate());
   const [slot, setSlot] = useState("");
   const [notes, setNotes] = useState("");
@@ -31,8 +31,13 @@ export function BookingForm() {
 
   const serviceOptions = useMemo(() => {
     if (services.length) return services;
-    return fallbackServices.map((s) => s.title);
+    return [...bookingServiceTitles];
   }, [services]);
+
+  function pickDefaultService(titles: string[]) {
+    if (titles.includes(DEFAULT_BOOKING_SERVICE)) return DEFAULT_BOOKING_SERVICE;
+    return titles[0] || DEFAULT_BOOKING_SERVICE;
+  }
 
   useEffect(() => {
     let alive = true;
@@ -42,12 +47,12 @@ export function BookingForm() {
         if (!alive) return;
         const titles = (data.services || []).map((s) => s.title).filter(Boolean);
         setServices(titles);
-        if (titles[0]) setService((prev) => prev || titles[0]);
+        setService((prev) => (prev && titles.includes(prev) ? prev : pickDefaultService(titles)));
       })
       .catch(() => {
         if (!alive) return;
         setServices([]);
-        setService((prev) => prev || fallbackServices[0]?.title || "");
+        setService(DEFAULT_BOOKING_SERVICE);
       })
       .finally(() => {
         if (alive) setLoadingServices(false);

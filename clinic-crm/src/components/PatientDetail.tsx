@@ -4,6 +4,7 @@ import type { Appointment, Patient, Payment } from '../types';
 import { STATUS_LABELS } from '../types';
 import type { CatalogItem } from '../types';
 import { updatePatient, updateAppointment, createPatient, createAppointment, fetchPatients, fetchAvailableSlots, fetchCatalog, fetchPatientPayments } from '../lib/api';
+import { BOOKING_SERVICE_TITLES, DEFAULT_BOOKING_SERVICE } from '../lib/bookingServices';
 import { toTelUrl, toWhatsAppUrl } from '../lib/phone';
 import { PatientFormDialog } from './PatientFormDialog';
 import { RecordPaymentDialog } from './RecordPaymentDialog';
@@ -484,11 +485,6 @@ interface BookProps {
 
 type BookStep = 'lookup' | 'patient' | 'treatment' | 'schedule';
 
-function fmtSlot(t: string) {
-  const [h, m] = t.split(':').map(Number);
-  return `${h % 12 || 12}:${m.toString().padStart(2,'0')} ${h >= 12 ? 'PM' : 'AM'}`;
-}
-
 function bookSteps(prefill: boolean, existing: boolean): BookStep[] {
   if (prefill) return ['treatment', 'schedule'];
   if (existing) return ['lookup', 'treatment', 'schedule'];
@@ -504,11 +500,11 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
   const [phone, setPhone] = useState('');
   const [age, setAge] = useState('');
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
-  const [service, setService] = useState('');
+  const [service, setService] = useState(DEFAULT_BOOKING_SERVICE);
   const [serviceId, setServiceId] = useState<string>('');
   const [chiefComplaint, setChiefComplaint] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [time, setTime] = useState('10:00');
+  const [slot, setSlot] = useState('');
   const [slotLabels, setSlotLabels] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -546,8 +542,13 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
           }));
         setCatalogItems(clean);
         if (clean.length > 0) {
-          setService(clean[0].title);
-          setServiceId(clean[0].id);
+          const defaultItem =
+            clean.find((it) => it.title === DEFAULT_BOOKING_SERVICE) || clean[0];
+          setService(defaultItem.title);
+          setServiceId(defaultItem.id);
+        } else {
+          setService(DEFAULT_BOOKING_SERVICE);
+          setServiceId('');
         }
       })
       .catch(() => {});
@@ -555,15 +556,18 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
   }, []);
 
   const servicesList = useMemo(() => {
-    // Canonical: the tenant catalog is the source of truth.
-    // If catalog is empty/unavailable, allow a custom text service entry instead of silently drifting.
     const items = catalogItems.filter((it: any) => {
       if (!it || !it.title) return false;
       const s = String((it as any).status || '').toLowerCase();
       if (!s) return true;
       return !['inactive', 'disabled', 'archived'].includes(s);
     });
-    return items;
+    if (items.length) return items;
+    return BOOKING_SERVICE_TITLES.map((title, i) => ({
+      id: `fallback-${i}`,
+      title,
+      category: '',
+    })) as CatalogItem[];
   }, [catalogItems]);
 
   const selectedCatalog = useMemo(() => {
@@ -579,11 +583,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
         if (!alive) return;
         const labels = d?.slots || [];
         setSlotLabels(labels);
-        // If time isn't in suggestions, set first suggested time
-        if (labels.length > 0) {
-          const t = parseSlotLabel(labels[0]);
-          if (t) setTime(t);
-        }
+        setSlot((prev) => (prev && labels.includes(prev) ? prev : labels[0] || ''));
       })
       .catch(() => { if (alive) setSlotLabels([]); })
       .finally(() => { if (alive) setLoadingSlots(false); });
@@ -633,6 +633,12 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
     if (!returningAgeValid) {
       setError('Age is required');
       onToast('Add patient age to continue', 'err');
+      return;
+    }
+    const time = parseSlotLabel(slot);
+    if (!time) {
+      setError('Please pick a time slot');
+      onToast('Please pick a time slot', 'err');
       return;
     }
     setLoading(true);
@@ -842,45 +848,25 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
             </div>
           )}
           <div className="form-field">
-            <label className="form-label"><Stethoscope size={12} /> Pick one</label>
-            {servicesList.length > 0 ? (
-              <>
-                <div className="service-grid">
-                  {servicesList.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className={`service-chip${serviceId === s.id ? ' selected' : ''}`}
-                        onClick={() => { setService(s.title); setServiceId(s.id); }}
-                        title={s.title}
-                      >
-                        <span className="service-chip-title">{s.title}</span>
-                        {s.category && (
-                          <span className="service-chip-sub">
-                            {s.category}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                </div>
-                {selectedCatalog?.subtitle && (
-                  <p className="form-hint" style={{ marginTop: 10 }}>
-                    {selectedCatalog.subtitle}
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="form-hint" style={{ marginTop: 0 }}>
-                  No services are configured for this clinic yet. Type the visit reason below for now.
-                </p>
-                <input
-                  className="form-input"
-                  value={service}
-                  onChange={(e) => { setService(e.target.value); setServiceId(''); }}
-                  placeholder="e.g. Consultation / RCT / Cleaning"
-                />
-              </>
+            <label className="form-label"><Stethoscope size={12} /> Service</label>
+            <select
+              className="form-input form-select"
+              value={service}
+              onChange={(e) => {
+                const title = e.target.value;
+                const item = servicesList.find((s) => s.title === title);
+                setService(title);
+                setServiceId(item && !item.id.startsWith('fallback-') ? item.id : '');
+              }}
+            >
+              {servicesList.map((s) => (
+                <option key={s.id} value={s.title}>{s.title}</option>
+              ))}
+            </select>
+            {selectedCatalog?.subtitle && (
+              <p className="form-hint" style={{ marginTop: 8 }}>
+                {selectedCatalog.subtitle}
+              </p>
             )}
           </div>
           <div className="form-field">
@@ -906,44 +892,42 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
         <div className="book-card">
           <p className="book-card-title">Date and time</p>
           <div className="form-field">
-            <label className="form-label">Date</label>
-            <input type="date" className="form-input" value={date} onChange={(e) => setDate(e.target.value)} />
+            <label className="form-label">Preferred date</label>
+            <input
+              type="date"
+              className="form-input"
+              min={new Date().toISOString().slice(0, 10)}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
           </div>
           <div className="form-field">
-            <label className="form-label">Time</label>
-            <div style={{ display: 'grid', gap: 10 }}>
-              {loadingSlots && <p className="form-hint" style={{ marginTop: 0 }}>Loading available slots…</p>}
-              {slotLabels.length > 0 ? (
-                <div className="time-grid">
-                  {slotLabels.map((label) => {
-                    const t = parseSlotLabel(label);
-                    if (!t) return null;
-                    return (
-                      <button key={label} type="button" className={`time-chip${time === t ? ' selected' : ''}`} onClick={() => setTime(t)}>
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="time-grid">
-                  {['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00'].map((t) => (
-                    <button key={t} type="button" className={`time-chip${time === t ? ' selected' : ''}`} onClick={() => setTime(t)}>
-                      {fmtSlot(t)}
-                    </button>
-                  ))}
-                </div>
+            <label className="form-label">Preferred time</label>
+            <select
+              className="form-input form-select"
+              value={slot}
+              onChange={(e) => setSlot(e.target.value)}
+              disabled={loadingSlots || slotLabels.length === 0}
+            >
+              {loadingSlots && <option value="">Loading available slots…</option>}
+              {!loadingSlots && slotLabels.length === 0 && (
+                <option value="">No open slots — try another day</option>
               )}
-              <div className="form-field" style={{ marginTop: 4 }}>
-                <label className="form-label" style={{ fontWeight: 500 }}>Custom time <span style={{ color: 'var(--muted)' }}>(optional)</span></label>
-                <input type="time" className="form-input" value={time} onChange={(e) => setTime(e.target.value)} />
-              </div>
-            </div>
+              {slotLabels.map((label) => (
+                <option key={label} value={label}>{label}</option>
+              ))}
+            </select>
           </div>
           {error && <div className="form-error">{error}</div>}
           <div className="form-actions">
             <button type="button" className="btn btn-ghost" onClick={() => setStep('treatment')}>Back</button>
-            <button type="button" className="btn btn-primary" style={{ flex: 1 }} disabled={loading} onClick={submit}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ flex: 1 }}
+              disabled={loading || !slot || slotLabels.length === 0}
+              onClick={submit}
+            >
               {loading ? 'Saving…' : 'Book now'}
             </button>
           </div>

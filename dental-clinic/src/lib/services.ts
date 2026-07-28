@@ -56,4 +56,12 @@ export const services = [
     desc: "Gentle care for children, adults and seniors — all in one clinic.",
   },
 ] as const;
+
+export const DEFAULT_BOOKING_SERVICE = "General Consultation";
+
+/** Website services plus consultation — used by the booking form. */
+export const bookingServiceTitles = [
+  DEFAULT_BOOKING_SERVICE,
+  ...services.map((s) => s.title),
+] as const;
   

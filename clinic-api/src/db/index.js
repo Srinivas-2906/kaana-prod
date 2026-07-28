@@ -162,6 +162,7 @@ export function initDatabase() {
   `);
 
   syncDentaCareDemo();
+  syncDentaCareCatalog();
   return db;
 }
 
@@ -200,17 +201,45 @@ export function tenantToClient(row) {
 export function seedCatalogForTenant(tenantId, industry = 'clinic') {
   const existing = db.prepare('SELECT id FROM catalog_items WHERE tenant_id = ? LIMIT 1').get(tenantId);
   if (existing) return;
+  upsertCatalogForTenant(tenantId, industry);
+}
+
+function upsertCatalogForTenant(tenantId, industry = 'clinic') {
   const items = getCatalogTemplate(industry);
+  const existing = db.prepare('SELECT id, title FROM catalog_items WHERE tenant_id = ?').all(tenantId);
+  const byTitle = new Map(existing.map((row) => [row.title, row.id]));
   const insert = db.prepare(`
     INSERT INTO catalog_items (id, tenant_id, title, subtitle, price, price_num, meta, image_url, category, status, sort_order)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Available', ?)
   `);
+  const update = db.prepare(`
+    UPDATE catalog_items
+    SET subtitle = ?, price = ?, price_num = ?, meta = ?, image_url = ?, category = ?, sort_order = ?, status = 'Available'
+    WHERE id = ?
+  `);
   items.forEach((item, i) => {
-    insert.run(
-      nanoid(10), tenantId, item.title, item.subtitle, item.price, item.priceNum ?? 0,
-      item.meta, item.image, item.category, i,
-    );
+    const id = byTitle.get(item.title);
+    if (id) {
+      update.run(item.subtitle, item.price, item.priceNum ?? 0, item.meta, item.image, item.category, i, id);
+    } else {
+      insert.run(
+        nanoid(10), tenantId, item.title, item.subtitle, item.price, item.priceNum ?? 0,
+        item.meta, item.image, item.category, i,
+      );
+    }
   });
+  const templateTitles = new Set(items.map((item) => item.title));
+  for (const row of existing) {
+    if (!templateTitles.has(row.title)) {
+      db.prepare('DELETE FROM catalog_items WHERE id = ?').run(row.id);
+    }
+  }
+}
+
+function syncDentaCareCatalog() {
+  const tenantId = 'denta-care';
+  if (!db.prepare('SELECT id FROM tenants WHERE id = ?').get(tenantId)) return;
+  upsertCatalogForTenant(tenantId, 'clinic');
 }
 
 export function getCatalogItems(tenantId) {
