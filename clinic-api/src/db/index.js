@@ -229,7 +229,10 @@ function syncDentaCareDemo() {
     city: 'Visakhapatnam',
     emoji: '🦷',
     doctorName: 'Dr. D. Ajit',
-    clinicHours: { start: 10, end: 21, slotMin: 30 },
+    clinicSessions: [
+      { start: 10, end: 15, slotMin: 30 },
+      { start: 17, end: 22, slotMin: 30 },
+    ],
   };
   const tenantSlug = 'dentacare';
 

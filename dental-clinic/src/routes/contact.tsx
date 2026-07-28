@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     q: "What are the consultation hours?",
-    a: "Monday to Saturday, 10:00 AM – 1:00 PM and 5:00 PM – 9:00 PM. The clinic is closed on Sundays.",
+    a: "Monday to Saturday, 10:00 AM – 2:00 PM and 5:00 PM – 9:00 PM. The clinic is closed on Sundays.",
   },
   {
     q: "What is the consultation fee?",
@@ -81,7 +81,7 @@ function Contact() {
               {
                 icon: Clock,
                 t: "Hours",
-                lines: ["Monday – Saturday", "10:00 AM – 1:00 PM", "5:00 PM – 9:00 PM"],
+                lines: ["Monday – Saturday", "10:00 AM – 2:00 PM", "5:00 PM – 9:00 PM"],
               },
               {
                 icon: Phone,

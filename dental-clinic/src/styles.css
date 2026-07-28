@@ -135,4 +135,11 @@
   .lead {
     @apply text-base leading-relaxed text-muted-foreground sm:text-lg;
   }
+
+  /* iOS Safari: inputs <16px trigger focus zoom and layout jump */
+  .booking-form input,
+  .booking-form select,
+  .booking-form textarea {
+    font-size: 16px;
+  }
 }

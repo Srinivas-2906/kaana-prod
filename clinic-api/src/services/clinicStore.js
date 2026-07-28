@@ -77,21 +77,36 @@ function rowToAppointment(row) {
   };
 }
 
+/** Morning 10–2 and evening 5–9 (end hour exclusive in slot loop). */
+const DEFAULT_SESSIONS = [
+  { start: 10, end: 15, slotMin: 30 },
+  { start: 17, end: 22, slotMin: 30 },
+];
+
 const DEFAULT_HOURS = { start: 10, end: 19, slotMin: 30 };
 
-export function getClinicHours(tenantId) {
+export function getClinicSessions(tenantId) {
   const row = getDb().prepare('SELECT settings FROM tenants WHERE id = ?').get(tenantId);
-  if (!row) return DEFAULT_HOURS;
-  try {
-    const s = JSON.parse(row.settings || '{}');
-    return {
-      start: s.clinicHours?.start ?? DEFAULT_HOURS.start,
-      end: s.clinicHours?.end ?? DEFAULT_HOURS.end,
-      slotMin: s.clinicHours?.slotMin ?? DEFAULT_HOURS.slotMin,
-    };
-  } catch {
-    return DEFAULT_HOURS;
+  if (row) {
+    try {
+      const s = JSON.parse(row.settings || '{}');
+      if (Array.isArray(s.clinicSessions) && s.clinicSessions.length) {
+        return s.clinicSessions.map((session) => ({
+          start: session.start ?? DEFAULT_SESSIONS[0].start,
+          end: session.end ?? DEFAULT_SESSIONS[0].end,
+          slotMin: session.slotMin ?? 30,
+        }));
+      }
+    } catch {
+      /* use defaults */
+    }
   }
+  return DEFAULT_SESSIONS;
+}
+
+export function getClinicHours(tenantId) {
+  const sessions = getClinicSessions(tenantId);
+  return sessions[0] ?? DEFAULT_HOURS;
 }
 
 export function getOrCreatePatient({ phone, name, tenantId, source = 'WhatsApp', chiefComplaint, age, conversationId }) {
@@ -520,7 +535,7 @@ export function resolveScheduledAt(dateLabel, timeLabel) {
 }
 
 export function getAvailableSlots(tenantId, dateStr) {
-  const hours = getClinicHours(tenantId);
+  const sessions = getClinicSessions(tenantId);
   const booked = getDb().prepare(`
     SELECT scheduled_at, duration_min FROM appointments
     WHERE tenant_id = ? AND date(scheduled_at) = date(?)
@@ -533,14 +548,15 @@ export function getAvailableSlots(tenantId, dateStr) {
   }));
 
   const slots = [];
-  for (let h = hours.start; h < hours.end; h++) {
-    for (let m = 0; m < 60; m += hours.slotMin) {
-      const label = formatSlotLabel(h, m);
-      const key = `${h}:${String(m).padStart(2, '0')}`;
-      if (!bookedTimes.has(key)) slots.push(label);
+  for (const hours of sessions) {
+    for (let h = hours.start; h < hours.end; h++) {
+      for (let m = 0; m < 60; m += hours.slotMin) {
+        const key = `${h}:${String(m).padStart(2, '0')}`;
+        if (!bookedTimes.has(key)) slots.push(formatSlotLabel(h, m));
+      }
     }
   }
-  return slots.slice(0, 8);
+  return slots;
 }
 
 function formatSlotLabel(h, m) {

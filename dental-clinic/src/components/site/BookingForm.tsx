@@ -9,6 +9,10 @@ import {
 } from "@/lib/clinicBooking";
 import { services as fallbackServices } from "@/lib/services";
 
+/** 16px minimum — prevents iOS Safari from zooming when focusing inputs */
+const FIELD =
+  "w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none focus:border-primary";
+
 export function BookingForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -145,7 +149,7 @@ export function BookingForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="h-fit rounded-[1.75rem] border border-border bg-card p-6 sm:rounded-[2rem] sm:p-8 lg:p-10"
+      className="booking-form h-fit rounded-[1.75rem] border border-border bg-card p-6 sm:rounded-[2rem] sm:p-8 lg:p-10"
     >
       <h2 className="font-display text-2xl text-foreground">Book an appointment</h2>
       <p className="mt-2 text-sm text-muted-foreground">
@@ -161,7 +165,7 @@ export function BookingForm() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className={FIELD}
           />
         </label>
 
@@ -175,7 +179,7 @@ export function BookingForm() {
             placeholder="10-digit mobile number"
             value={phone}
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className={FIELD}
           />
         </label>
 
@@ -187,7 +191,7 @@ export function BookingForm() {
             value={service}
             onChange={(e) => setService(e.target.value)}
             disabled={loadingServices}
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className={FIELD}
           >
             {serviceOptions.map((title) => (
               <option key={title} value={title}>
@@ -206,7 +210,7 @@ export function BookingForm() {
             min={minBookingDate()}
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className={FIELD}
           />
         </label>
 
@@ -226,7 +230,7 @@ export function BookingForm() {
               name="slot"
               value={slot}
               onChange={(e) => setSlot(e.target.value)}
-              className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+              className={FIELD}
             >
               <option value="" disabled>
                 Select a time
@@ -250,7 +254,7 @@ export function BookingForm() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Any pain, allergies, or questions"
-            className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            className={FIELD}
           />
         </label>
 

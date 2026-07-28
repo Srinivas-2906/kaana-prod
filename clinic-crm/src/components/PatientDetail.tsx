@@ -927,7 +927,7 @@ export function BookView({ onBooked, onToast, prefillPatient, onCancelPrefill }:
                 </div>
               ) : (
                 <div className="time-grid">
-                  {['10:00','10:30','11:00','11:30','12:00','12:30','17:00','17:30','18:00','18:30','19:00','19:30'].map((t) => (
+                  {['10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00'].map((t) => (
                     <button key={t} type="button" className={`time-chip${time === t ? ' selected' : ''}`} onClick={() => setTime(t)}>
                       {fmtSlot(t)}
                     </button>
