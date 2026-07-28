@@ -7,6 +7,10 @@ RUN npm ci
 
 FROM deps AS build
 WORKDIR /app
+ARG VITE_CLINIC_API=/api/platform
+ARG VITE_CLINIC_TENANT=dentacare
+ENV VITE_CLINIC_API=$VITE_CLINIC_API
+ENV VITE_CLINIC_TENANT=$VITE_CLINIC_TENANT
 COPY . .
 RUN npm run build && npm prune --omit=dev
 

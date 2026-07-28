@@ -51,10 +51,15 @@ export interface TodayStats {
   date: string;
   total: number;
   unconfirmed: number;
+  unconfirmedToday?: number;
   confirmed: number;
   arrived: number;
   totalPatients: number;
   appointments: Appointment[];
+  /** Website / phone requests for a future day — need confirmation */
+  pendingRequests?: Appointment[];
+  /** All active bookings on later days (confirmed walk-ins, website requests, etc.) */
+  upcomingLater?: Appointment[];
 }
 
 export interface Payment {
@@ -75,12 +80,24 @@ export interface PaymentSummary {
   dueCount: number;
 }
 
-export type TabId = 'overview' | 'today' | 'patients' | 'book' | 'payments' | 'reports';
+export type TabId = 'overview' | 'today' | 'patients' | 'book' | 'payments' | 'reports' | 'team';
+
+export interface AccessRequest {
+  id: string;
+  tenantId: string;
+  email: string;
+  name: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: string;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  reviewNote?: string;
+}
 
 export const STATUS_LABELS: Record<AppointmentStatus, string> = {
   requested: 'Not confirmed',
   confirmed: 'Confirmed',
-  arrived:   'In clinic',
+  arrived:   'Arrived',
   visited:   'Completed',
   cancelled: 'Cancelled',
   no_show:   'Did not come',

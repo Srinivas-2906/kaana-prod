@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, LayoutDashboard, CalendarDays, Users, CalendarPlus, LogOut, Banknote, BarChart3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutDashboard, CalendarDays, Users, CalendarPlus, LogOut, Banknote, BarChart3, UserCog } from 'lucide-react';
 import { logout } from '../lib/auth';
 import type { TabId } from '../types';
 
@@ -11,6 +11,8 @@ const NAV_ITEMS: { id: TabId; label: string; Icon: React.ElementType }[] = [
   { id: 'reports',   label: 'Reports',  Icon: BarChart3 },
 ];
 
+const TEAM_ITEM = { id: 'team' as const, label: 'Team', Icon: UserCog };
+
 interface Props {
   active: TabId;
   collapsed: boolean;
@@ -19,9 +21,11 @@ interface Props {
   brandName: string;
   brandSub: string;
   userInitials: string;
+  showTeam?: boolean;
 }
 
-export function Sidebar({ active, collapsed, onChange, onToggle, brandName, brandSub, userInitials }: Props) {
+export function Sidebar({ active, collapsed, onChange, onToggle, brandName, brandSub, userInitials, showTeam }: Props) {
+  const navItems = showTeam ? [...NAV_ITEMS, TEAM_ITEM] : NAV_ITEMS;
   return (
     <aside className={`clinic-sidebar${collapsed ? ' collapsed' : ''}`}>
 
@@ -43,7 +47,7 @@ export function Sidebar({ active, collapsed, onChange, onToggle, brandName, bran
       {/* Nav */}
       <nav className="sidebar-nav">
         {!collapsed && <span className="sidebar-nav-section">Menu</span>}
-        {NAV_ITEMS.map(({ id, label, Icon }) => (
+        {navItems.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"

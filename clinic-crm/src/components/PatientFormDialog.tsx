@@ -4,7 +4,7 @@ import { Camera, FileText, X } from 'lucide-react';
 import type { Patient } from '../types';
 import { GENDERS, PATIENT_SOURCES } from '../types';
 import { createPatient, updatePatient } from '../lib/api';
-import { uploadPatientPrescription } from '../lib/firebase';
+import { uploadPatientPrescription } from '../lib/uploads';
 import { resolveTenantSlug } from '../lib/tenant';
 import { useScrollLock } from '../hooks/useScrollLock';
 import {

@@ -7,6 +7,10 @@ steps:
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
       - -t
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:latest
+      - --build-arg
+      - VITE_CLINIC_API=${_VITE_CLINIC_API}
+      - --build-arg
+      - VITE_CLINIC_TENANT=${_VITE_CLINIC_TENANT}
       - .
 
   - id: push
@@ -24,6 +28,16 @@ steps:
       - |
         set -euo pipefail
         IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA"
+        CLINIC_API_ORIGIN="${_CLINIC_API_ORIGIN}"
+        if [[ "$$CLINIC_API_ORIGIN" == "auto" ]]; then
+          CLINIC_API_ORIGIN="$$(gcloud run services describe clinic-api \
+            --region "${_REGION}" \
+            --format='value(status.url)' 2>/dev/null || true)"
+        fi
+        if [[ -z "$$CLINIC_API_ORIGIN" ]]; then
+          echo "clinic-api Cloud Run service not found. Deploy clinic-api first or set _CLINIC_API_ORIGIN."
+          exit 1
+        fi
         gcloud run deploy "${_SERVICE}" \
           --image "$$IMAGE" \
           --region "${_REGION}" \
@@ -33,12 +47,16 @@ steps:
           --min-instances 0 \
           --max-instances 3 \
           --memory 512Mi \
-          --cpu 1
+          --cpu 1 \
+          --set-env-vars "CLINIC_API_ORIGIN=$$CLINIC_API_ORIGIN"
 
 substitutions:
   _REGION: asia-south1
   _AR_REPO: apps
-  _SERVICE: dental-clinic
+  _SERVICE: ajitdentalclinic
+  _VITE_CLINIC_API: /api/platform
+  _VITE_CLINIC_TENANT: dentacare
+  _CLINIC_API_ORIGIN: auto
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA

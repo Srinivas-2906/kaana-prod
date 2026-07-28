@@ -38,6 +38,9 @@ hostRules:
   - hosts:
       - api.kaana.in
     pathMatcher: api
+  - hosts:
+      - clinic-api.kaana.in
+    pathMatcher: clinic-api
 pathMatchers:
   - name: marketing
     defaultService: global/backendServices/kaana-web-backend-classic
@@ -53,3 +56,5 @@ pathMatchers:
     defaultService: global/backendServices/ajitdentalclinic-backend
   - name: api
     defaultService: global/backendServices/kaana-api-backend
+  - name: clinic-api
+    defaultService: global/backendServices/clinic-api-backend

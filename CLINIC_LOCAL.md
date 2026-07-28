@@ -5,78 +5,51 @@ Test the full dental clinic stack on your machine without deploying to GCP.
 ## What you need
 
 - Node.js 20+
-- Three terminal windows (API, platform, clinic dashboard)
+- Two terminal windows (**clinic-api**, **clinic-crm**)
 
-Optional: real WhatsApp via ngrok + Meta token (step 6 below).
+Optional: `botiq-whatsapp-server` only if you need WhatsApp booking sync (separate stack).
 
 ---
 
 ## Step 1 — Install dependencies (one time)
 
 ```bash
-cd botiq-whatsapp-server && npm install
-cd ../kaana-platform && npm install
+cd clinic-api && npm install
 cd ../clinic-crm && npm install
-cd ../botiq && npm install   # optional — for inbox
 ```
 
 ---
 
-## Step 2 — Start the API (terminal 1)
+## Step 2 — Start clinic API (terminal 1)
 
 ```bash
-cd botiq-whatsapp-server
+cd clinic-api
 cp .env.example .env   # skip if .env already exists
-```
-
-Add this line to `.env` for local testing **without** a real WhatsApp token:
-
-```
-WHATSAPP_DRY_RUN=true
-```
-
-Then start the server:
-
-```bash
 npm run dev
 ```
 
 You should see:
 
 ```
-API:        http://localhost:3002/api
-Demo chat:  POST http://localhost:3002/api/demo/whatsapp
-Clinic login: clinic@demo.kaana.in / demo1234
-Reminders:  scheduler every 60s
+Clinic API (standalone)
+API:    http://localhost:3010/api
+Login:  ajitdentacare@gmail.com / Dentacare@123  (tenant: dentacare)
 ```
-
-> Default port is **3002** if set in `.env` (`PORT=3002`).
 
 ---
 
-## Step 3 — Start Kaana platform (terminal 2)
-
-```bash
-cd kaana-platform
-npm run dev
-```
-
-Open **http://localhost:5180**
-
----
-
-## Step 4 — Start clinic dashboard (terminal 3)
+## Step 3 — Start clinic dashboard (terminal 2)
 
 ```bash
 cd clinic-crm
 npm run dev
 ```
 
-Open **http://localhost:5185**
+Open **http://localhost:5185?tenant=dentacare**
 
 ---
 
-## Step 5 — Log in
+## Step 4 — Log in
 
 ### Option A — Demo clinic account (fastest)
 
@@ -213,14 +186,14 @@ Demo tenant slug: **`smile-dental`** (Smile Dental Clinic)
 
 ## Troubleshooting
 
-**401 on clinic dashboard** — Log in again at localhost:5180, then reopen clinic desk.
+**401 on clinic dashboard** — Log in again at localhost:5185.
 
-**Empty Today tab** — Run the WhatsApp simulation (step 6) or use the Book tab.
+**Empty Today tab** — Use the Book tab to add a walk-in, or check that `clinic-api` seeded demo data on first run.
 
-**API port mismatch** — Ensure `clinic-crm` uses `VITE_WHATSAPP_API=http://localhost:3002/api` (default).
+**API connection refused** — Start `clinic-api` first (`npm run dev` in `clinic-api`, port **3010**). The CRM proxies `/api` there automatically in dev.
 
-**Demo user missing** — Restart API once; `ensureClinicDemoUser()` runs on boot.
+**Phone cannot connect** — Same Wi‑Fi as Mac; allow Node/Vite through macOS firewall.
 
 ```bash
-curl http://localhost:3002/api/demo/clinic-credentials
+curl http://localhost:3010/api/health
 ```

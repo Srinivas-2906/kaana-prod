@@ -1,13 +1,23 @@
-import { useState } from 'react';
-import { RefreshCw, Phone, MessageSquare, Sunrise, Sunset, LayoutList, Columns3, Banknote, MoreVertical } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { RefreshCw, Phone, MessageSquare, LayoutList, Columns3, Banknote, MoreVertical } from 'lucide-react';
 import type { Appointment, AppointmentStatus } from '../types';
 import { STATUS_LABELS } from '../types';
 import { updateAppointment } from '../lib/api';
+import { toTelUrl, toWhatsAppUrl } from '../lib/phone';
+import { formatApptTime, formatTodayHeader, isApptToday } from '../lib/appointmentDisplay';
 import { AppointmentBoard } from './AppointmentBoard';
 import { CompleteVisitDialog } from './CompleteVisitDialog';
 import { AppointmentActionsDialog } from './AppointmentActionsDialog';
 
 type TodayViewMode = 'list' | 'board';
+type StatusFilter = 'all' | 'requested' | 'confirmed' | 'arrived';
+
+const FILTER_CHIPS: { id: StatusFilter; tone: string; label: string; statKey: keyof Props['stats'] }[] = [
+  { id: 'all', tone: 'purple', label: 'all', statKey: 'total' },
+  { id: 'requested', tone: 'amber', label: 'confirm', statKey: 'unconfirmed' },
+  { id: 'confirmed', tone: 'blue', label: 'confirmed', statKey: 'confirmed' },
+  { id: 'arrived', tone: 'green', label: 'arrived', statKey: 'arrived' },
+];
 
 const PALETTES: [string, string][] = [
   ['#1565C0','#e3f0fd'],['#0369a1','#e0f2fe'],['#7c3aed','#f5f3ff'],
@@ -16,13 +26,13 @@ const PALETTES: [string, string][] = [
 function ava(name: string): [string, string] { return PALETTES[name.charCodeAt(0) % PALETTES.length]; }
 
 function splitTime(iso: string) {
-  const t = new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true }).toUpperCase();
+  const t = formatApptTime(iso).toUpperCase();
   const parts = t.split(' ');
   return { hm: parts[0], ampm: parts[1] ?? '' };
 }
 
-function dateHeader(iso: string) {
-  return new Date(iso).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+function isMobileViewport() {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
 }
 
 const NEXT: Partial<Record<AppointmentStatus, AppointmentStatus>> = {
@@ -56,10 +66,25 @@ interface Props {
 }
 
 export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoToBook, onToast }: Props) {
-  const [viewMode, setViewMode] = useState<TodayViewMode>('board');
+  const [viewMode, setViewMode] = useState<TodayViewMode>(() => (isMobileViewport() ? 'list' : 'board'));
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [collapseSessions, setCollapseSessions] = useState(false);
   const [completeAppt, setCompleteAppt] = useState<Appointment | null>(null);
   const [actionsAppt, setActionsAppt] = useState<Appointment | null>(null);
-  const today = appointments.length ? dateHeader(appointments[0].scheduledAt) : dateHeader(new Date().toISOString());
+  const todayLabel = formatTodayHeader();
+
+  const todayAppts = useMemo(
+    () => appointments.filter((a) => isApptToday(a.scheduledAt)),
+    [appointments],
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const sync = () => { if (mq.matches) setViewMode('list'); };
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
 
   async function advance(appt: Appointment) {
     const next = NEXT[appt.status];
@@ -75,19 +100,33 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
     } catch { onToast('Could not save', 'err'); }
   }
 
-  const sorted = [...appointments].sort(
-    (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
+  const sorted = useMemo(
+    () => [...todayAppts].sort(
+      (a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime(),
+    ),
+    [todayAppts],
   );
 
-  // Group into sessions
-  const morning = sorted.filter(a => new Date(a.scheduledAt).getHours() < 14);
-  const evening = sorted.filter(a => new Date(a.scheduledAt).getHours() >= 14);
+  const filtered = useMemo(() => {
+    if (statusFilter === 'all') return sorted;
+    return sorted.filter((a) => a.status === statusFilter);
+  }, [sorted, statusFilter]);
+
+  function toggleStatusFilter(next: StatusFilter) {
+    setStatusFilter((prev) => (prev === next ? 'all' : next));
+  }
+
+  // Group into sessions (optional in list view)
+  const morning = filtered.filter(a => new Date(a.scheduledAt).getHours() < 14);
+  const evening = filtered.filter(a => new Date(a.scheduledAt).getHours() >= 14);
+  const showSessionSplit = !collapseSessions && morning.length > 0 && evening.length > 0;
 
   function AppointmentCard({ appt }: { appt: Appointment }) {
     const { hm, ampm } = splitTime(appt.scheduledAt);
     const name = appt.patientName || 'Patient';
     const [fg, bg] = ava(name);
-    const phone = appt.patientPhone?.replace(/\D/g, '') || '';
+    const telUrl = toTelUrl(appt.patientPhone);
+    const waUrl = toWhatsAppUrl(appt.patientPhone);
 
     return (
       <li className={`appt-card status-${appt.status}`}>
@@ -109,6 +148,7 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
             <div className="appt-tags">
               <span className={TAG_CLASS[appt.status]}>{STATUS_LABELS[appt.status]}</span>
               {appt.source === 'WhatsApp' && <span className="tag tag-wa"><MessageSquare size={9}/> WA</span>}
+              {appt.source === 'Website' && <span className="tag tag-web">Web</span>}
               {appt.paymentAmount != null && appt.paymentAmount > 0 && (
                 <span className="tag tag-payment"><Banknote size={9}/> ₹{appt.paymentAmount.toLocaleString('en-IN')}</span>
               )}
@@ -116,14 +156,18 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
           </div>
           <div className="appt-action-col">
             {/* Quick contact actions */}
-            {phone && (
+            {(telUrl || waUrl) && (
               <div className="quick-contact">
-                <a href={`tel:+91${phone}`} className="quick-action-btn" title={`Call ${name}`}>
-                  <Phone size={12} />
-                </a>
-                <a href={`https://wa.me/91${phone}`} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp">
-                  <MessageSquare size={12} />
-                </a>
+                {telUrl && (
+                  <a href={telUrl} className="quick-action-btn" title={`Call ${name}`}>
+                    <Phone size={12} />
+                  </a>
+                )}
+                {waUrl && (
+                  <a href={waUrl} target="_blank" rel="noreferrer" className="quick-action-btn quick-action-wa" title="WhatsApp">
+                    <MessageSquare size={12} />
+                  </a>
+                )}
               </div>
             )}
             <button type="button" className="quick-action-btn" title="Actions" onClick={() => setActionsAppt(appt)}>
@@ -140,31 +184,36 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
     );
   }
 
-  function SessionBlock({ label, icon, appts, emptyMsg }: {
-    label: string; icon: React.ReactNode; appts: Appointment[]; emptyMsg: string;
+  function ListBlock({ appts }: { appts: Appointment[] }) {
+    return (
+      <>
+        <div className="appt-list-header" aria-hidden="true">
+          <span>Time</span>
+          <span>Patient</span>
+          <span>What for</span>
+          <span>Status</span>
+          <span></span>
+        </div>
+        <ul className="appt-list appt-with-header">
+          {appts.map(a => <AppointmentCard key={a.id} appt={a} />)}
+        </ul>
+      </>
+    );
+  }
+
+  function SessionBlock({ label, appts, emptyMsg }: {
+    label: string; appts: Appointment[]; emptyMsg: string;
   }) {
     return (
       <div className="session-block">
         <div className="session-header">
-          {icon}
           <span className="session-label">{label}</span>
           <span className="session-count">{appts.length}</span>
         </div>
         {appts.length === 0 ? (
           <p className="session-empty">{emptyMsg}</p>
         ) : (
-          <>
-            <div className="appt-list-header" aria-hidden="true">
-              <span>Time</span>
-              <span>Patient</span>
-              <span>What for</span>
-              <span>Status</span>
-              <span></span>
-            </div>
-            <ul className="appt-list appt-with-header">
-              {appts.map(a => <AppointmentCard key={a.id} appt={a} />)}
-            </ul>
-          </>
+          <ListBlock appts={appts} />
         )}
       </div>
     );
@@ -172,72 +221,66 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
 
   return (
     <div className="view today-view">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Today</p>
-          <h1 className="page-title">{today}</h1>
-          <p className="page-subtitle">{stats.total} appointment{stats.total !== 1 ? 's' : ''} today</p>
-        </div>
-        <div className="page-header-actions">
-          <button type="button" className="icon-btn" onClick={onRefresh} aria-label="Refresh">
-            <RefreshCw size={15} />
-          </button>
+      <header className="page-header page-header-compact">
+        <div className="page-header-main">
+          <div className="page-header-title-row">
+            <h1 className="page-title">Today · {todayLabel}</h1>
+            <span className="page-title-meta">{stats.total} appt{stats.total !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="today-stat-row">
+            <div className="header-stat-chips" role="toolbar" aria-label="Filter appointments">
+              {FILTER_CHIPS.map(({ id, tone, label, statKey }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`header-stat-chip ${tone}${statusFilter === id ? ' active' : ''}`}
+                  aria-pressed={statusFilter === id}
+                  onClick={() => toggleStatusFilter(id)}
+                  title={statusFilter === id ? `Showing ${label} only — tap again for all` : `Show ${label} only`}
+                >
+                  <strong>{stats[statKey]}</strong> {label}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="icon-btn today-refresh-btn" onClick={onRefresh} aria-label="Refresh">
+              <RefreshCw size={15} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Stats */}
-      <div className="stat-strip">
-        <div className="stat-card">
-          <div className="stat-icon amber">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-          </div>
-          <div className="stat-val">{stats.unconfirmed}</div>
-          <div className="stat-lbl">Need confirm</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon blue">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
-          <div className="stat-val">{stats.confirmed}</div>
-          <div className="stat-lbl">Confirmed</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon green">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          </div>
-          <div className="stat-val">{stats.arrived}</div>
-          <div className="stat-lbl">In clinic</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon purple">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          </div>
-          <div className="stat-val">{stats.total}</div>
-          <div className="stat-lbl">Total</div>
-        </div>
-      </div>
-
-      {/* List / Board toggle */}
+      {/* List / Board toggle — desktop only */}
       {sorted.length > 0 && (
-        <div className="view-toggle" role="tablist" aria-label="Schedule view">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'board'}
-            className={`view-toggle-btn${viewMode === 'board' ? ' active' : ''}`}
-            onClick={() => setViewMode('board')}
-          >
-            <Columns3 size={15} /> Board
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={viewMode === 'list'}
-            className={`view-toggle-btn${viewMode === 'list' ? ' active' : ''}`}
-            onClick={() => setViewMode('list')}
-          >
-            <LayoutList size={15} /> List
-          </button>
+        <div className="today-toolbar">
+          <div className="view-toggle view-toggle-desktop" role="tablist" aria-label="Schedule view">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'board'}
+              className={`view-toggle-btn${viewMode === 'board' ? ' active' : ''}`}
+              onClick={() => setViewMode('board')}
+            >
+              <Columns3 size={15} /> Board
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'list'}
+              className={`view-toggle-btn${viewMode === 'list' ? ' active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              <LayoutList size={15} /> List
+            </button>
+          </div>
+          {viewMode === 'list' && morning.length > 0 && evening.length > 0 && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm today-session-toggle"
+              onClick={() => setCollapseSessions(v => !v)}
+            >
+              {collapseSessions ? 'Split morning/evening' : 'One list'}
+            </button>
+          )}
         </div>
       )}
 
@@ -254,30 +297,30 @@ export function TodayView({ appointments, stats, onRefresh, onOpenPatient, onGoT
             Book appointment
           </button>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-state today-filter-empty">
+          <h2>No {FILTER_CHIPS.find((c) => c.id === statusFilter)?.label ?? ''} appointments</h2>
+          <p>Try another filter or show everyone scheduled today.</p>
+          <button type="button" className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={() => setStatusFilter('all')}>
+            Show all {stats.total}
+          </button>
+        </div>
       ) : viewMode === 'board' ? (
         <AppointmentBoard
-          appointments={sorted}
+          appointments={filtered}
           onRefresh={onRefresh}
           onOpenPatient={onOpenPatient}
           onToast={onToast}
         />
       ) : (
-        <>
-          <SessionBlock
-            label="Morning · 10 AM to 1 PM"
-            icon={<Sunrise size={14} color="var(--warning)" />}
-            appts={morning}
-            emptyMsg="No one in the morning slot"
-          />
-          {evening.length > 0 && (
-            <SessionBlock
-              label="Evening · 5 PM to 9 PM"
-              icon={<Sunset size={14} color="var(--brand)" />}
-              appts={evening}
-              emptyMsg="No one in the evening slot"
-            />
-          )}
-        </>
+        showSessionSplit ? (
+          <>
+            <SessionBlock label="Morning" appts={morning} emptyMsg="No morning appointments" />
+            <SessionBlock label="Evening" appts={evening} emptyMsg="No evening appointments" />
+          </>
+        ) : (
+          <ListBlock appts={filtered} />
+        )
       )}
 
       {completeAppt && (

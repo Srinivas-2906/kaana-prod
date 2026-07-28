@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Info, LogIn } from 'lucide-react';
-import { isAuthenticated, loginWithCredentials, saveToken, clearToken, getAuthToken } from '../lib/auth';
+import { Eye, EyeOff, Info, LogIn, UserPlus, ArrowLeft } from 'lucide-react';
+import { isAuthenticated, loginWithCredentials, saveToken, clearToken, getAuthToken, submitAccessRequest } from '../lib/auth';
 import { resolveTenantSlug, getTenantLoginDefaults } from '../lib/tenant';
 
 const API_BASE = (() => {
-  const api = (import.meta as any).env?.VITE_WHATSAPP_API as string | undefined || '/api';
+  const api = (import.meta as any).env?.VITE_CLINIC_API as string | undefined
+    || (import.meta as any).env?.VITE_WHATSAPP_API as string | undefined
+    || '/api';
   return api.replace(/\/api$/, '') || '';
 })();
 
@@ -18,6 +20,10 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [businessName, setBusinessName] = useState('');
+  const [mode, setMode] = useState<'login' | 'request'>('login');
+  const [requestName, setRequestName] = useState('');
+  const [requestEmail, setRequestEmail] = useState('');
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
     if (!tenantSlug) return;
@@ -32,7 +38,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
       const token = getAuthToken();
       if (!token) { setChecking(false); return; }
       try {
-        const API = import.meta.env.VITE_WHATSAPP_API || '/api';
+        const API = import.meta.env.VITE_CLINIC_API || import.meta.env.VITE_WHATSAPP_API || '/api';
         const base = API.replace(/\/api$/, '') || '';
         const res = await fetch(`${base}/api/platform/me`, { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) throw new Error('Unauthorized');
@@ -55,7 +61,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!identifier.trim() || !password) {
-      setError('Enter your username/email and password.');
+      setError('Enter email and password.');
       return;
     }
     setLoading(true); setError('');
@@ -66,6 +72,27 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Wrong email or password.');
     } finally { setLoading(false); }
+  }
+
+  async function handleRequestAccess(e: React.FormEvent) {
+    e.preventDefault();
+    if (!requestName.trim() || !requestEmail.trim()) {
+      setError('Enter your name and Gmail.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const result = await submitAccessRequest(requestEmail.trim(), requestName.trim());
+      setRequestSent(true);
+      if (result.alreadyPending) {
+        setError('');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not submit request.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (checking) {
@@ -102,6 +129,9 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
 
           {/* Form */}
           <div className="login-form-area">
+            {mode === 'login' ? (
+              <>
+            {!import.meta.env.PROD && (
             <div className="login-demo-hint">
               <Info size={15} color="var(--brand)" style={{ flexShrink: 0, marginTop: 1 }} />
               <div className="login-demo-hint-text">
@@ -117,6 +147,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             </div>
+            )}
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="login-field">
@@ -171,6 +202,68 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
                 }
               </button>
             </form>
+
+            <button
+              type="button"
+              className="login-switch-mode"
+              onClick={() => { setMode('request'); setError(''); setRequestSent(false); }}
+            >
+              <UserPlus size={14} /> Need access? Request
+            </button>
+              </>
+            ) : (
+              <>
+            {requestSent ? (
+              <div className="login-request-sent">
+                <strong>Request submitted</strong>
+                <p>Owner will review <code>{requestEmail}</code>. After approval, you will get a link to set your password.</p>
+                <button type="button" className="login-switch-mode" onClick={() => { setMode('login'); setRequestSent(false); }}>
+                  <ArrowLeft size={14} /> Back to sign in
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="login-request-intro">
+                  Enter your Gmail. Owner must approve before you can sign in.
+                </p>
+                <form onSubmit={handleRequestAccess} noValidate>
+                  <div className="login-field">
+                    <label htmlFor="reqName" className="login-label">Your name</label>
+                    <input
+                      id="reqName"
+                      type="text"
+                      className="login-input"
+                      value={requestName}
+                      onChange={(e) => setRequestName(e.target.value)}
+                      autoComplete="name"
+                      required
+                    />
+                  </div>
+                  <div className="login-field">
+                    <label htmlFor="reqEmail" className="login-label">Gmail address</label>
+                    <input
+                      id="reqEmail"
+                      type="email"
+                      className="login-input"
+                      value={requestEmail}
+                      onChange={(e) => setRequestEmail(e.target.value)}
+                      autoComplete="email"
+                      autoCapitalize="none"
+                      required
+                    />
+                  </div>
+                  {error && <div className="login-error">{error}</div>}
+                  <button type="submit" className="login-submit" disabled={loading}>
+                    {loading ? 'Submitting…' : <><UserPlus size={15} /> Request access</>}
+                  </button>
+                </form>
+                <button type="button" className="login-switch-mode" onClick={() => { setMode('login'); setError(''); }}>
+                  <ArrowLeft size={14} /> Back to sign in
+                </button>
+              </>
+            )}
+              </>
+            )}
           </div>
 
         </div>

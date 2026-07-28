@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, Phone, Clock, Mail, HelpCircle } from "lucide-react";
 import { Reveal } from "@/components/site/Reveal";
+import { BookingForm } from "@/components/site/BookingForm";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -109,68 +110,7 @@ function Contact() {
 
           <div className="h-fit self-start lg:sticky lg:top-24">
           <Reveal delayMs={80} direction="left">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const form = e.currentTarget;
-              const fd = new FormData(form);
-              const name = String(fd.get("name") ?? "").trim();
-              const phone = String(fd.get("phone") ?? "").trim();
-              const msg = String(fd.get("msg") ?? "").trim();
-
-              const text = [
-                "Appointment request",
-                name ? `Name: ${name}` : null,
-                phone ? `Phone: ${phone}` : null,
-                msg ? `Reason: ${msg}` : null,
-              ]
-                .filter(Boolean)
-                .join("\n");
-
-              const waUrl = `https://wa.me/916301433852?text=${encodeURIComponent(text)}`;
-              window.open(waUrl, "_blank", "noopener,noreferrer");
-            }}
-            className="h-fit rounded-[1.75rem] border border-border bg-card p-6 sm:rounded-[2rem] sm:p-8 lg:p-10"
-          >
-            <h2 className="font-display text-2xl text-foreground">Request an appointment</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Share a few details. We’ll open WhatsApp so you can message the clinic.
-            </p>
-            <div className="mt-5 grid gap-4 sm:mt-6">
-              <label className="text-sm">
-                <span className="mb-1.5 block font-medium text-foreground">Full name</span>
-                <input
-                  required
-                  name="name"
-                  type="text"
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
-                />
-              </label>
-              <label className="text-sm">
-                <span className="mb-1.5 block font-medium text-foreground">Phone</span>
-                <input
-                  required
-                  name="phone"
-                  type="tel"
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
-                />
-              </label>
-              <label className="text-sm">
-                <span className="mb-1.5 block font-medium text-foreground">Reason for visit</span>
-                <textarea
-                  name="msg"
-                  rows={4}
-                  className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-primary"
-                />
-              </label>
-              <button
-                type="submit"
-                className="mt-1 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01]"
-              >
-                Message on WhatsApp
-              </button>
-            </div>
-          </form>
+          <BookingForm />
           </Reveal>
           </div>
         </div>
