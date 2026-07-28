@@ -79,16 +79,17 @@ steps:
           --min-instances 0 \
           --max-instances 3 \
           --memory 256Mi \
-          --cpu 1
+          --cpu 1 \
+          --set-env-vars "CLINIC_API_ORIGIN=$$(gcloud run services describe ${_CLINIC_API_SERVICE} --region ${_REGION} --format='value(status.url)')"
 
 substitutions:
   _REGION: asia-south1
   _ARTIFACT_REPO: kaana
   _CLINIC_API_SERVICE: clinic-api
   _CLINIC_CRM_SERVICE: kaana-clinic
-  _VITE_CLINIC_API: https://clinic-api.kaana.in/api
+  _VITE_CLINIC_API: /api
   _VITE_TENANT_SLUG: dentacare
-  _PUBLIC_CLINIC_API_URL: https://clinic-api.kaana.in
+  _PUBLIC_CLINIC_API_URL: https://clinic-api-wtba53dhka-el.a.run.app
   _DB_BUCKET: kaana-prod-db
   _API_SERVICE_ACCOUNT: kaana-api-runner@kaana-prod.iam.gserviceaccount.com
   _SECRET_JWT: kaana-jwt-secret

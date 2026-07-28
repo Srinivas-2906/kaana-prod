@@ -214,7 +214,8 @@ steps:
           --min-instances 0 \
           --max-instances 3 \
           --memory 256Mi \
-          --cpu 1
+          --cpu 1 \
+          --set-env-vars "CLINIC_API_ORIGIN=$$(gcloud run services describe clinic-api --region ${_REGION} --format='value(status.url)')"
 
   # ── Build & deploy API (api.kaana.in) ──────────────────────────────────
   - id: build-api
@@ -281,7 +282,7 @@ substitutions:
   _VITE_CLINIC_URL: https://clinic.kaana.in
   _VITE_LISTINGS_URL: https://api.kaana.in/listings
   _VITE_WHATSAPP_LINK: https://wa.me/91XXXXXXXXXX
-  _VITE_CLINIC_API: https://clinic-api.kaana.in/api
+  _VITE_CLINIC_API: /api
   _VITE_PLATFORM_URL: https://app.kaana.in
 
   # API runtime
