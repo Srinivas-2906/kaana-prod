@@ -81,7 +81,7 @@ router.get('/tenant/:slug/booking/slots', (req, res) => {
   if (!tenant) return res.status(404).json({ error: 'Business not found' });
   if (tenant.status !== 'active') return res.status(403).json({ error: 'Bookings unavailable' });
   try {
-    const date = String(req.query.date || new Date().toISOString().slice(0, 10));
+    const date = String(req.query.date || new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
     res.json(listPublicSlots(tenant.id, date));
   } catch (err) {
     res.status(400).json({ error: err.message });

@@ -51,7 +51,8 @@ export function submitBooking(payload: {
   date: string;
   slot: string;
   notes?: string;
-  website?: string;
+  /** Honeypot — must stay empty; bots only */
+  _hp?: string;
 }) {
   return request<BookingResult>(`/tenant/${TENANT_SLUG}/booking`, {
     method: 'POST',
@@ -59,8 +60,9 @@ export function submitBooking(payload: {
   });
 }
 
+/** Clinic calendar date (IST) — matches clinic-api booking validation. */
 export function minBookingDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 }
 
 export function formatBookingConfirmation(iso: string): string {

@@ -35,16 +35,17 @@ export function buildScheduledAt(dateStr, slotLabel) {
   return `${dateStr}T${time}:00`;
 }
 
+function clinicLocalDate() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+}
+
 function isSunday(dateStr) {
-  const d = new Date(`${dateStr}T12:00:00`);
+  const d = new Date(`${dateStr}T12:00:00+05:30`);
   return d.getDay() === 0;
 }
 
 function isPastDate(dateStr) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const picked = new Date(`${dateStr}T00:00:00`);
-  return picked < today;
+  return dateStr < clinicLocalDate();
 }
 
 export function listPublicServices(tenantId) {
@@ -71,7 +72,8 @@ export function listPublicSlots(tenantId, dateStr) {
 }
 
 export function submitPublicBooking(tenantId, body) {
-  if (body?.website) {
+  const honeypot = String(body?._hp ?? body?.website ?? '').trim();
+  if (honeypot) {
     throw new Error('Invalid submission');
   }
 
