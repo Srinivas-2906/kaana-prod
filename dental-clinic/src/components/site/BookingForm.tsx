@@ -104,7 +104,7 @@ export function BookingForm() {
         date,
         slot,
         notes: notes.trim() || undefined,
-        website: String(fd.get("website") ?? ""),
+        _hp: String(fd.get("_hp") ?? ""),
       });
       setSuccess({
         message: result.message,
@@ -263,8 +263,8 @@ export function BookingForm() {
           />
         </label>
 
-        {/* Honeypot — hidden from users */}
-        <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+        {/* Honeypot — obscure name so browsers/password managers do not autofill it */}
+        <input type="text" name="_hp" tabIndex={-1} autoComplete="nope" className="hidden" aria-hidden />
 
         {error && <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</p>}
 
