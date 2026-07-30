@@ -1,0 +1,101 @@
+steps:
+  # ── API (MySQL / Cloud SQL) ───────────────────────────────────────────
+  - id: build-tracker-api
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api:latest
+      - ./kaana-tracker-api
+
+  - id: push-tracker-api
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api
+
+  - id: deploy-tracker-api
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api:$BUILD_ID"
+        gcloud run deploy "${_TRACKER_API_SERVICE}" \
+          --image "$$IMAGE" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 512Mi \
+          --cpu 1 \
+          --add-cloudsql-instances "${_CLOUDSQL_INSTANCE}" \
+          --set-secrets "DB_PASS=${_SECRET_DB_PASSWORD}:latest,JWT_SECRET=${_SECRET_JWT}:latest" \
+          --set-env-vars "NODE_ENV=production,DB_NAME=${_DB_NAME},DB_USER=${_DB_USER},DB_SOCKET=/cloudsql/${_CLOUDSQL_INSTANCE},CORS_ORIGIN=https://tracker.kaana.in"
+
+  # ── Frontend (same Cloud Run service name → tracker.kaana.in unchanged) ─
+  - id: build-tracker
+    name: gcr.io/cloud-builders/docker
+    waitFor: ['deploy-tracker-api']
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:latest
+      - --build-arg
+      - VITE_TRACKER_API=/api
+      - ./kaana-tracker
+
+  - id: push-tracker
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker
+
+  - id: deploy-tracker
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:$BUILD_ID"
+        gcloud run deploy "${_TRACKER_SERVICE}" \
+          --image "$$IMAGE" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1 \
+          --set-env-vars "TRACKER_API_ORIGIN=$$(gcloud run services describe ${_TRACKER_API_SERVICE} --region ${_REGION} --format='value(status.url)')"
+
+substitutions:
+  _REGION: asia-south1
+  _ARTIFACT_REPO: kaana
+  _TRACKER_SERVICE: kaana-tracker
+  _TRACKER_API_SERVICE: kaana-tracker-api
+  _CLOUDSQL_INSTANCE: kaana-prod:asia-south1:kaana-tracker-mysql
+  _DB_NAME: expense_tracker
+  _DB_USER: tracker
+  _SECRET_DB_PASSWORD: kaana-tracker-db-password
+  _SECRET_JWT: kaana-jwt-secret
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api:latest
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:latest
