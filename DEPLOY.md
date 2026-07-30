@@ -49,6 +49,18 @@ Standalone **clinic-api** + **clinic-crm** — see **[CLINIC_PRODUCTION.md](./CL
 gcloud builds submit --config cloudbuild.clinic.yaml .
 ```
 
+## Deploy Kaana Tracker (React + API)
+
+Replaces the legacy PHP app at **https://tracker.kaana.in** (same URL, new stack).
+
+```bash
+gcloud builds submit --config cloudbuild.tracker.yaml --project kaana-prod .
+```
+
+Auto-deploy: push to `main` with changes under `kaana-tracker/` or `kaana-tracker-api/` (see `.github/workflows/deploy-tracker.yml`).
+
+Details: **[TRACKER_MIGRATION.md](./TRACKER_MIGRATION.md)**
+
 ## Deploy only the clinic desk UI (legacy single-service)
 
 ```bash
