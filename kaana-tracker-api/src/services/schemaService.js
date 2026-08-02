@@ -1,5 +1,6 @@
 import { getPool } from '../db/index.js';
 
+let baseDone = false;
 let planDone = false;
 let m2Done = false;
 let m3Done = false;
@@ -15,8 +16,125 @@ async function runAlters(alters) {
   }
 }
 
+async function runCreates(creates) {
+  const pool = getPool();
+  for (const sql of creates) {
+    try {
+      await pool.query(sql);
+    } catch (e) {
+      console.warn('Schema create warning:', e.message);
+    }
+  }
+}
+
+/** Core PHP-era tables — required before M2/M3 migrations on fresh Cloud SQL */
+export async function ensureBaseSchema() {
+  if (baseDone) return;
+
+  await runCreates([
+    `CREATE TABLE IF NOT EXISTS users (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(150) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS transactions (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      type ENUM('income', 'expense') NOT NULL,
+      amount DECIMAL(12, 2) NOT NULL,
+      category VARCHAR(50) NOT NULL,
+      description TEXT,
+      transaction_date DATE NOT NULL,
+      payment_method ENUM('UPI', 'Cash', 'Bank Transfer', 'Card') NOT NULL DEFAULT 'UPI',
+      paid_by ENUM('Company', 'Kaana', 'Partner') NOT NULL DEFAULT 'Company',
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_type (type),
+      INDEX idx_category (category),
+      INDEX idx_transaction_date (transaction_date),
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS clusters (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      description TEXT,
+      color VARCHAR(20) NOT NULL DEFAULT '#3b82f6',
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS work_items (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      cluster_id INT UNSIGNED NULL,
+      title VARCHAR(200) NOT NULL,
+      description TEXT,
+      item_type ENUM('task', 'story', 'work', 'idea') NOT NULL DEFAULT 'task',
+      status ENUM('backlog', 'todo', 'in_progress', 'review', 'done') NOT NULL DEFAULT 'backlog',
+      priority ENUM('low', 'medium', 'high', 'urgent') NOT NULL DEFAULT 'medium',
+      due_date DATE NULL,
+      start_date DATE NULL,
+      source_note_id INT UNSIGNED NULL,
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_status (status),
+      INDEX idx_due_date (due_date),
+      INDEX idx_cluster (cluster_id),
+      INDEX idx_item_type (item_type),
+      FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS whiteboards (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      title VARCHAR(150) NOT NULL,
+      description TEXT,
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS whiteboard_notes (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      whiteboard_id INT UNSIGNED NOT NULL,
+      content TEXT NOT NULL,
+      color VARCHAR(20) NOT NULL DEFAULT '#fef08a',
+      pos_x INT NOT NULL DEFAULT 40,
+      pos_y INT NOT NULL DEFAULT 40,
+      width INT NOT NULL DEFAULT 200,
+      height INT NOT NULL DEFAULT 140,
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (whiteboard_id) REFERENCES whiteboards(id) ON DELETE CASCADE,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS discussions (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      entity_type VARCHAR(30) NOT NULL,
+      entity_id INT UNSIGNED NULL,
+      content TEXT NOT NULL,
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_entity (entity_type, entity_id),
+      INDEX idx_created_at (created_at),
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ]);
+
+  baseDone = true;
+}
+
 export async function ensurePlanSchema() {
   if (planDone) return;
+  await ensureBaseSchema();
   await runAlters([
     'ALTER TABLE whiteboard_notes ADD COLUMN scheduled_date DATE NULL AFTER height',
     'ALTER TABLE work_items ADD COLUMN source_note_id INT UNSIGNED NULL AFTER start_date',

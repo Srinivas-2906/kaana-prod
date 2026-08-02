@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { initDatabase } from './db/index.js';
-import { ensureM4Schema } from './services/schemaService.js';
+import { ensureBaseSchema, ensureM4Schema } from './services/schemaService.js';
 import { corsMiddleware } from './middleware/cors.js';
 import authRouter from './routes/auth.js';
 import projectsRouter from './routes/projects.js';
@@ -20,6 +20,7 @@ const app = express();
 const PORT = process.env.PORT || 3011;
 
 await initDatabase();
+await ensureBaseSchema();
 await ensureM4Schema();
 
 app.use(express.json({ limit: '10mb' }));
