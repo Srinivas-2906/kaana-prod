@@ -45,7 +45,7 @@ async function continueBookingAfterWeb(phone, body, tenant, messageId) {
     return false;
   }
 
-  const service = parseServiceSelection(body, tenant.id) || session.reason;
+  const service = await parseServiceSelection(body, tenant.id) || session.reason;
   if (!service) return false;
 
   patchSession(phone, { reason: service, resumedFromWeb: false, webResumeAt: null }, tenant.id);
@@ -111,7 +111,7 @@ function convIdForPhone(phone) {
   return `wa-${String(phone).replace(/\D/g, '')}`;
 }
 
-function parseServiceSelection(body, tenantId) {
+async function parseServiceSelection(body, tenantId) {
   const text = normalize(body);
   if (!text) return null;
 
@@ -140,8 +140,8 @@ function parseServiceSelection(body, tenantId) {
   return partial?.title ?? null;
 }
 
-function findCatalogItem(tenantId, title) {
-  return await getCatalogItems(tenantId).find((i) => i.title === title) ?? null;
+async function findCatalogItem(tenantId, title) {
+  return (await getCatalogItems(tenantId)).find((i) => i.title === title) ?? null;
 }
 
 async function startBookingWithService(phone, serviceTitle, tenant, messageId) {
@@ -151,7 +151,7 @@ async function startBookingWithService(phone, serviceTitle, tenant, messageId) {
     if (session.phase === 'name') return;
   }
 
-  const item = findCatalogItem(tenant.id, serviceTitle);
+  const item = await findCatalogItem(tenant.id, serviceTitle);
   patchSession(phone, {
     phase: 'name',
     reason: serviceTitle,
@@ -203,7 +203,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
           const timeOptions = session.timeOptions || ['10:00 AM', '11:00 AM', '2:00 PM', '4:00 PM'];
           await sendOptions(phone, { text: 'Which time works for you?', options: timeOptions });
         } else {
-          const catalogTitles = await getCatalogItems(tenant.id).map((i) => i.title).slice(0, 4);
+          const catalogTitles = (await getCatalogItems(tenant.id)).map((i) => i.title).slice(0, 4);
           await sendOptions(phone, { text: 'Which service would you like?', options: catalogTitles });
         }
         return;
@@ -224,7 +224,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
       if (await continueBookingAfterWeb(phone, body, tenant, messageId)) return;
     }
 
-    const servicePick = parseServiceSelection(body, tenant.id);
+    const servicePick = await parseServiceSelection(body, tenant.id);
     if (servicePick && session.phase !== 'done' && session.phase !== 'agent') {
       if (servicePick === session.reason && ['name', 'date'].includes(session.phase)) return;
       await startBookingWithService(phone, servicePick, tenant, messageId);
@@ -243,7 +243,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
       if (/services|pricing|view our/i.test(choice)) {
         const url = servicesUrl(tenant, phone);
         patchSession(phone, { phase: 'await_service', industry: 'clinic' });
-        const catalogTitles = await getCatalogItems(tenant.id).map((i) => i.title).slice(0, 3);
+        const catalogTitles = (await getCatalogItems(tenant.id)).map((i) => i.title).slice(0, 3);
         await sendOptions(phone, {
           text: `Browse treatments & prices:\n${url}${catalogTitles.length ? '\n\nOr pick a service:' : ''}`,
           options: catalogTitles.length
@@ -268,7 +268,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
 
       // Book appointment — show services link first, then fallback list
       const url = servicesUrl(tenant, phone);
-      const catalogTitles = await getCatalogItems(tenant.id).map((i) => i.title);
+      const catalogTitles = (await getCatalogItems(tenant.id)).map((i) => i.title);
       patchSession(phone, { phase: 'await_service', industry: 'clinic' });
       if (catalogTitles.length) {
         await sendOptions(phone, {
@@ -282,7 +282,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
     }
 
     if (phase === 'await_service') {
-      const catalogTitles = await getCatalogItems(tenant.id).map((i) => i.title);
+      const catalogTitles = (await getCatalogItems(tenant.id)).map((i) => i.title);
       const quickOptions = [
         ...catalogTitles.slice(0, 3),
         '📅 Book an appointment',
@@ -307,7 +307,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
         }
       }
 
-      const service = choice && catalogTitles.includes(choice) ? choice : parseServiceSelection(body, tenant.id);
+      const service = choice && catalogTitles.includes(choice) ? choice : await parseServiceSelection(body, tenant.id);
       if (service) {
         await startBookingWithService(phone, service, tenant, messageId);
         return;
@@ -324,7 +324,7 @@ export async function handleClinicMessage(phone, body, buttonPayload, messageId,
       const choice = pickOption(body, buttonPayload, ['📅 Book an appointment', '📞 Speak with our team', '✅ All set, thanks']);
       if (choice?.includes('Book')) {
         patchSession(phone, { phase: 'await_service' });
-        const catalogTitles = await getCatalogItems(tenant.id).map((i) => i.title).slice(0, 4);
+        const catalogTitles = (await getCatalogItems(tenant.id)).map((i) => i.title).slice(0, 4);
         await sendOptions(phone, { text: 'Which service would you like?', options: catalogTitles });
         return;
       }

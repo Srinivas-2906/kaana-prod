@@ -117,7 +117,7 @@ export async function handleIndustryMessage(phone, body, buttonPayload, messageI
       patchSession(phone, { phase: 'qualify', choice, step: 0 });
 
       if (/catalog|browse|shop|menu|services|membership|vehicles|course|admission/i.test(choice)) {
-        const items = await getCatalogItems(tenant.id).slice(0, 3);
+        const items = (await getCatalogItems(tenant.id)).slice(0, 3);
         if (items.length) {
           await botReply(phone, `Here are our top picks 👇`, messageId);
           for (const item of items) await sendCatalogCard(phone, item);
