@@ -35,7 +35,7 @@ Alternate demo accounts (same tenant):
 ### 1. Start API
 
 ```bash
-cd botiq-whatsapp-server
+cd botiq-app
 # Ensure .env has: WHATSAPP_DRY_RUN=true
 npm run dev
 ```
@@ -68,7 +68,7 @@ After login you'll see **3 sample appointments today** (Lakshmi, Rajesh, Priya).
 ## Optional: simulate WhatsApp booking
 
 ```bash
-cd botiq-whatsapp-server
+cd botiq-app
 npm run test:clinic
 ```
 

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: botiq-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: botiq
+      POSTGRES_PASSWORD: botiq_dev
+      POSTGRES_DB: botiq
+    volumes:
+      - botiq_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U botiq -d botiq"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  botiq_pg_data:

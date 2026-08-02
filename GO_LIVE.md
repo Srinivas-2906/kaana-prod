@@ -6,22 +6,21 @@ Multi-tenant SaaS stack: marketing site, API, WhatsApp bot, BotIQ dashboard, Pro
 
 ```
 kaana-platform (5180)  →  Sign up / Login / Pricing
-         ↓ JWT
-botiq-whatsapp-server (3002)  →  SQLite tenants, WhatsApp, API
-         ↓
-botiq (5174)  →  Inbox dashboard
-propcrm (5175)  →  Lead CRM
-/listings?tenant=slug  →  Branded mini-site
+         ↓ JWT (SSO postMessage)
+botiq-app (3002)       →  Postgres, WhatsApp API, inbox UI (SERVE_CLIENT)
+propcrm (5175)         →  Lead CRM
+/listings?tenant=slug  →  Branded mini-site (served by botiq-app)
 ```
 
 ## Quick start (local)
 
-### 1. API server
+### 1. BotIQ unified app (API + inbox)
 ```bash
-cd botiq-whatsapp-server
-cp .env.example .env   # add Meta token + JWT_SECRET
-npm install
-npm start
+cd botiq-app
+cp server/.env.example server/.env   # DATABASE_URL + Meta token + JWT_SECRET
+npm run db:up && npm install
+npm run db:migrate && npm run db:seed
+npm run dev                        # API :3002, inbox :5174
 ```
 
 ### 2. Marketing website

@@ -10,18 +10,16 @@ Internal reference for the full Kaana stack: marketing site, customer apps, API,
 ```
 kaana-platform (5180)     Sign up · Login · Marketing · Dashboard · Admin
          ↓ JWT + SSO
-botiq-whatsapp-server (3002)   Tenants · WhatsApp · SQLite · Billing · Tracking
+botiq-app (3002)           Postgres · WhatsApp · API · Inbox UI
          ↓
-botiq (5174)              Team inbox
-propcrm (5175)            Lead CRM
-/listings?tenant=slug     Branded mini-site
+propcrm (5175)             Lead CRM
+/listings?tenant=slug      Branded mini-site
 ```
 
 | App | Port | Role |
 |-----|------|------|
 | **kaana-platform** | 5180 | Marketing + account + workspace hub + platform admin |
-| **botiq-whatsapp-server** | 3002 | Multi-tenant API, WhatsApp bot, persistence, Razorpay |
-| **botiq** | 5174 | Conversations inbox, agent handoff, analytics |
+| **botiq-app** | 3002 | Unified API + WhatsApp bot + inbox UI (Postgres) |
 | **propcrm** | 5175 | Kanban CRM, follow-ups, reports |
 | **Mini-site** | 3002/listings | Per-tenant catalog/listings page |
 

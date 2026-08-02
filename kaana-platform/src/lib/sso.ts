@@ -17,14 +17,10 @@ function originOf(url: string) {
 }
 
 /**
- * Opens BotIQ/CRM without leaking JWT in the URL.
- * Flow:
- * - Platform opens app in a new tab.
- * - App asks for auth via postMessage.
- * - Platform replies once with the token (targetOrigin locked).
+ * Opens BotIQ / CRM / clinic without leaking JWT in the URL.
  *
- * NOTE: This is a pragmatic stopgap for separate frontends. Long-term, use
- * httpOnly cookies or a backend-issued one-time SSO code.
+ * Production: inbox.kaana.in and api.kaana.in both route to botiq-app (kaana-api).
+ * SSO uses postMessage with origin locked to the target app URL.
  */
 export function openAppWithSSO(app: AppKey) {
   const token = getToken();

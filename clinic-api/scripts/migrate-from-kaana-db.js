@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Copy clinic tenant data from legacy kaana.db (botiq-whatsapp-server) into clinic-api SQLite.
+ * Copy clinic tenant data from legacy kaana.db (SQLite) into clinic-api SQLite.
  *
  * Usage:
- *   node scripts/migrate-from-kaana-db.js --source ../botiq-whatsapp-server/data/kaana.db --tenant dentacare
+ *   node scripts/migrate-from-kaana-db.js --source /path/to/kaana.db --tenant dentacare
  *   node scripts/migrate-from-kaana-db.js --source /tmp/kaana.db --tenant dentacare --target ./data/clinic.db
  *
  * Production (litestream replica):

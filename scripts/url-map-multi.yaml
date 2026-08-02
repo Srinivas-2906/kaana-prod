@@ -47,7 +47,7 @@ pathMatchers:
   - name: platform
     defaultService: global/backendServices/kaana-platform-backend
   - name: inbox
-    defaultService: global/backendServices/kaana-inbox-backend
+    defaultService: global/backendServices/kaana-api-backend
   - name: crm
     defaultService: global/backendServices/kaana-crm-backend
   - name: clinic

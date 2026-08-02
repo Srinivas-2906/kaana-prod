@@ -1,0 +1,28 @@
+{
+  "name": "@botiq-app/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "build": "echo 'Server has no build step'",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node -e \"import('./src/db/index.js').then(m => m.initDatabase()).then(() => console.log('Seeded')).catch(e => { console.error(e); process.exit(1); })\"",
+    "db:migrate:sqlite": "node scripts/migrate-from-sqlite.js",
+    "test-token": "node scripts/test-meta-token.js",
+    "verify-webhook": "bash scripts/verify-webhook.sh"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "nanoid": "^5.1.11",
+    "pg": "^8.16.3",
+    "twilio": "^5.4.0"
+  },
+  "devDependencies": {
+    "better-sqlite3": "^12.10.1"
+  }
+}

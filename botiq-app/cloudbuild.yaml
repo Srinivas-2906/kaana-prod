@@ -1,0 +1,72 @@
+# Deploy botiq-app → Cloud Run (kaana-api)
+# Usage: gcloud builds submit --config cloudbuild.yaml --project kaana-prod .
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/botiq:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/botiq:latest
+      - --build-arg
+      - VITE_WHATSAPP_API=/api
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - .
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/botiq
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/botiq:$BUILD_ID"
+        gcloud run deploy ${_SERVICE} \
+          --image "$$IMAGE" \
+          --region ${_REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 3002 \
+          --min-instances 0 \
+          --max-instances 5 \
+          --memory 512Mi \
+          --cpu 1 \
+          --service-account ${_SERVICE_ACCOUNT} \
+          --add-cloudsql-instances ${_CLOUDSQL_INSTANCE} \
+          --set-env-vars "NODE_ENV=production,SERVE_CLIENT=true,PUBLIC_URL=${_PUBLIC_URL},LISTINGS_BASE_URL=${_LISTINGS_BASE_URL},WHATSAPP_PROVIDER=meta,META_API_VERSION=v21.0,KAANA_SELF_SERVE=false,KAANA_CONCIERGE_SPOTS=10,JWT_EXPIRES=7d,TYPING_DELAY_MS=350,KAANA_PLATFORM_URL=${_VITE_PLATFORM_URL},KAANA_BOTIQ_URL=${_BOTIQ_URL},BOTIQ_URL=${_BOTIQ_URL},WHATSAPP_DRY_RUN=false" \
+          --set-secrets "DATABASE_URL=${_SECRET_DATABASE_URL}:latest,JWT_SECRET=${_SECRET_JWT}:latest,WHATSAPP_ACCESS_TOKEN=${_SECRET_WHATSAPP_TOKEN}:latest,WHATSAPP_PHONE_NUMBER_ID=${_SECRET_WHATSAPP_PHONE}:latest,WHATSAPP_VERIFY_TOKEN=${_SECRET_WHATSAPP_VERIFY}:latest,PLATFORM_ADMIN_EMAIL=${_SECRET_ADMIN_EMAIL}:latest,PLATFORM_ADMIN_PASSWORD=${_SECRET_ADMIN_PASSWORD}:latest"
+
+substitutions:
+  _REGION: asia-south1
+  _ARTIFACT_REPO: kaana
+  _SERVICE: kaana-api
+  _CLOUDSQL_INSTANCE: kaana-prod:asia-south1:botiq-pg
+  _PUBLIC_URL: https://api.kaana.in
+  _LISTINGS_BASE_URL: https://api.kaana.in/listings
+  _BOTIQ_URL: https://inbox.kaana.in
+  _VITE_PLATFORM_URL: https://app.kaana.in
+  _SERVICE_ACCOUNT: kaana-api-runner@kaana-prod.iam.gserviceaccount.com
+  _SECRET_DATABASE_URL: kaana-database-url
+  _SECRET_JWT: kaana-jwt-secret
+  _SECRET_WHATSAPP_TOKEN: kaana-whatsapp-access-token
+  _SECRET_WHATSAPP_PHONE: kaana-whatsapp-phone-id
+  _SECRET_WHATSAPP_VERIFY: kaana-whatsapp-verify-token
+  _SECRET_ADMIN_EMAIL: kaana-admin-email
+  _SECRET_ADMIN_PASSWORD: kaana-admin-password
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/botiq:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/botiq:latest

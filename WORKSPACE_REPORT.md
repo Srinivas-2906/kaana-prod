@@ -15,10 +15,10 @@ Last scanned: 2026-06-26
 ### Kaana “suite” (linked apps)
 - `kaana/`: Kaana marketing site (Next.js)
 - `kaana-platform/`: main platform web app (Vite/React SPA)
-- `botiq/`: inbox web app (Vite/React SPA)
+- `botiq-app/`: unified inbox + API (React + Node + Postgres)
 - `propcrm/`: CRM web app (Vite/React SPA)
 - `clinic-crm/`: clinic front-desk web app (Vite/React SPA)
-- `botiq-whatsapp-server/`: backend API (Node/Express + SQLite + WhatsApp provider)
+- `botiq-app/server/`: backend API (Node/Express + Postgres + WhatsApp provider)
 
 ### Other projects
 - `dental-clinic/`: Dental clinic marketing site (TanStack Start + Nitro)
