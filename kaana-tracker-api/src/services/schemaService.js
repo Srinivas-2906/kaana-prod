@@ -53,8 +53,7 @@ export async function ensureBaseSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       INDEX idx_type (type),
       INDEX idx_category (category),
-      INDEX idx_transaction_date (transaction_date),
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      INDEX idx_transaction_date (transaction_date)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS clusters (
@@ -64,8 +63,7 @@ export async function ensureBaseSchema() {
       color VARCHAR(20) NOT NULL DEFAULT '#3b82f6',
       created_by INT UNSIGNED NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS work_items (
@@ -85,9 +83,7 @@ export async function ensureBaseSchema() {
       INDEX idx_status (status),
       INDEX idx_due_date (due_date),
       INDEX idx_cluster (cluster_id),
-      INDEX idx_item_type (item_type),
-      FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE SET NULL,
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      INDEX idx_item_type (item_type)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS whiteboards (
@@ -96,8 +92,7 @@ export async function ensureBaseSchema() {
       description TEXT,
       created_by INT UNSIGNED NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS whiteboard_notes (
@@ -111,9 +106,7 @@ export async function ensureBaseSchema() {
       height INT NOT NULL DEFAULT 140,
       created_by INT UNSIGNED NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (whiteboard_id) REFERENCES whiteboards(id) ON DELETE CASCADE,
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
     `CREATE TABLE IF NOT EXISTS discussions (
@@ -124,8 +117,7 @@ export async function ensureBaseSchema() {
       created_by INT UNSIGNED NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       INDEX idx_entity (entity_type, entity_id),
-      INDEX idx_created_at (created_at),
-      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      INDEX idx_created_at (created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   ]);
 
