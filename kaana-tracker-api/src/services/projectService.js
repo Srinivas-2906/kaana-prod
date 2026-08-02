@@ -1,6 +1,8 @@
 import { getPool } from '../db/index.js';
+import { ensureBaseSchema } from './schemaService.js';
 
 export async function listProjects() {
+  await ensureBaseSchema();
   const pool = getPool();
   const [rows] = await pool.query(`
     SELECT c.*, u.name AS created_by_name,

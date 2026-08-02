@@ -1,6 +1,6 @@
 import { getPool } from '../db/index.js';
 import { WORK_ITEM_TYPES, WORK_STATUSES, WORK_PRIORITIES } from '../constants.js';
-import { ensureM4Schema } from './schemaService.js';
+import { ensureBaseSchema, ensureM4Schema } from './schemaService.js';
 import { logActivity, logFieldChange } from './activityService.js';
 import { linkWorkItems } from './entityLinkService.js';
 
@@ -322,6 +322,8 @@ export async function deleteWorkItem(id, userId) {
 }
 
 export async function getWorkStats() {
+  await ensureBaseSchema();
+  await ensureM4Schema();
   const pool = getPool();
   const [rows] = await pool.query(`
     SELECT
