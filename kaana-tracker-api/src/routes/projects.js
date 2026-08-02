@@ -7,6 +7,7 @@ import {
   updateProject,
   deleteProject,
 } from '../services/projectService.js';
+import { listMembers, addMember, removeMember, listUsers } from '../services/membershipService.js';
 
 const router = Router();
 
@@ -34,6 +35,15 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create project' });
+  }
+});
+
+router.get('/meta/users', async (_req, res) => {
+  try {
+    res.json({ users: await listUsers() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to list users' });
   }
 });
 
@@ -70,6 +80,38 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete project' });
+  }
+});
+
+router.get('/:id/members', async (req, res) => {
+  try {
+    res.json(await listMembers(Number(req.params.id)));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load members' });
+  }
+});
+
+router.post('/:id/members', async (req, res) => {
+  try {
+    const { userId, role } = req.body || {};
+    const result = await addMember(Number(req.params.id), Number(userId), role || 'contributor', req.user.sub);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.status(201).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add member' });
+  }
+});
+
+router.delete('/:id/members/:userId', async (req, res) => {
+  try {
+    const result = await removeMember(Number(req.params.id), Number(req.params.userId), req.user.sub);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to remove member' });
   }
 });
 

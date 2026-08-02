@@ -76,10 +76,27 @@ Port API routes and UI for:
 - Discussions
 - Transactions + reports
 - Unified shell (from `feature/unified-shell` branch in expense-tracker)
+- Calendar/project/daybook URL sync
 
-### Phase M2 — North-star features
+### Phase M2 — North-star features (in progress)
 
-Activity ledger, memberships, daybook, time travel — implement on Node API (cleaner than extending PHP).
+Implemented on Node API + React:
+
+- **`activity_events`** — append-only ledger; auto-logged on work item, discussion, journal, decision, membership changes
+- **`entity_versions`** — field-level snapshots for time travel ("Then vs Today")
+- **`journal_entries`** — end-of-day reflection in Daybook
+- **`project_members`** — People tab with roles
+- **`decisions`** — formal decision log with approve workflow
+- **`entity_links`** — idea → story lineage via `derived_from` / `belongs_to`
+- **`idea_stage`** on ideas (captured → rejected), separate from task status
+- Project **Timeline** tab, Hub activity feed, work item time travel panel
+
+Still planned for M2+:
+
+- Full authorization (project-scoped access)
+- Soft delete / archive pipeline
+- Project-scoped whiteboards and finance links
+- Notifications, mentions, intelligence layer
 
 ### Phase M3 — Production switch
 

@@ -1,31 +1,149 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { fetchProject, fetchWorkItems } from '../lib/api';
+import {
+  addProjectMember, createTransaction, createWorkItem, fetchFinanceSummary, fetchProject,
+  fetchProjectMembers, fetchTransactionMeta, fetchTransactions, fetchUsers, fetchWorkItems,
+  removeProjectMember,
+} from '../lib/api';
+import { WorkBoard } from '../components/WorkBoard';
 import { ProjectTabs } from '../components/ProjectTabs';
-import type { Project, ProjectTab, WorkItem } from '../types';
+import { PlanView } from '../components/PlanView';
+import { AttachmentPanel } from '../components/AttachmentPanel';
+import { currentMonth, todayISO } from '../lib/dates';
+import type {
+  FinanceSummary, Project, ProjectMember, ProjectTab, Transaction, TransactionMeta, User, WorkItem,
+} from '../types';
+
+function BoardQuickAdd({ projectId, stories, onAdded }: { projectId: number; stories: WorkItem[]; onAdded: () => void }) {
+  const [title, setTitle] = useState('');
+  const [itemType, setItemType] = useState<'story' | 'task'>('story');
+  const [parentId, setParentId] = useState<number | ''>('');
+  const [error, setError] = useState('');
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    try {
+      await createWorkItem({
+        title,
+        item_type: itemType,
+        status: 'backlog',
+        priority: 'medium',
+        cluster_id: projectId,
+        parent_id: itemType === 'task' && parentId ? parentId : null,
+      });
+      setTitle('');
+      setParentId('');
+      onAdded();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed');
+    }
+  }
+
+  return (
+    <form className="card" style={{ marginBottom: '1rem' }} onSubmit={onSubmit}>
+      {error && <p style={{ color: '#dc2626' }}>{error}</p>}
+      <div className="form-row">
+        <input required placeholder="New story or task…" value={title} onChange={(e) => setTitle(e.target.value)} style={{ flex: 1 }} />
+        <select value={itemType} onChange={(e) => setItemType(e.target.value as 'story' | 'task')}>
+          <option value="story">Story</option>
+          <option value="task">Task</option>
+        </select>
+        {itemType === 'task' && stories.length > 0 && (
+          <select value={parentId} onChange={(e) => setParentId(e.target.value ? Number(e.target.value) : '')}>
+            <option value="">No parent story</option>
+            {stories.map((s) => <option key={s.id} value={s.id}>#{s.id} {s.title.slice(0, 40)}</option>)}
+          </select>
+        )}
+        <button type="submit" className="btn btn-primary">Add</button>
+      </div>
+    </form>
+  );
+}
 
 export function ProjectPage() {
-  const { id, tab = 'overview' } = useParams<{ id: string; tab?: ProjectTab }>();
+  const { id, tab = 'board' } = useParams<{ id: string; tab?: ProjectTab }>();
   const projectId = Number(id);
   const [project, setProject] = useState<Project | null>(null);
   const [items, setItems] = useState<WorkItem[]>([]);
+  const [finance, setFinance] = useState<FinanceSummary | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [txMeta, setTxMeta] = useState<TransactionMeta | null>(null);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
+  const [creator, setCreator] = useState<Project | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState('');
+  const month = currentMonth();
+
+  function reloadItems() {
+    if (!projectId) return;
+    fetchWorkItems({ projectId }).then((w) => setItems(w.items)).catch((e) => setError(e.message));
+  }
 
   useEffect(() => {
     if (!projectId) return;
-    Promise.all([
-      fetchProject(projectId),
-      fetchWorkItems({ projectId, itemType: tab === 'ideas' ? 'idea' : undefined }),
-    ])
-      .then(([p, w]) => {
-        setProject(p.project);
-        setItems(w.items);
-      })
-      .catch((e) => setError(e.message));
-  }, [projectId, tab]);
+    fetchProject(projectId).then((p) => setProject(p.project)).catch((e) => setError(e.message));
+  }, [projectId]);
+
+  useEffect(() => { reloadItems(); }, [projectId]);
+
+  useEffect(() => {
+    if (tab === 'people') {
+      Promise.all([fetchProjectMembers(projectId), fetchUsers()])
+        .then(([m, u]) => {
+          setMembers(m.members);
+          setCreator(m.creator);
+          setUsers(u.users);
+        }).catch(console.error);
+    }
+    if (tab === 'finance') {
+      Promise.all([
+        fetchFinanceSummary(month, projectId),
+        fetchTransactions({ month, projectId }),
+        fetchTransactionMeta(),
+      ]).then(([s, t, meta]) => {
+        setFinance(s.summary);
+        setTransactions(t.transactions);
+        setTxMeta(meta);
+      }).catch(console.error);
+    }
+  }, [tab, projectId, month]);
+
+  async function onAddMember(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    await addProjectMember(projectId, Number(fd.get('userId')), String(fd.get('role')));
+    const m = await fetchProjectMembers(projectId);
+    setMembers(m.members);
+    e.currentTarget.reset();
+  }
+
+  async function onAddExpense(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    await createTransaction({
+      type: fd.get('type'),
+      amount: Number(fd.get('amount')),
+      category: fd.get('category'),
+      description: fd.get('description') || null,
+      transaction_date: fd.get('transaction_date') || todayISO(),
+      payment_method: fd.get('payment_method'),
+      paid_by: fd.get('paid_by'),
+      project_id: projectId,
+    });
+    const [s, t] = await Promise.all([
+      fetchFinanceSummary(month, projectId),
+      fetchTransactions({ month, projectId }),
+    ]);
+    setFinance(s.summary);
+    setTransactions(t.transactions);
+    e.currentTarget.reset();
+  }
 
   if (!projectId) return null;
   const basePath = `/projects/${projectId}`;
+  const boardItems = items.filter((i) => i.item_type === 'story' || i.item_type === 'task' || i.item_type === 'work');
+  const stories = items.filter((i) => i.item_type === 'story');
 
   return (
     <>
@@ -41,40 +159,117 @@ export function ProjectPage() {
         {project?.description && <p className="muted" style={{ marginTop: 0 }}>{project.description}</p>}
         <ProjectTabs basePath={basePath} />
 
-        {tab === 'overview' && (
-          <div className="grid-2">
+        {tab === 'board' && (
+          <>
+            <BoardQuickAdd projectId={projectId} stories={stories} onAdded={reloadItems} />
+            <WorkBoard items={boardItems} onChange={reloadItems} />
+          </>
+        )}
+
+        {tab === 'plan' && (
+          <PlanView fixedProjectId={projectId} showProjectFilter={false} showIdeaPool={false} />
+        )}
+
+        {tab === 'finance' && finance && txMeta && (
+          <>
+            <div className="grid-4" style={{ marginBottom: '1rem' }}>
+              <div className="card"><div className="muted">Income</div><div className="stat-value" style={{ color: '#16a34a' }}>₹{finance.total_income.toLocaleString()}</div></div>
+              <div className="card"><div className="muted">Expense</div><div className="stat-value" style={{ color: '#dc2626' }}>₹{finance.total_expense.toLocaleString()}</div></div>
+              <div className="card"><div className="muted">Net</div><div className="stat-value">₹{finance.net.toLocaleString()}</div></div>
+              <div className="card"><div className="muted">Balance</div><div className="stat-value">₹{finance.balance.toLocaleString()}</div></div>
+            </div>
+            <form className="card" style={{ marginBottom: '1rem' }} onSubmit={onAddExpense}>
+              <h3 style={{ marginTop: 0 }}>Quick expense / income</h3>
+              <div className="form-row">
+                <select name="type" defaultValue="expense">
+                  <option value="expense">Expense</option>
+                  <option value="income">Income</option>
+                </select>
+                <input name="amount" type="number" step="0.01" required placeholder="Amount" />
+                <select name="category" required>
+                  {txMeta.categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <input name="transaction_date" type="date" defaultValue={todayISO()} />
+              </div>
+              <div className="form-row" style={{ marginTop: '0.5rem' }}>
+                <select name="payment_method" defaultValue={txMeta.paymentMethods[0]}>
+                  {txMeta.paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <select name="paid_by" defaultValue={txMeta.paidByOptions[0]}>
+                  {txMeta.paidByOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <input name="description" placeholder="Description" style={{ flex: 1 }} />
+                <button type="submit" className="btn btn-primary">Save</button>
+              </div>
+            </form>
             <div className="card">
-              <h3 style={{ marginTop: 0 }}>Active work</h3>
-              {items.filter((i) => i.status !== 'done').slice(0, 8).map((item) => (
-                <div key={item.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
-                  <strong>{item.title}</strong>
-                  <div className="muted">{item.item_type} · {item.status}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h3 style={{ margin: 0 }}>This month</h3>
+                <Link to={`/transactions?projectId=${projectId}`} className="btn btn-ghost">All expenses →</Link>
+              </div>
+              {transactions.map((tx) => (
+                <div key={tx.id} className="tx-row">
+                  <div>
+                    <strong>{tx.category}</strong>
+                    <div className="muted">{tx.transaction_date} · {tx.description || tx.payment_method}</div>
+                  </div>
+                  <strong style={{ color: tx.type === 'income' ? '#16a34a' : '#dc2626' }}>
+                    {tx.type === 'income' ? '+' : '-'}₹{Number(tx.amount).toLocaleString()}
+                  </strong>
                 </div>
               ))}
-              {!items.length && <p className="muted">No work yet.</p>}
+              {!transactions.length && <p className="muted">No expenses this month.</p>}
             </div>
-            <div className="card muted">
-              Timeline, decisions, and finance tabs will fill in as migration continues (see TRACKER_MIGRATION.md).
-            </div>
-          </div>
+          </>
         )}
 
-        {tab === 'ideas' && (
-          <div className="grid-2">
-            {items.map((idea) => (
-              <div key={idea.id} className="card" style={{ borderLeft: '4px solid #eab308' }}>
-                <strong>{idea.title}</strong>
-                <p className="muted">{idea.status} · {idea.created_by_name}</p>
+        {tab === 'people' && (
+          <>
+            <div className="card" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ marginTop: 0 }}>Team</h3>
+              {creator && (
+                <div className="member-row">
+                  <strong>{creator.created_by_name}</strong>
+                  <span className="muted">Creator · Owner</span>
+                </div>
+              )}
+              {members.map((m) => (
+                <div key={m.id} className="member-row">
+                  <div>
+                    <strong>{m.name}</strong>
+                    <span className="muted"> · {m.email}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <span className="role-badge">{m.role}</span>
+                    {m.role !== 'owner' && (
+                      <button type="button" className="btn btn-ghost" onClick={() => removeProjectMember(projectId, m.user_id).then(() => fetchProjectMembers(projectId).then((r) => setMembers(r.members)))}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <form className="card" onSubmit={onAddMember}>
+              <h3 style={{ marginTop: 0 }}>Add member</h3>
+              <div className="form-row">
+                <select name="userId" required>
+                  <option value="">Select user</option>
+                  {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
+                <select name="role" defaultValue="contributor">
+                  <option value="manager">Manager</option>
+                  <option value="contributor">Contributor</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+                <button type="submit" className="btn btn-primary">Add</button>
               </div>
-            ))}
-            {!items.length && <p className="muted">No ideas in this project yet.</p>}
-          </div>
-        )}
-
-        {!['overview', 'ideas'].includes(tab) && (
-          <div className="card muted">
-            <strong>{tab}</strong> tab — coming in migration Phase M1. PHP version still available at tracker.kaana.in until cutover.
-          </div>
+            </form>
+            <div className="card" style={{ marginTop: '1rem' }}>
+              <h3 style={{ marginTop: 0 }}>Project files</h3>
+              <AttachmentPanel entityType="project" entityId={projectId} />
+            </div>
+          </>
         )}
       </div>
     </>

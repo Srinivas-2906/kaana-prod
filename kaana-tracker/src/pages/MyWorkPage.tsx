@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchWorkItems } from '../lib/api';
+import { WorkItemCard } from '../components/WorkItemCard';
 import type { WorkItem } from '../types';
 
 export function MyWorkPage() {
@@ -14,9 +15,8 @@ export function MyWorkPage() {
       <header className="topbar"><h1 style={{ margin: 0, fontSize: '1.125rem' }}>My work</h1></header>
       <div className="page">
         {items.map((item) => (
-          <div key={item.id} className="card" style={{ marginBottom: '0.5rem', borderLeft: item.cluster_color ? `4px solid ${item.cluster_color}` : undefined }}>
-            <strong>{item.title}</strong>
-            <p className="muted">{item.cluster_name || 'No project'} · {item.status}</p>
+          <div key={item.id} style={{ marginBottom: '0.5rem' }}>
+            <WorkItemCard item={item} />
           </div>
         ))}
         {!items.length && <p className="muted">No open work assigned to you.</p>}

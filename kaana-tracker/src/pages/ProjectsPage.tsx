@@ -21,7 +21,7 @@ export function ProjectsPage() {
     e.preventDefault();
     try {
       const { project } = await createProject({ name, color });
-      window.location.href = `/projects/${project.id}/overview`;
+      window.location.href = `/projects/${project.id}/board`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed');
     }
@@ -35,7 +35,7 @@ export function ProjectsPage() {
         <div className="grid-2">
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             {projects.map((p) => (
-              <Link key={p.id} to={`/projects/${p.id}/overview`} className="card" style={{ borderLeft: `4px solid ${p.color}` }}>
+              <Link key={p.id} to={`/projects/${p.id}/board`} className="card" style={{ borderLeft: `4px solid ${p.color}` }}>
                 <strong style={{ fontSize: '1.0625rem' }}>{p.name}</strong>
                 {p.description && <p className="muted">{p.description}</p>}
                 <p className="muted">{p.open_count} open · {p.item_count} total</p>

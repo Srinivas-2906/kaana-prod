@@ -27,12 +27,15 @@ export function LoginPage() {
         <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
         <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
         {error && <p style={{ color: '#dc2626', fontSize: '0.875rem' }}>{error}</p>}
-        <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Email</label>
+        <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Email or username</label>
         <input
-          type="email"
+          type="text"
+          name="username"
+          autoComplete="username"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder="kaana or you@company.com"
           style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', marginBottom: '1rem' }}
         />
         <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Password</label>
