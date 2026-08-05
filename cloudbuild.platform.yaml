@@ -1,0 +1,76 @@
+steps:
+  - id: build-platform
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:latest
+      - --build-arg
+      - VITE_API_URL=${_VITE_API_URL}
+      - --build-arg
+      - VITE_BILLING_URL=${_VITE_BILLING_URL}
+      - --build-arg
+      - VITE_BOTIQ_URL=${_VITE_BOTIQ_URL}
+      - --build-arg
+      - VITE_CRM_URL=${_VITE_CRM_URL}
+      - --build-arg
+      - VITE_CLINIC_URL=${_VITE_CLINIC_URL}
+      - --build-arg
+      - VITE_LISTINGS_URL=${_VITE_LISTINGS_URL}
+      - --build-arg
+      - VITE_WHATSAPP_LINK=${_VITE_WHATSAPP_LINK}
+      - --build-arg
+      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - ./kaana-platform
+
+  - id: push-platform
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform
+
+  - id: deploy-platform
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:$BUILD_ID"
+        gcloud run deploy "${_PLATFORM_SERVICE}" \
+          --image "$$IMAGE" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1
+
+substitutions:
+  _REGION: asia-south1
+  _ARTIFACT_REPO: kaana
+  _PLATFORM_SERVICE: kaana-platform
+
+  _VITE_API_URL: https://api.kaana.in/api/platform
+  _VITE_BILLING_URL: https://api.kaana.in/api/billing
+  _VITE_BOTIQ_URL: https://inbox.kaana.in
+  _VITE_CRM_URL: https://crm.kaana.in
+  _VITE_CLINIC_URL: https://clinic.kaana.in
+  _VITE_LISTINGS_URL: https://api.kaana.in/listings
+  _VITE_WHATSAPP_LINK: https://wa.me/91XXXXXXXXXX
+  _VITE_WHATSAPP_API: https://api.kaana.in/api
+  _VITE_PLATFORM_URL: https://app.kaana.in
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/platform:latest
