@@ -2602,6 +2602,210 @@ img, video, canvas { max-width: 100%; height: auto; }
 .book-card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .book-card-sub   { font-size: 12px; color: var(--muted); margin-bottom: 0; }
 
+/* Adaptive book flow */
+.book-mode-toggle {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.book-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.book-mode-btn.active {
+  border-color: var(--brand);
+  background: var(--brand-light);
+  color: var(--brand);
+}
+
+.book-step-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-bottom: 18px;
+  font-size: 12px;
+}
+
+.book-step-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+}
+
+.book-step-nav-item.active { color: var(--brand); font-weight: 700; }
+.book-step-nav-item.done   { color: var(--text); }
+
+.book-step-nav-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  font-size: 11px;
+}
+
+.book-step-nav-sep {
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+  margin: 0 2px;
+}
+
+.book-search-status {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.book-patient-found {
+  margin-top: 14px;
+  padding: 14px;
+  background: var(--success-light);
+  border: 1px solid #86efac;
+  border-radius: var(--radius-sm);
+}
+
+.book-patient-found.compact {
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.book-patient-found-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.book-patient-found-title { flex: 1; min-width: 0; }
+
+.book-patient-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 4px;
+}
+
+.book-patient-context-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.book-patient-context-grid dt { color: var(--muted); margin: 0; }
+.book-patient-context-grid dd { margin: 0; font-weight: 600; color: var(--text); }
+
+.book-outstanding { color: #b45309 !important; }
+
+.book-patient-context-loading {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+
+.book-continue-btn { margin-top: 14px; }
+
+.book-search-results {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.book-search-result-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+
+.book-search-result-row:hover { border-color: var(--brand); }
+
+.book-no-match {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--surface-2, #f8fafc);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.book-no-match p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.book-walkin-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 12px;
+  text-align: center;
+}
+
+.book-confirm-summary {
+  background: var(--surface-2, #f8fafc);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.book-confirm-summary dl {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.book-confirm-summary dt { color: var(--muted); margin: 0; }
+.book-confirm-summary dd { margin: 0; font-weight: 600; }
+
+.book-walkin-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #b45309;
+}
+
+@media (min-width: 768px) {
+  .page-header-compact .book-mode-toggle { margin-left: auto; }
+  .book-view .page-header-compact {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+}
+
 /* ═══════════════════════════════════════════
    TOAST NOTIFICATIONS
 ═══════════════════════════════════════════ */
