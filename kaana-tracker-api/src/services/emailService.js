@@ -16,7 +16,7 @@ export async function sendProjectInviteEmail({
   role,
 }) {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.INVITE_FROM_EMAIL || 'Kaana Tracker <invites@kaana.in>';
+  const from = process.env.INVITE_FROM_EMAIL || process.env.RESEND_FROM || 'Kaana Tracker <onboarding@resend.dev>';
   const subject = `${inviterName} invited you to ${projectName}`;
   const roleText = roleLabel(role);
 
