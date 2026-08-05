@@ -1,0 +1,51 @@
+steps:
+  - id: build-marketing
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:latest
+      - ./kaana
+
+  - id: push-marketing
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing
+
+  - id: deploy-marketing
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:$BUILD_ID"
+        gcloud run deploy "${_MARKETING_SERVICE}" \
+          --image "$$IMAGE" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 512Mi \
+          --cpu 1 \
+          --set-env-vars "NEXT_PUBLIC_SITE_URL=https://kaana.in,GEMINI_MODEL=gemini-3.6-flash,GEMINI_DAILY_LIMIT=50,GEMINI_IP_WINDOW_LIMIT=3,GEMINI_IP_DAILY_LIMIT=8,GEMINI_IP_MIN_INTERVAL_MS=10000,GEMINI_CHAT_MAX_OUTPUT_TOKENS=2048,GEMINI_MAX_OUTPUT_TOKENS=2048" \
+          --set-secrets "GEMINI_API_KEY=${_SECRET_GEMINI}:latest"
+
+substitutions:
+  _REGION: asia-south1
+  _ARTIFACT_REPO: kaana
+  _MARKETING_SERVICE: kaana-web
+  _SECRET_GEMINI: kaana-gemini-api-key
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/marketing:latest

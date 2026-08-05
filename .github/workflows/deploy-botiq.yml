@@ -1,0 +1,50 @@
+name: Deploy BotIQ (api.kaana.in / inbox.kaana.in)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'botiq-app/**'
+      - '.github/workflows/deploy-botiq.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-botiq-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy botiq to Cloud Run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: kaana-prod
+
+      - name: Submit Cloud Build
+        run: |
+          gcloud builds submit \
+            --project kaana-prod \
+            --config botiq-app/cloudbuild.yaml \
+            --service-account=projects/kaana-prod/serviceAccounts/kaana-cloudbuild-deployer@kaana-prod.iam.gserviceaccount.com \
+            botiq-app
+
+      - name: Verify live service
+        run: |
+          URL="$(gcloud run services describe kaana-api \
+            --project kaana-prod \
+            --region asia-south1 \
+            --format='value(status.url)')"
+          echo "Checking ${URL}/health"
+          curl -fsS "${URL}/health" -o /dev/null
+          echo "Deploy OK: ${URL} (prod: https://api.kaana.in and https://inbox.kaana.in)"
+
