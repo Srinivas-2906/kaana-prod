@@ -393,11 +393,20 @@ export function fetchProjectInvites(projectId: number) {
   return request<{ invites: import('../types').ProjectInvite[] }>(`/projects/${projectId}/invites`);
 }
 
-export function createProjectInvite(projectId: number, role: 'viewer' | 'contributor' | 'manager') {
+export function createProjectInvite(
+  projectId: number,
+  role: 'viewer' | 'contributor' | 'manager',
+  email?: string,
+) {
   return request<{ invite: import('../types').ProjectInvite }>(`/projects/${projectId}/invites`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ role, expiresInDays: 14, maxUses: 1 }),
+    body: JSON.stringify({
+      role,
+      expiresInDays: 14,
+      maxUses: 1,
+      ...(email ? { email } : {}),
+    }),
   });
 }
 

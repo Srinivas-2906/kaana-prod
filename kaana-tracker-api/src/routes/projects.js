@@ -18,7 +18,13 @@ router.use(authMiddleware);
 router.get('/', async (req, res) => {
   try {
     const projects = await listProjects(req.user.sub);
-    res.json({ projects });
+    res.json({
+      projects: projects.map((p) => ({
+        ...p,
+        can_edit: canEdit(p.my_role || (p.created_by === req.user.sub ? 'owner' : null)),
+        can_manage: canManageMembers(p.my_role || (p.created_by === req.user.sub ? 'owner' : null)),
+      })),
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to list projects' });
