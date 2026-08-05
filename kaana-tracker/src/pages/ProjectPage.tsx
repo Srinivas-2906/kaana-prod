@@ -9,7 +9,7 @@ import { WorkBoard } from '../components/WorkBoard';
 import { ProjectTabs } from '../components/ProjectTabs';
 import { PlanView } from '../components/PlanView';
 import { AttachmentPanel } from '../components/AttachmentPanel';
-import { ProjectInvitesPanel } from '../components/ProjectInvitesPanel';
+import { ProjectSharePanel, ProjectShareDialog } from '../components/ProjectShareDialog';
 import { ActivityTimeline } from '../components/ActivityTimeline';
 import { currentMonth, todayISO } from '../lib/dates';
 import type {
@@ -79,6 +79,7 @@ export function ProjectPage() {
   const month = currentMonth();
   const canEdit = project?.can_edit !== false;
   const canManage = Boolean(project?.can_manage);
+  const [shareOpen, setShareOpen] = useState(false);
 
   function reloadItems() {
     if (!projectId) return;
@@ -162,8 +163,23 @@ export function ProjectPage() {
           <span style={{ width: 10, height: 10, borderRadius: '50%', background: project?.color || '#ccc' }} />
           <h1 style={{ margin: 0, fontSize: '1.125rem' }}>{project?.name || 'Project'}</h1>
         </div>
-        <Link to="/projects" className="btn btn-ghost">All projects</Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {canManage && (
+            <button type="button" className="btn btn-ghost" onClick={() => setShareOpen(true)}>
+              Share
+            </button>
+          )}
+          <Link to="/projects" className="btn btn-ghost">All projects</Link>
+        </div>
       </header>
+      {project && (
+        <ProjectShareDialog
+          projectId={projectId}
+          projectName={project.name}
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
       <div className="page">
         {error && <p style={{ color: '#dc2626' }}>{error}</p>}
         {!canEdit && (
@@ -249,7 +265,7 @@ export function ProjectPage() {
 
         {tab === 'people' && (
           <>
-            <ProjectInvitesPanel projectId={projectId} canManage={canManage} />
+            <ProjectSharePanel projectId={projectId} projectName={project?.name || 'Project'} canManage={canManage} />
             <div className="card" style={{ marginBottom: '1rem' }}>
               <h3 style={{ marginTop: 0 }}>Team</h3>
               {creator && (

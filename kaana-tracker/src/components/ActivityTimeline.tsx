@@ -9,6 +9,7 @@ const EVENT_ICONS: Record<string, string> = {
   decision_created: '⚖',
   decision_status_changed: '⚖',
   invite_created: '🔗',
+  invite_sent: '✉',
   invite_accepted: '✓',
   invite_revoked: '✕',
   member_added: '👤',

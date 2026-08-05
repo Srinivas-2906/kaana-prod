@@ -23,7 +23,7 @@ router.get('/:token', async (req, res) => {
 
 router.post('/:token/accept', authMiddleware, async (req, res) => {
   try {
-    const result = await acceptInvite(req.params.token, req.user.sub);
+    const result = await acceptInvite(req.params.token, req.user.sub, req.user.email);
     if (result.error) return res.status(400).json({ error: result.error });
     res.json(result);
   } catch (err) {
@@ -37,12 +37,12 @@ export default router;
 export function mountProjectInviteRoutes(projectsRouter) {
   projectsRouter.post('/:id/invites', async (req, res) => {
     try {
-      const { role, expiresInDays, maxUses } = req.body || {};
+      const { role, expiresInDays, maxUses, email } = req.body || {};
       const result = await createInvite(
         Number(req.params.id),
         role,
         req.user.sub,
-        { expiresInDays, maxUses },
+        { expiresInDays, maxUses, email, inviterName: req.user.name },
       );
       if (result.error) return res.status(403).json({ error: result.error });
       res.status(201).json(result);

@@ -38,6 +38,9 @@ function InviteCard({
         <p className="muted">
           Invited by {preview.created_by_name} · {ROLE_LABELS[preview.role] || preview.role}
         </p>
+        {preview.invitee_email && (
+          <p className="muted">Sent to {preview.invitee_email}</p>
+        )}
         {error && <p style={{ color: '#dc2626' }}>{error}</p>}
 
         {!signedIn ? (

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { UserPlus } from 'lucide-react';
 import { createProject, fetchProjects } from '../lib/api';
+import { ProjectShareDialog } from '../components/ProjectShareDialog';
 import type { Project } from '../types';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#22c55e', '#14b8a6'];
@@ -10,6 +12,7 @@ export function ProjectsPage() {
   const [name, setName] = useState('');
   const [color, setColor] = useState(COLORS[0]);
   const [error, setError] = useState('');
+  const [shareProject, setShareProject] = useState<Project | null>(null);
 
   function load() {
     fetchProjects().then((r) => setProjects(r.projects)).catch((e) => setError(e.message));
@@ -35,11 +38,26 @@ export function ProjectsPage() {
         <div className="grid-2">
           <div style={{ display: 'grid', gap: '0.75rem' }}>
             {projects.map((p) => (
-              <Link key={p.id} to={`/projects/${p.id}/board`} className="card" style={{ borderLeft: `4px solid ${p.color}` }}>
-                <strong style={{ fontSize: '1.0625rem' }}>{p.name}</strong>
-                {p.description && <p className="muted">{p.description}</p>}
-                <p className="muted">{p.open_count} open · {p.item_count} total</p>
-              </Link>
+              <div key={p.id} className="card project-card" style={{ borderLeft: `4px solid ${p.color}` }}>
+                <div className="project-card-row">
+                  <Link to={`/projects/${p.id}/board`} className="project-card-link">
+                    <strong style={{ fontSize: '1.0625rem' }}>{p.name}</strong>
+                    {p.description && <p className="muted">{p.description}</p>}
+                    <p className="muted">{p.open_count} open · {p.item_count} total</p>
+                  </Link>
+                  {p.can_manage && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost project-share-btn"
+                      title="Share project"
+                      onClick={() => setShareProject(p)}
+                    >
+                      <UserPlus size={16} />
+                      Share
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
           <form className="card" onSubmit={onCreate}>
@@ -54,6 +72,14 @@ export function ProjectsPage() {
           </form>
         </div>
       </div>
+      {shareProject && (
+        <ProjectShareDialog
+          projectId={shareProject.id}
+          projectName={shareProject.name}
+          open
+          onClose={() => setShareProject(null)}
+        />
+      )}
     </>
   );
 }

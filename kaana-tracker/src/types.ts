@@ -218,6 +218,8 @@ export type ProjectInvite = {
   project_id: number;
   token: string;
   role: 'viewer' | 'contributor' | 'manager';
+  invitee_email?: string | null;
+  status?: 'pending' | 'accepted' | 'revoked' | 'expired' | 'active';
   created_by: number;
   created_by_name?: string;
   expires_at: string | null;
@@ -236,6 +238,7 @@ export type InvitePreview = {
   role: 'viewer' | 'contributor' | 'manager';
   created_by_name: string;
   expires_at: string | null;
+  invitee_email?: string | null;
 };
 
 export type EntityLink = {

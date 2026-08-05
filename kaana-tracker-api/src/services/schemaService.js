@@ -356,6 +356,14 @@ export async function ensureInviteSchema() {
     )
   `);
 
+  await runAlters([
+    'ALTER TABLE project_invites ADD COLUMN invitee_email VARCHAR(150) NULL AFTER role',
+    'ALTER TABLE project_invites ADD COLUMN status ENUM(\'pending\',\'accepted\',\'revoked\') NOT NULL DEFAULT \'pending\' AFTER invitee_email',
+    'ALTER TABLE project_invites ADD COLUMN accepted_at TIMESTAMP NULL AFTER use_count',
+    'ALTER TABLE project_invites ADD COLUMN accepted_by INT UNSIGNED NULL AFTER accepted_at',
+    'ALTER TABLE project_invites ADD INDEX idx_invitee_email (invitee_email)',
+  ]);
+
   inviteDone = true;
 }
 
