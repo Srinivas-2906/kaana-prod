@@ -21,8 +21,8 @@ router.get('/', async (req, res) => {
     res.json({
       projects: projects.map((p) => ({
         ...p,
-        can_edit: canEdit(p.my_role || (p.created_by === req.user.sub ? 'owner' : null)),
-        can_manage: canManageMembers(p.my_role || (p.created_by === req.user.sub ? 'owner' : null)),
+        can_edit: canEdit(p.my_role || (Number(p.created_by) === Number(req.user.sub) ? 'owner' : null)),
+        can_manage: canManageMembers(p.my_role || (Number(p.created_by) === Number(req.user.sub) ? 'owner' : null)),
       })),
     });
   } catch (err) {
