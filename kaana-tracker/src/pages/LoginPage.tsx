@@ -1,8 +1,11 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
 export function LoginPage() {
+  const [params] = useSearchParams();
+  const redirectUrl = params.get('redirect_url') || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,7 +17,7 @@ export function LoginPage() {
         <div className="card login-card clerk-auth-card">
           <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
           <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
-          <SignIn routing="path" path="/login" signUpUrl="/sign-up" forceRedirectUrl="/" />
+          <SignIn routing="path" path="/login" signUpUrl="/sign-up" forceRedirectUrl={redirectUrl} />
         </div>
       </div>
     );
@@ -26,7 +29,7 @@ export function LoginPage() {
     setError('');
     try {
       await legacyLogin(email, password);
-      window.location.href = '/';
+      window.location.href = redirectUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

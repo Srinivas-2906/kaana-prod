@@ -9,9 +9,11 @@ import { WORK_STATUSES, statusLabel } from '../types';
 export function WorkBoard({
   items: initial,
   onChange,
+  readOnly = false,
 }: {
   items: WorkItem[];
   onChange?: () => void;
+  readOnly?: boolean;
 }) {
   const [items, setItems] = useState(initial);
   const [dragId, setDragId] = useState<number | null>(null);
@@ -32,7 +34,7 @@ export function WorkBoard({
   );
 
   async function drop(status: string) {
-    if (dragId == null) return;
+    if (readOnly || dragId == null) return;
     const item = items.find((i) => i.id === dragId);
     if (!item || item.status === status) return;
     setItems((prev) => prev.map((i) => (i.id === dragId ? { ...i, status } : i)));
@@ -46,6 +48,7 @@ export function WorkBoard({
   }
 
   async function toggleSubtask(task: WorkItem) {
+    if (readOnly) return;
     const nextStatus = task.status === 'done' ? 'todo' : 'done';
     setItems((prev) => prev.map((i) => (i.id === task.id ? { ...i, status: nextStatus } : i)));
     try {
@@ -63,7 +66,7 @@ export function WorkBoard({
           <div
             key={status}
             className="kanban-col"
-            onDragOver={(e) => e.preventDefault()}
+            onDragOver={(e) => !readOnly && e.preventDefault()}
             onDrop={() => drop(status)}
           >
             <div className="kanban-col-head">
@@ -74,15 +77,15 @@ export function WorkBoard({
               <div
                 key={item.id}
                 className="kanban-card-wrap"
-                draggable
-                onDragStart={() => setDragId(item.id)}
+                draggable={!readOnly}
+                onDragStart={() => !readOnly && setDragId(item.id)}
                 onDragEnd={() => setDragId(null)}
               >
                 <WorkItemCard
                   item={item}
                   subtasks={childrenByParent.get(item.id) || []}
                   onSelect={() => setSelectedId(item.id)}
-                  onToggleSubtask={toggleSubtask}
+                  onToggleSubtask={readOnly ? undefined : toggleSubtask}
                 />
               </div>
             ))}
@@ -95,6 +98,7 @@ export function WorkBoard({
           itemId={selectedId}
           onClose={() => setSelectedId(null)}
           onUpdate={onChange}
+          readOnly={readOnly}
         />
       )}
     </>

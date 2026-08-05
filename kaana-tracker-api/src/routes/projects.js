@@ -8,14 +8,16 @@ import {
   deleteProject,
 } from '../services/projectService.js';
 import { listMembers, addMember, removeMember, listUsers } from '../services/membershipService.js';
+import { assertProjectAccess, canEdit, canManageMembers } from '../services/authorizationService.js';
+import { mountProjectInviteRoutes } from './invites.js';
 
 const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const projects = await listProjects();
+    const projects = await listProjects(req.user.sub);
     res.json({ projects });
   } catch (err) {
     console.error(err);
@@ -38,8 +40,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/meta/users', async (_req, res) => {
+router.get('/meta/users', async (req, res) => {
   try {
+    const access = await assertProjectAccess(Number(req.query.projectId), req.user.sub, 'manage');
+    if (access.error) return res.status(403).json({ error: access.error });
     res.json({ users: await listUsers() });
   } catch (err) {
     console.error(err);
@@ -49,9 +53,20 @@ router.get('/meta/users', async (_req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const project = await getProjectById(Number(req.params.id));
+    const projectId = Number(req.params.id);
+    const access = await assertProjectAccess(projectId, req.user.sub, 'view');
+    if (access.error) return res.status(access.status).json({ error: access.error });
+
+    const project = await getProjectById(projectId, req.user.sub);
     if (!project) return res.status(404).json({ error: 'Project not found' });
-    res.json({ project });
+    res.json({
+      project: {
+        ...project,
+        my_role: access.role,
+        can_edit: canEdit(access.role),
+        can_manage: canManageMembers(access.role),
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load project' });
@@ -60,11 +75,15 @@ router.get('/:id', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
-    const project = await updateProject(Number(req.params.id), {
+    const projectId = Number(req.params.id);
+    const access = await assertProjectAccess(projectId, req.user.sub, 'edit');
+    if (access.error) return res.status(access.status).json({ error: access.error });
+
+    const project = await updateProject(projectId, {
       name: req.body?.name,
       description: req.body?.description,
       color: req.body?.color,
-    });
+    }, req.user.sub);
     if (!project) return res.status(404).json({ error: 'Project not found' });
     res.json({ project });
   } catch (err) {
@@ -75,7 +94,12 @@ router.patch('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    await deleteProject(Number(req.params.id));
+    const projectId = Number(req.params.id);
+    const access = await assertProjectAccess(projectId, req.user.sub, 'manage');
+    if (access.error || access.role !== 'owner') {
+      return res.status(403).json({ error: 'Only the project owner can delete this project' });
+    }
+    await deleteProject(projectId);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -85,7 +109,10 @@ router.delete('/:id', async (req, res) => {
 
 router.get('/:id/members', async (req, res) => {
   try {
-    res.json(await listMembers(Number(req.params.id)));
+    const projectId = Number(req.params.id);
+    const access = await assertProjectAccess(projectId, req.user.sub, 'view');
+    if (access.error) return res.status(access.status).json({ error: access.error });
+    res.json(await listMembers(projectId));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load members' });
@@ -94,8 +121,12 @@ router.get('/:id/members', async (req, res) => {
 
 router.post('/:id/members', async (req, res) => {
   try {
+    const projectId = Number(req.params.id);
+    const access = await assertProjectAccess(projectId, req.user.sub, 'manage');
+    if (access.error) return res.status(access.status).json({ error: access.error });
+
     const { userId, role } = req.body || {};
-    const result = await addMember(Number(req.params.id), Number(userId), role || 'contributor', req.user.sub);
+    const result = await addMember(projectId, Number(userId), role || 'contributor', req.user.sub);
     if (result.error) return res.status(400).json({ error: result.error });
     res.status(201).json(result);
   } catch (err) {
@@ -106,7 +137,11 @@ router.post('/:id/members', async (req, res) => {
 
 router.delete('/:id/members/:userId', async (req, res) => {
   try {
-    const result = await removeMember(Number(req.params.id), Number(req.params.userId), req.user.sub);
+    const projectId = Number(req.params.id);
+    const access = await assertProjectAccess(projectId, req.user.sub, 'manage');
+    if (access.error) return res.status(access.status).json({ error: access.error });
+
+    const result = await removeMember(projectId, Number(req.params.userId), req.user.sub);
     if (result.error) return res.status(400).json({ error: result.error });
     res.json(result);
   } catch (err) {
@@ -114,5 +149,7 @@ router.delete('/:id/members/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to remove member' });
   }
 });
+
+mountProjectInviteRoutes(router);
 
 export default router;

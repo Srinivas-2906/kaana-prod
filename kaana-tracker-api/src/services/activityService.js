@@ -42,6 +42,10 @@ export async function listActivity(filters = {}) {
   if (filters.projectId) {
     where.push('(a.project_id = ? OR (a.entity_type = \'cluster\' AND a.entity_id = ?))');
     params.push(filters.projectId, filters.projectId);
+  } else if (filters.accessibleProjectIds?.length) {
+    const placeholders = filters.accessibleProjectIds.map(() => '?').join(',');
+    where.push(`(a.project_id IN (${placeholders}) OR (a.entity_type = 'cluster' AND a.entity_id IN (${placeholders})))`);
+    params.push(...filters.accessibleProjectIds, ...filters.accessibleProjectIds);
   }
   if (filters.entityType) {
     where.push('a.entity_type = ?');
