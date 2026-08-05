@@ -1,4 +1,4 @@
-import { authHeaders, clearToken } from './auth';
+import { authHeaders, clearLegacyToken } from './auth';
 import type {
   Attachment,
   CalendarDayGlimpses,
@@ -24,15 +24,16 @@ const API = import.meta.env.VITE_TRACKER_API || '/api';
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
+    const headers = await authHeaders();
     res = await fetch(`${API}${path}`, {
       ...init,
-      headers: { ...authHeaders(), ...(init?.headers || {}) },
+      headers: { ...headers, ...(init?.headers || {}) },
     });
   } catch {
     throw new Error('Cannot reach tracker API. Start kaana-tracker-api on port 3011.');
   }
   if (res.status === 401) {
-    clearToken();
+    clearLegacyToken();
     throw new Error('Unauthorized');
   }
   if (!res.ok) {

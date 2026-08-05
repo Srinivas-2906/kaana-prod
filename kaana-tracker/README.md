@@ -17,6 +17,10 @@ npm install && npm run dev
 
 Open http://localhost:5190
 
+## Auth (Clerk)
+
+Tracker uses Clerk when `VITE_CLERK_PUBLISHABLE_KEY` is set. See [TRACKER_CLERK.md](../TRACKER_CLERK.md).
+
 ## Deploy
 
 From repo root:

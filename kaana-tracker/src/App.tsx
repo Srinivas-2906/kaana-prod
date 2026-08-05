@@ -1,7 +1,9 @@
 import { Navigate, Outlet, Route, Routes, useSearchParams } from 'react-router-dom';
-import { isAuthenticated } from './lib/auth';
+import { useAuth } from '@clerk/clerk-react';
+import { isClerkEnabled, isLegacyAuthenticated } from './lib/auth';
 import { AppShell } from './components/AppShell';
 import { LoginPage } from './pages/LoginPage';
+import { SignUpPage } from './pages/SignUpPage';
 import { HubPage } from './pages/HubPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectPage } from './pages/ProjectPage';
@@ -13,9 +15,26 @@ import { DiscussionsPage } from './pages/DiscussionsPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { WorkItemPage } from './pages/WorkItemPage';
 
-function RequireAuth() {
-  if (!isAuthenticated()) return <Navigate to="/login" replace />;
+function RequireAuthClerk() {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) {
+    return (
+      <div className="login-page">
+        <p className="muted">Loading session…</p>
+      </div>
+    );
+  }
+  if (!isSignedIn) return <Navigate to="/login" replace />;
   return <Outlet />;
+}
+
+function RequireAuthLegacy() {
+  if (!isLegacyAuthenticated()) return <Navigate to="/login" replace />;
+  return <Outlet />;
+}
+
+function RequireAuth() {
+  return isClerkEnabled() ? <RequireAuthClerk /> : <RequireAuthLegacy />;
 }
 
 function PlanProjectRedirect() {
@@ -34,7 +53,8 @@ function PlanProjectRedirect() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login/*" element={<LoginPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<HubPage />} />
