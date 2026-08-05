@@ -94,7 +94,7 @@ substitutions:
   _SECRET_JWT: kaana-jwt-secret
   _SECRET_CLERK: kaana-tracker-clerk-secret-key
   _SECRET_CLERK_WEBHOOK: kaana-tracker-clerk-webhook-secret
-  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_bmVhcmJ5LWdlbGRpbmctNDIuY2xlcmsuYWNjb3VudHMuZGV2JA
 
 options:
   logging: CLOUD_LOGGING_ONLY

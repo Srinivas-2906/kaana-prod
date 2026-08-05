@@ -31,11 +31,21 @@ Clerk webhook → POST /api/auth/webhooks/clerk → sync user create/update/dele
 
 ### 2) Configure env
 
+Tracker reuses the **same Clerk application** as Faralin. Map env names:
+
+| Faralin (`.env`) | Tracker |
+|------------------|---------|
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` or `CLERK_PUBLISHABLE_KEY` | `kaana-tracker/.env` → `VITE_CLERK_PUBLISHABLE_KEY` |
+| `CLERK_SECRET_KEY` | `kaana-tracker-api/.env` → `CLERK_SECRET_KEY` |
+| `CLERK_WEBHOOK_SECRET` | `kaana-tracker-api/.env` → `CLERK_WEBHOOK_SECRET` |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` | Tracker uses **`/login`** (already set in `AuthProvider`) |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up` | Tracker uses **`/sign-up`** |
+
 **API** (`kaana-tracker-api/.env`):
 
 ```env
 CLERK_SECRET_KEY=sk_test_...
-CLERK_WEBHOOK_SECRET=whsec_...
+CLERK_WEBHOOK_SECRET=whsec_...   # not whsec_placeholder — copy from Clerk → Webhooks
 ```
 
 **Frontend** (`kaana-tracker/.env`):
@@ -45,6 +55,8 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 ```
 
 Leave Clerk keys blank to keep legacy email/password login locally.
+
+**Clerk Dashboard → Paths:** set Sign-in URL to `/login` for tracker.kaana.in (Faralin keeps `/sign-in`).
 
 ### 3) Run
 
