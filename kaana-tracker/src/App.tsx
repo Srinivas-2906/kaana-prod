@@ -13,6 +13,7 @@ import { WhiteboardsPage } from './pages/WhiteboardsPage';
 import { WhiteboardPage } from './pages/WhiteboardPage';
 import { DiscussionsPage } from './pages/DiscussionsPage';
 import { TransactionsPage } from './pages/TransactionsPage';
+import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { WorkItemPage } from './pages/WorkItemPage';
 
 function RequireAuthClerk() {
@@ -55,6 +56,7 @@ export default function App() {
     <Routes>
       <Route path="/login/*" element={<LoginPage />} />
       <Route path="/sign-up/*" element={<SignUpPage />} />
+      <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<HubPage />} />

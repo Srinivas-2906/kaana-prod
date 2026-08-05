@@ -1,14 +1,23 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { listActivity, getEntityStateAt, listEntityVersions } from '../services/activityService.js';
+import { assertProjectAccess, listAccessibleProjectIds } from '../services/authorizationService.js';
 
 const router = Router();
 router.use(authMiddleware);
 
 router.get('/', async (req, res) => {
   try {
+    const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
+    if (projectId) {
+      const access = await assertProjectAccess(projectId, req.user.sub, 'view');
+      if (access.error) return res.status(access.status).json({ error: access.error });
+    }
+
+    const accessibleProjectIds = projectId ? undefined : await listAccessibleProjectIds(req.user.sub);
     const events = await listActivity({
-      projectId: req.query.projectId ? Number(req.query.projectId) : undefined,
+      projectId,
+      accessibleProjectIds,
       entityType: req.query.entityType || undefined,
       entityId: req.query.entityId ? Number(req.query.entityId) : undefined,
       date: req.query.date || undefined,

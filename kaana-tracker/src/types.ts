@@ -13,6 +13,9 @@ export type Project = {
   created_by_name: string;
   item_count: number;
   open_count: number;
+  my_role?: 'owner' | 'manager' | 'contributor' | 'viewer';
+  can_edit?: boolean;
+  can_manage?: boolean;
 };
 
 export type WorkItemContentSection = {
@@ -210,6 +213,31 @@ export type ProjectMember = {
   email: string;
 };
 
+export type ProjectInvite = {
+  id: number;
+  project_id: number;
+  token: string;
+  role: 'viewer' | 'contributor' | 'manager';
+  created_by: number;
+  created_by_name?: string;
+  expires_at: string | null;
+  max_uses: number | null;
+  use_count: number;
+  revoked_at: string | null;
+  created_at: string;
+  url: string;
+  active?: boolean;
+};
+
+export type InvitePreview = {
+  project_id: number;
+  project_name: string;
+  project_color: string;
+  role: 'viewer' | 'contributor' | 'manager';
+  created_by_name: string;
+  expires_at: string | null;
+};
+
 export type EntityLink = {
   id: number;
   source_type: string;
@@ -293,6 +321,7 @@ export const PROJECT_TABS = [
   'plan',
   'finance',
   'people',
+  'activity',
 ] as const;
 
 export type ProjectTab = (typeof PROJECT_TABS)[number];

@@ -15,10 +15,12 @@ export function IssuePanel({
   itemId,
   onClose,
   onUpdate,
+  readOnly = false,
 }: {
   itemId: number;
   onClose: () => void;
   onUpdate?: () => void;
+  readOnly?: boolean;
 }) {
   const navigate = useNavigate();
   const [item, setItem] = useState<WorkItem | null>(null);
@@ -36,8 +38,13 @@ export function IssuePanel({
 
   useEffect(() => {
     load();
-    fetchUsers().then((r) => setUsers(r.users)).catch(console.error);
-  }, [itemId]);
+    fetchWorkItem(itemId).then((r) => {
+      const projectId = r.item.cluster_id;
+      if (projectId && !readOnly) {
+        fetchUsers(projectId).then((res) => setUsers(res.users)).catch(console.error);
+      }
+    }).catch(console.error);
+  }, [itemId, readOnly]);
 
   async function saveField(patch: Partial<WorkItem>) {
     if (!item) return;
@@ -106,7 +113,9 @@ export function IssuePanel({
               Status
               <select
                 value={item.status}
+                disabled={readOnly}
                 onChange={async (e) => {
+                  if (readOnly) return;
                   await updateWorkItemStatus(item.id, e.target.value);
                   load();
                   onUpdate?.();
@@ -119,6 +128,7 @@ export function IssuePanel({
               Assignee
               <select
                 value={item.owner_id ?? ''}
+                disabled={readOnly}
                 onChange={(e) => saveField({ owner_id: e.target.value ? Number(e.target.value) : null })}
               >
                 <option value="">Unassigned</option>
@@ -131,13 +141,14 @@ export function IssuePanel({
                 type="number"
                 min={0}
                 max={100}
+                disabled={readOnly}
                 value={item.story_points ?? ''}
                 onChange={(e) => saveField({ story_points: e.target.value ? Number(e.target.value) : null })}
               />
             </label>
             <label>
               Priority
-              <select value={item.priority} onChange={(e) => saveField({ priority: e.target.value })}>
+              <select value={item.priority} disabled={readOnly} onChange={(e) => saveField({ priority: e.target.value })}>
                 {WORK_PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </label>
@@ -145,6 +156,7 @@ export function IssuePanel({
               Due
               <input
                 type="date"
+                disabled={readOnly}
                 value={due}
                 onChange={(e) => saveField({ due_date: e.target.value || null })}
               />
@@ -154,6 +166,7 @@ export function IssuePanel({
           <SubtaskSection
             parent={item}
             compact
+            readOnly={readOnly}
             onNavigate={(id) => { navigate(`/work/${id}`); onClose(); }}
             onChanged={onUpdate}
           />
@@ -162,8 +175,10 @@ export function IssuePanel({
             Description
             <textarea
               rows={3}
+              readOnly={readOnly}
               defaultValue={item.description || ''}
               onBlur={(e) => {
+                if (readOnly) return;
                 if (e.target.value !== (item.description || '')) saveField({ description: e.target.value });
               }}
             />
@@ -173,9 +188,11 @@ export function IssuePanel({
             Acceptance criteria
             <textarea
               rows={3}
+              readOnly={readOnly}
               defaultValue={item.acceptance_criteria || ''}
               placeholder="Given… When… Then…"
               onBlur={(e) => {
+                if (readOnly) return;
                 if (e.target.value !== (item.acceptance_criteria || '')) saveField({ acceptance_criteria: e.target.value });
               }}
             />
@@ -194,14 +211,18 @@ export function IssuePanel({
             </div>
             <form onSubmit={onComment} className="comment-compose">
               {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
-              <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
+              {!readOnly && (
+                <>
+                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
+                  <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
+                </>
+              )}
             </form>
           </div>
 
           <div style={{ marginTop: '1rem' }}>
             <h4 className="agenda-heading">Attachments</h4>
-            <AttachmentPanel entityType="work_item" entityId={itemId} onChange={onUpdate} />
+            <AttachmentPanel entityType="work_item" entityId={itemId} onChange={onUpdate} readOnly={readOnly} />
           </div>
         </div>
       </aside>

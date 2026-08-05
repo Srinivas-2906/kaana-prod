@@ -14,7 +14,7 @@ function buildConfig() {
       connectionLimit: 10,
     };
   }
-  return {
+  const config = {
     host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
@@ -22,6 +22,8 @@ function buildConfig() {
     waitForConnections: true,
     connectionLimit: 10,
   };
+  if (process.env.DB_PORT) config.port = Number(process.env.DB_PORT);
+  return config;
 }
 
 export async function initDatabase() {

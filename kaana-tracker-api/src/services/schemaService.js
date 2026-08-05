@@ -316,6 +316,49 @@ export async function ensureM4Schema() {
   m4Done = true;
 }
 
+let inviteDone = false;
+
+export async function ensureInviteSchema() {
+  if (inviteDone) return;
+  await ensureM2Schema();
+
+  const pool = getPool();
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS project_invites (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        project_id INT UNSIGNED NOT NULL,
+        token VARCHAR(64) NOT NULL UNIQUE,
+        role ENUM('viewer', 'contributor', 'manager') NOT NULL DEFAULT 'contributor',
+        created_by INT UNSIGNED NOT NULL,
+        expires_at TIMESTAMP NULL,
+        max_uses INT UNSIGNED NULL DEFAULT 1,
+        use_count INT UNSIGNED NOT NULL DEFAULT 0,
+        revoked_at TIMESTAMP NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_project (project_id),
+        INDEX idx_token (token),
+        FOREIGN KEY (project_id) REFERENCES clusters(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+  } catch (e) {
+    console.warn('Schema create warning:', e.message);
+  }
+
+  await pool.query(`
+    INSERT IGNORE INTO project_members (project_id, user_id, role)
+    SELECT c.id, c.created_by, 'owner'
+    FROM clusters c
+    WHERE NOT EXISTS (
+      SELECT 1 FROM project_members pm
+      WHERE pm.project_id = c.id AND pm.user_id = c.created_by
+    )
+  `);
+
+  inviteDone = true;
+}
+
 let clerkDone = false;
 
 export async function ensureClerkSchema() {

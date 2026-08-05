@@ -8,10 +8,12 @@ export function AttachmentPanel({
   entityType,
   entityId,
   onChange,
+  readOnly = false,
 }: {
   entityType: string;
   entityId: number;
   onChange?: () => void;
+  readOnly?: boolean;
 }) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -62,26 +64,28 @@ export function AttachmentPanel({
 
   return (
     <div className="attachment-panel">
-      <div
-        className="attachment-drop"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}
-        onClick={() => inputRef.current?.click()}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
-      >
-        <Paperclip size={16} />
-        <span>{uploading ? 'Uploading…' : 'Drop files or click to upload'}</span>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          hidden
-          accept="image/*,.pdf,.txt,.doc,.docx,.xls,.xlsx"
-          onChange={(e) => onFiles(e.target.files)}
-        />
-      </div>
+      {!readOnly && (
+        <div
+          className="attachment-drop"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); onFiles(e.dataTransfer.files); }}
+          onClick={() => inputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+        >
+          <Paperclip size={16} />
+          <span>{uploading ? 'Uploading…' : 'Drop files or click to upload'}</span>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            hidden
+            accept="image/*,.pdf,.txt,.doc,.docx,.xls,.xlsx"
+            onChange={(e) => onFiles(e.target.files)}
+          />
+        </div>
+      )}
       {error && <p style={{ color: '#dc2626', fontSize: '0.8125rem' }}>{error}</p>}
       <ul className="attachment-list">
         {attachments.map((a) => (
@@ -90,9 +94,11 @@ export function AttachmentPanel({
               {a.original_name}
             </button>
             <span className="muted">{(a.file_size / 1024).toFixed(0)} KB · {a.uploaded_by_name}</span>
-            <button type="button" className="btn btn-ghost attachment-remove" onClick={() => onRemove(a.id)} aria-label="Remove">
-              <Trash2 size={14} />
-            </button>
+            {!readOnly && (
+              <button type="button" className="btn btn-ghost attachment-remove" onClick={() => onRemove(a.id)} aria-label="Remove">
+                <Trash2 size={14} />
+              </button>
+            )}
           </li>
         ))}
         {!attachments.length && <li className="muted">No attachments yet.</li>}

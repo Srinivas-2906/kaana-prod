@@ -384,8 +384,35 @@ export function removeProjectMember(projectId: number, userId: number) {
   return request<{ ok: boolean }>(`/projects/${projectId}/members/${userId}`, { method: 'DELETE' });
 }
 
-export function fetchUsers() {
-  return request<{ users: User[] }>('/projects/meta/users');
+export function fetchUsers(projectId?: number) {
+  const qs = projectId ? `?projectId=${projectId}` : '';
+  return request<{ users: User[] }>(`/projects/meta/users${qs}`);
+}
+
+export function fetchProjectInvites(projectId: number) {
+  return request<{ invites: import('../types').ProjectInvite[] }>(`/projects/${projectId}/invites`);
+}
+
+export function createProjectInvite(projectId: number, role: 'viewer' | 'contributor' | 'manager') {
+  return request<{ invite: import('../types').ProjectInvite }>(`/projects/${projectId}/invites`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role, expiresInDays: 14, maxUses: 1 }),
+  });
+}
+
+export function revokeProjectInvite(projectId: number, inviteId: number) {
+  return request<{ ok: boolean }>(`/projects/${projectId}/invites/${inviteId}`, { method: 'DELETE' });
+}
+
+export function fetchInvitePreview(token: string) {
+  return request<{ invite: import('../types').InvitePreview }>(`/invites/${token}`);
+}
+
+export function acceptProjectInvite(token: string) {
+  return request<{ projectId: number; role: string; projectUrl: string }>(`/invites/${token}/accept`, {
+    method: 'POST',
+  });
 }
 
 export function promoteIdeaToStory(ideaId: number, data?: Record<string, unknown>) {

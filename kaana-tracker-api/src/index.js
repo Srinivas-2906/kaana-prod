@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { initDatabase } from './db/index.js';
-import { ensureBaseSchema, ensureM4Schema, ensureClerkSchema } from './services/schemaService.js';
+import { ensureBaseSchema, ensureM4Schema, ensureClerkSchema, ensureInviteSchema } from './services/schemaService.js';
 import { corsMiddleware } from './middleware/cors.js';
 import authRouter from './routes/auth.js';
 import { handleClerkWebhook } from './services/authService.js';
@@ -16,6 +16,7 @@ import journalRouter from './routes/journal.js';
 import decisionsRouter from './routes/decisions.js';
 import remindersRouter from './routes/reminders.js';
 import attachmentsRouter from './routes/attachments.js';
+import invitesRouter from './routes/invites.js';
 
 const app = express();
 const PORT = process.env.PORT || 3011;
@@ -24,6 +25,7 @@ await initDatabase();
 await ensureBaseSchema();
 await ensureM4Schema();
 await ensureClerkSchema();
+await ensureInviteSchema();
 
 app.post('/api/auth/webhooks/clerk', express.raw({ type: 'application/json' }), handleClerkWebhook);
 app.use(express.json({ limit: '10mb' }));
@@ -34,6 +36,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/invites', invitesRouter);
 app.use('/api/projects', projectsRouter);
 app.use('/api/work-items', workItemsRouter);
 app.use('/api/plan', planRouter);

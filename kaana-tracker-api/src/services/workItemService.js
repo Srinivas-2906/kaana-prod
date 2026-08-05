@@ -100,6 +100,11 @@ export async function listWorkItems(filters = {}) {
   const params = [];
 
   if (filters.projectId) { where.push('w.cluster_id = ?'); params.push(filters.projectId); }
+  else if (filters.accessibleProjectIds) {
+    if (!filters.accessibleProjectIds.length) return [];
+    where.push(`w.cluster_id IN (${filters.accessibleProjectIds.map(() => '?').join(',')})`);
+    params.push(...filters.accessibleProjectIds);
+  }
   if (filters.itemType) { where.push('w.item_type = ?'); params.push(filters.itemType); }
   if (filters.parentId != null) { where.push('w.parent_id = ?'); params.push(filters.parentId); }
   if (filters.ideaStage) { where.push('w.idea_stage = ?'); params.push(filters.ideaStage); }

@@ -157,12 +157,14 @@ export function SubtaskSection({
   onNavigate,
   onChanged,
   variant = 'default',
+  readOnly = false,
 }: {
   parent: WorkItem;
   compact?: boolean;
   onNavigate?: (id: number) => void;
   onChanged?: () => void;
   variant?: 'default' | 'business';
+  readOnly?: boolean;
 }) {
   const [tasks, setTasks] = useState<WorkItem[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -177,6 +179,7 @@ export function SubtaskSection({
   useEffect(() => { reload(); }, [parent.id]);
 
   async function toggleDone(task: WorkItem) {
+    if (readOnly) return;
     setTogglingId(task.id);
     try {
       const full = await fetchWorkItem(task.id);
@@ -192,6 +195,7 @@ export function SubtaskSection({
   }
 
   async function unlink(child: WorkItem) {
+    if (readOnly) return;
     const full = await fetchWorkItem(child.id);
     await updateWorkItem(child.id, { ...full.item, parent_id: null });
     reload();
@@ -213,10 +217,12 @@ export function SubtaskSection({
         )}
       </div>
 
-      <button type="button" className="task-add-link" onClick={() => setPickerOpen(true)}>
-        <Plus size={14} />
-        Add Task
-      </button>
+      {!readOnly && (
+        <button type="button" className="task-add-link" onClick={() => setPickerOpen(true)}>
+          <Plus size={14} />
+          Add Task
+        </button>
+      )}
 
       <ul className="task-list">
         {tasks.map((t) => {
@@ -229,7 +235,7 @@ export function SubtaskSection({
               <button
                 type="button"
                 className="task-check"
-                disabled={togglingId === t.id}
+                disabled={readOnly || togglingId === t.id}
                 onClick={() => toggleDone(t)}
                 aria-label={isDone ? 'Mark task incomplete' : 'Mark task complete'}
               >
@@ -250,7 +256,7 @@ export function SubtaskSection({
                   {useBusinessLabels ? businessStatusLabel(t.status) : statusLabel(t.status)}
                 </span>
               )}
-              {!compact && (
+              {!compact && !readOnly && (
                 <button
                   type="button"
                   className="btn btn-ghost task-unlink"

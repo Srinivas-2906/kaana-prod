@@ -72,14 +72,23 @@ export function WorkItemPage() {
 
   useEffect(() => {
     if (!itemId) return;
-    Promise.all([fetchWorkItem(itemId), fetchProjects(), fetchUsers()])
-      .then(([w, p, u]) => {
+    Promise.all([fetchWorkItem(itemId), fetchProjects()])
+      .then(async ([w, p]) => {
         setItem(w.item);
         setSections(defaultSectionsFromItem(w.item));
         setProjects(p.projects);
-        setUsers(u.users);
         if (w.item.cluster_id) {
-          fetchProject(w.item.cluster_id).then((r) => setProject(r.project)).catch(console.error);
+          fetchProject(w.item.cluster_id).then(async (r) => {
+            setProject(r.project);
+            if (r.project.can_edit !== false) {
+              try {
+                const u = await fetchUsers(w.item.cluster_id!);
+                setUsers(u.users);
+              } catch {
+                setUsers([]);
+              }
+            }
+          }).catch(console.error);
         }
         if (w.item.parent_id) {
           fetchWorkItem(w.item.parent_id).then((pr) => setParentItem(pr.item)).catch(() => setParentItem(null));

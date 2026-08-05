@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  addProjectMember, createTransaction, createWorkItem, fetchFinanceSummary, fetchProject,
+  addProjectMember, createTransaction, createWorkItem, fetchActivity, fetchFinanceSummary, fetchProject,
   fetchProjectMembers, fetchTransactionMeta, fetchTransactions, fetchUsers, fetchWorkItems,
   removeProjectMember,
 } from '../lib/api';
@@ -9,9 +9,11 @@ import { WorkBoard } from '../components/WorkBoard';
 import { ProjectTabs } from '../components/ProjectTabs';
 import { PlanView } from '../components/PlanView';
 import { AttachmentPanel } from '../components/AttachmentPanel';
+import { ProjectInvitesPanel } from '../components/ProjectInvitesPanel';
+import { ActivityTimeline } from '../components/ActivityTimeline';
 import { currentMonth, todayISO } from '../lib/dates';
 import type {
-  FinanceSummary, Project, ProjectMember, ProjectTab, Transaction, TransactionMeta, User, WorkItem,
+  ActivityEvent, FinanceSummary, Project, ProjectMember, ProjectTab, Transaction, TransactionMeta, User, WorkItem,
 } from '../types';
 
 function BoardQuickAdd({ projectId, stories, onAdded }: { projectId: number; stories: WorkItem[]; onAdded: () => void }) {
@@ -72,8 +74,11 @@ export function ProjectPage() {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [creator, setCreator] = useState<Project | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [error, setError] = useState('');
   const month = currentMonth();
+  const canEdit = project?.can_edit !== false;
+  const canManage = Boolean(project?.can_manage);
 
   function reloadItems() {
     if (!projectId) return;
@@ -89,12 +94,17 @@ export function ProjectPage() {
 
   useEffect(() => {
     if (tab === 'people') {
-      Promise.all([fetchProjectMembers(projectId), fetchUsers()])
+      Promise.all([fetchProjectMembers(projectId), canManage ? fetchUsers(projectId) : Promise.resolve({ users: [] })])
         .then(([m, u]) => {
           setMembers(m.members);
           setCreator(m.creator);
           setUsers(u.users);
         }).catch(console.error);
+    }
+    if (tab === 'activity') {
+      fetchActivity({ projectId, limit: 100 })
+        .then((r) => setActivity(r.events))
+        .catch(console.error);
     }
     if (tab === 'finance') {
       Promise.all([
@@ -107,7 +117,7 @@ export function ProjectPage() {
         setTxMeta(meta);
       }).catch(console.error);
     }
-  }, [tab, projectId, month]);
+  }, [tab, projectId, month, canManage]);
 
   async function onAddMember(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -156,13 +166,21 @@ export function ProjectPage() {
       </header>
       <div className="page">
         {error && <p style={{ color: '#dc2626' }}>{error}</p>}
+        {!canEdit && (
+          <div className="card" style={{ marginBottom: '1rem', borderLeft: '3px solid #f59e0b' }}>
+            <strong>View-only access</strong>
+            <p className="muted" style={{ margin: '0.25rem 0 0' }}>
+              Your role is {project?.my_role || 'viewer'}. You can browse this project but cannot make changes.
+            </p>
+          </div>
+        )}
         {project?.description && <p className="muted" style={{ marginTop: 0 }}>{project.description}</p>}
         <ProjectTabs basePath={basePath} />
 
         {tab === 'board' && (
           <>
-            <BoardQuickAdd projectId={projectId} stories={stories} onAdded={reloadItems} />
-            <WorkBoard items={boardItems} onChange={reloadItems} />
+            {canEdit && <BoardQuickAdd projectId={projectId} stories={stories} onAdded={reloadItems} />}
+            <WorkBoard items={boardItems} onChange={reloadItems} readOnly={!canEdit} />
           </>
         )}
 
@@ -180,27 +198,33 @@ export function ProjectPage() {
             </div>
             <form className="card" style={{ marginBottom: '1rem' }} onSubmit={onAddExpense}>
               <h3 style={{ marginTop: 0 }}>Quick expense / income</h3>
-              <div className="form-row">
-                <select name="type" defaultValue="expense">
-                  <option value="expense">Expense</option>
-                  <option value="income">Income</option>
-                </select>
-                <input name="amount" type="number" step="0.01" required placeholder="Amount" />
-                <select name="category" required>
-                  {txMeta.categories.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <input name="transaction_date" type="date" defaultValue={todayISO()} />
-              </div>
-              <div className="form-row" style={{ marginTop: '0.5rem' }}>
-                <select name="payment_method" defaultValue={txMeta.paymentMethods[0]}>
-                  {txMeta.paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-                <select name="paid_by" defaultValue={txMeta.paidByOptions[0]}>
-                  {txMeta.paidByOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-                </select>
-                <input name="description" placeholder="Description" style={{ flex: 1 }} />
-                <button type="submit" className="btn btn-primary">Save</button>
-              </div>
+              {canEdit ? (
+                <>
+                  <div className="form-row">
+                    <select name="type" defaultValue="expense">
+                      <option value="expense">Expense</option>
+                      <option value="income">Income</option>
+                    </select>
+                    <input name="amount" type="number" step="0.01" required placeholder="Amount" />
+                    <select name="category" required>
+                      {txMeta.categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <input name="transaction_date" type="date" defaultValue={todayISO()} />
+                  </div>
+                  <div className="form-row" style={{ marginTop: '0.5rem' }}>
+                    <select name="payment_method" defaultValue={txMeta.paymentMethods[0]}>
+                      {txMeta.paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <select name="paid_by" defaultValue={txMeta.paidByOptions[0]}>
+                      {txMeta.paidByOptions.map((p) => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                    <input name="description" placeholder="Description" style={{ flex: 1 }} />
+                    <button type="submit" className="btn btn-primary">Save</button>
+                  </div>
+                </>
+              ) : (
+                <p className="muted" style={{ margin: 0 }}>Finance entries are read-only for your role.</p>
+              )}
             </form>
             <div className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
@@ -225,6 +249,7 @@ export function ProjectPage() {
 
         {tab === 'people' && (
           <>
+            <ProjectInvitesPanel projectId={projectId} canManage={canManage} />
             <div className="card" style={{ marginBottom: '1rem' }}>
               <h3 style={{ marginTop: 0 }}>Team</h3>
               {creator && (
@@ -241,7 +266,7 @@ export function ProjectPage() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <span className="role-badge">{m.role}</span>
-                    {m.role !== 'owner' && (
+                    {canManage && m.role !== 'owner' && (
                       <button type="button" className="btn btn-ghost" onClick={() => removeProjectMember(projectId, m.user_id).then(() => fetchProjectMembers(projectId).then((r) => setMembers(r.members)))}>
                         Remove
                       </button>
@@ -250,26 +275,36 @@ export function ProjectPage() {
                 </div>
               ))}
             </div>
-            <form className="card" onSubmit={onAddMember}>
-              <h3 style={{ marginTop: 0 }}>Add member</h3>
-              <div className="form-row">
-                <select name="userId" required>
-                  <option value="">Select user</option>
-                  {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                </select>
-                <select name="role" defaultValue="contributor">
-                  <option value="manager">Manager</option>
-                  <option value="contributor">Contributor</option>
-                  <option value="viewer">Viewer</option>
-                </select>
-                <button type="submit" className="btn btn-primary">Add</button>
-              </div>
-            </form>
+            {canManage && (
+              <form className="card" onSubmit={onAddMember}>
+                <h3 style={{ marginTop: 0 }}>Add member</h3>
+                <div className="form-row">
+                  <select name="userId" required>
+                    <option value="">Select user</option>
+                    {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                  </select>
+                  <select name="role" defaultValue="contributor">
+                    <option value="manager">Manager</option>
+                    <option value="contributor">Contributor</option>
+                    <option value="viewer">Viewer</option>
+                  </select>
+                  <button type="submit" className="btn btn-primary">Add</button>
+                </div>
+              </form>
+            )}
             <div className="card" style={{ marginTop: '1rem' }}>
               <h3 style={{ marginTop: 0 }}>Project files</h3>
-              <AttachmentPanel entityType="project" entityId={projectId} />
+              <AttachmentPanel entityType="project" entityId={projectId} readOnly={!canEdit} />
             </div>
           </>
+        )}
+
+        {tab === 'activity' && (
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Project activity</h3>
+            <p className="muted">Who did what — invites, edits, status changes, and more.</p>
+            <ActivityTimeline events={activity} />
+          </div>
         )}
       </div>
     </>
