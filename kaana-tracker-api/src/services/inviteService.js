@@ -49,13 +49,13 @@ function mapInviteRow(row) {
 export async function createInvite(projectId, role, actorId, options = {}) {
   await ensureProjectOwnerMembership(projectId, actorId);
   const access = await assertProjectAccess(projectId, actorId, 'manage');
-  if (access.error) return { error: access.error };
+  if (access.error) return { error: access.error, status: 403 };
 
   const inviteRole = INVITE_ROLES.includes(role) ? role : 'contributor';
   const inviteeEmail = options.email ? normalizeEmail(options.email) : null;
 
   if (inviteeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteeEmail)) {
-    return { error: 'Enter a valid email address' };
+    return { error: 'Enter a valid email address', status: 400 };
   }
 
   const pool = getPool();
@@ -67,7 +67,7 @@ export async function createInvite(projectId, role, actorId, options = {}) {
       WHERE pm.project_id = ? AND LOWER(u.email) = ?
       LIMIT 1
     `, [projectId, inviteeEmail]);
-    if (members[0]) return { error: 'This person is already a project member' };
+    if (members[0]) return { error: 'This person is already a project member', status: 400 };
 
     const [pending] = await pool.query(`
       SELECT id FROM project_invites
@@ -76,7 +76,7 @@ export async function createInvite(projectId, role, actorId, options = {}) {
         AND (expires_at IS NULL OR expires_at > NOW())
       LIMIT 1
     `, [projectId, inviteeEmail]);
-    if (pending[0]) return { error: 'An invitation is already pending for this email' };
+    if (pending[0]) return { error: 'An invitation is already pending for this email', status: 400 };
   }
 
   const expiresInDays = Number(options.expiresInDays) || 14;
@@ -120,7 +120,7 @@ export async function createInvite(projectId, role, actorId, options = {}) {
     });
     if (emailResult.error) {
       await pool.query('UPDATE project_invites SET revoked_at = CURRENT_TIMESTAMP, status = ? WHERE id = ?', ['revoked', result.insertId]);
-      return { error: emailResult.error };
+      return { error: emailResult.error, status: 400 };
     }
   }
 

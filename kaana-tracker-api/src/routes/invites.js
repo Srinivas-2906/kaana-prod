@@ -44,7 +44,7 @@ export function mountProjectInviteRoutes(projectsRouter) {
         req.user.sub,
         { expiresInDays, maxUses, email, inviterName: req.user.name },
       );
-      if (result.error) return res.status(403).json({ error: result.error });
+      if (result.error) return res.status(result.status || 400).json({ error: result.error });
       res.status(201).json(result);
     } catch (err) {
       console.error(err);

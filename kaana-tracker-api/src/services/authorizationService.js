@@ -20,22 +20,24 @@ export function canCreateInvites(role) {
 
 export async function getProjectRole(projectId, userId) {
   const pool = getPool();
+  const uid = Number(userId);
+  const pid = Number(projectId);
   const [memberRows] = await pool.query(
     'SELECT role FROM project_members WHERE project_id = ? AND user_id = ? LIMIT 1',
-    [projectId, userId],
+    [pid, uid],
   );
   if (memberRows[0]) return memberRows[0].role;
 
   const [creatorRows] = await pool.query(
     'SELECT created_by FROM clusters WHERE id = ? LIMIT 1',
-    [projectId],
+    [pid],
   );
-  if (creatorRows[0]?.created_by === userId) return 'owner';
+  if (Number(creatorRows[0]?.created_by) === uid) return 'owner';
   return null;
 }
 
 export async function assertProjectAccess(projectId, userId, level = 'view') {
-  const role = await getProjectRole(projectId, userId);
+  const role = await getProjectRole(Number(projectId), Number(userId));
   if (!role || !canView(role)) {
     return { error: 'You do not have access to this project', status: 403, role: null };
   }

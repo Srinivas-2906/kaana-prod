@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { createClerkClient } from '@clerk/backend';
 import { Webhook } from 'svix';
 import { getPool } from '../db/index.js';
 import { signToken } from '../middleware/auth.js';
@@ -27,23 +28,39 @@ function displayNameFromPayload(payload, email) {
 
 export async function resolveClerkUser(clerkUserId, payload = {}) {
   const pool = getPool();
+  let email = extractEmailFromPayload(payload);
+
+  if (!email && process.env.CLERK_SECRET_KEY) {
+    try {
+      const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+      const clerkUser = await clerk.users.getUser(clerkUserId);
+      const primaryId = clerkUser.primaryEmailAddressId;
+      email = normalizeEmail(
+        clerkUser.emailAddresses?.find((entry) => entry.id === primaryId)?.emailAddress
+        || clerkUser.emailAddresses?.[0]?.emailAddress,
+      );
+    } catch {
+      // Fall through to clerk_user_id lookup.
+    }
+  }
+
+  // Prefer verified email so seeded/legacy accounts merge with the Clerk session.
+  if (email) {
+    const [byEmail] = await pool.query(
+      'SELECT id, name, email FROM users WHERE email = ? LIMIT 1',
+      [email],
+    );
+    if (byEmail[0]) {
+      await pool.query('UPDATE users SET clerk_user_id = ? WHERE id = ?', [clerkUserId, byEmail[0].id]);
+      return byEmail[0];
+    }
+  }
+
   const [rows] = await pool.query(
     'SELECT id, name, email FROM users WHERE clerk_user_id = ? LIMIT 1',
     [clerkUserId],
   );
   if (rows[0]) return rows[0];
-
-  const email = extractEmailFromPayload(payload);
-  if (email) {
-    const [existing] = await pool.query(
-      'SELECT id, name, email FROM users WHERE email = ? LIMIT 1',
-      [email],
-    );
-    if (existing[0]) {
-      await pool.query('UPDATE users SET clerk_user_id = ? WHERE id = ?', [clerkUserId, existing[0].id]);
-      return existing[0];
-    }
-  }
 
   const name = displayNameFromPayload(payload, email);
   const emailVal = email || `user-${clerkUserId.slice(-8)}@tracker.kaana.local`;
