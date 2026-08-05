@@ -1,34 +1,54 @@
-const TOKEN_KEY = 'tracker_token';
+const LEGACY_TOKEN_KEY = 'tracker_token';
 
-export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+let tokenGetter: (() => Promise<string | null>) | null = null;
+
+export function isClerkEnabled() {
+  const key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  return Boolean(key && !key.includes('placeholder'));
 }
 
-export function saveToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
+export function setTokenGetter(fn: () => Promise<string | null>) {
+  tokenGetter = fn;
 }
 
-export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+export function getLegacyToken() {
+  return localStorage.getItem(LEGACY_TOKEN_KEY);
 }
 
-export function authHeaders(): HeadersInit {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+export function saveLegacyToken(token: string) {
+  localStorage.setItem(LEGACY_TOKEN_KEY, token);
 }
 
-export function isAuthenticated() {
-  return !!getToken();
+export function clearLegacyToken() {
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
-export function logout() {
-  clearToken();
+export async function authHeaders(): Promise<HeadersInit> {
+  if (tokenGetter) {
+    try {
+      const token = await tokenGetter();
+      if (token) return { Authorization: `Bearer ${token}` };
+    } catch {
+      // Fall through to legacy token during migration.
+    }
+  }
+
+  const legacy = getLegacyToken();
+  return legacy ? { Authorization: `Bearer ${legacy}` } : {};
+}
+
+export function isLegacyAuthenticated() {
+  return !!getLegacyToken();
+}
+
+export function legacyLogout() {
+  clearLegacyToken();
   window.location.href = '/login';
 }
 
 const API = import.meta.env.VITE_TRACKER_API || '/api';
 
-export async function login(email: string, password: string) {
+export async function legacyLogin(email: string, password: string) {
   const res = await fetch(`${API}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -36,6 +56,6 @@ export async function login(email: string, password: string) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Login failed');
-  saveToken(data.token);
+  saveLegacyToken(data.token);
   return data;
 }

@@ -140,6 +140,9 @@ button, input, select, textarea { font: inherit; }
 }
 
 .login-card { width: 100%; max-width: 24rem; }
+.clerk-auth-card { max-width: 28rem; }
+.clerk-auth-card .cl-rootBox,
+.clerk-auth-card .cl-cardBox { width: 100%; box-shadow: none; }
 
 .stat-value { font-size: 1.75rem; font-weight: 700; margin-top: 0.25rem; }
 .muted { color: var(--muted); font-size: 0.8125rem; }

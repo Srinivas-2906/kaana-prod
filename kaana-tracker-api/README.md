@@ -13,7 +13,15 @@ npm run dev
 
 Health: http://localhost:3011/api/health
 
-## Routes (M0)
+## Auth
+
+- **Clerk (recommended):** set `CLERK_SECRET_KEY`; API verifies Clerk session JWTs and maps `users.clerk_user_id`.
+- **Legacy JWT:** `POST /api/auth/login` still supported during migration.
+- **Webhook:** `POST /api/auth/webhooks/clerk` (Svix-signed; requires raw body).
+
+See [TRACKER_CLERK.md](../TRACKER_CLERK.md).
+
+## Routes
 
 | Method | Path | Description |
 |--------|------|-------------|

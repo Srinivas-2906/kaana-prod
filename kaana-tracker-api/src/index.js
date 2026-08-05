@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import { initDatabase } from './db/index.js';
-import { ensureBaseSchema, ensureM4Schema } from './services/schemaService.js';
+import { ensureBaseSchema, ensureM4Schema, ensureClerkSchema } from './services/schemaService.js';
 import { corsMiddleware } from './middleware/cors.js';
 import authRouter from './routes/auth.js';
+import { handleClerkWebhook } from './services/authService.js';
 import projectsRouter from './routes/projects.js';
 import workItemsRouter from './routes/workItems.js';
 import planRouter from './routes/plan.js';
@@ -22,12 +23,14 @@ const PORT = process.env.PORT || 3011;
 await initDatabase();
 await ensureBaseSchema();
 await ensureM4Schema();
+await ensureClerkSchema();
 
+app.post('/api/auth/webhooks/clerk', express.raw({ type: 'application/json' }), handleClerkWebhook);
 app.use(express.json({ limit: '10mb' }));
 app.use(corsMiddleware);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'kaana-tracker-api', version: 'm3' });
+  res.json({ ok: true, service: 'kaana-tracker-api', version: 'm4-clerk' });
 });
 
 app.use('/api/auth', authRouter);

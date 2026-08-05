@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { useClerk } from '@clerk/clerk-react';
 import {
   LayoutDashboard,
   Layers,
@@ -8,7 +9,7 @@ import {
   Compass,
   LogOut,
 } from 'lucide-react';
-import { logout } from '../lib/auth';
+import { isClerkEnabled, legacyLogout } from '../lib/auth';
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Hub', end: true },
@@ -17,6 +18,33 @@ const NAV = [
   { to: '/plan', icon: CalendarDays, label: 'Calendar' },
   { to: '/transactions', icon: Wallet, label: 'Expenses' },
 ];
+
+function LogoutButtonClerk() {
+  const { signOut } = useClerk();
+  return (
+    <button
+      type="button"
+      className="nav-link"
+      style={{ marginTop: 'auto', border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
+      onClick={() => signOut({ redirectUrl: '/login' })}
+    >
+      <LogOut size={18} /> Logout
+    </button>
+  );
+}
+
+function LogoutButtonLegacy() {
+  return (
+    <button
+      type="button"
+      className="nav-link"
+      style={{ marginTop: 'auto', border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
+      onClick={legacyLogout}
+    >
+      <LogOut size={18} /> Logout
+    </button>
+  );
+}
 
 export function AppShell() {
   return (
@@ -35,9 +63,7 @@ export function AppShell() {
             {item.label}
           </NavLink>
         ))}
-        <button type="button" className="nav-link" style={{ marginTop: 'auto', border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }} onClick={logout}>
-          <LogOut size={18} /> Logout
-        </button>
+        {isClerkEnabled() ? <LogoutButtonClerk /> : <LogoutButtonLegacy />}
       </aside>
       <div className="main-area">
         <Outlet />

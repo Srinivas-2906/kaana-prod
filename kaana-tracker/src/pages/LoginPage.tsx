@@ -1,5 +1,6 @@
+import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
-import { login } from '../lib/auth';
+import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -7,12 +8,24 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  if (isClerkEnabled()) {
+    return (
+      <div className="login-page">
+        <div className="card login-card clerk-auth-card">
+          <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
+          <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
+          <SignIn routing="path" path="/login" signUpUrl="/sign-up" forceRedirectUrl="/" />
+        </div>
+      </div>
+    );
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      await login(email, password);
+      await legacyLogin(email, password);
       window.location.href = '/';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');

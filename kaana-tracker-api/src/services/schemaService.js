@@ -315,3 +315,14 @@ export async function ensureM4Schema() {
 
   m4Done = true;
 }
+
+let clerkDone = false;
+
+export async function ensureClerkSchema() {
+  if (clerkDone) return;
+  await ensureBaseSchema();
+  await runAlters([
+    'ALTER TABLE users ADD COLUMN clerk_user_id VARCHAR(64) NULL UNIQUE AFTER email',
+  ]);
+  clerkDone = true;
+}

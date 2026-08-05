@@ -53,7 +53,8 @@ export function AttachmentPanel({
 
   async function openAttachment(id: number) {
     const url = attachmentDownloadUrl(id);
-    const res = await fetch(url, { headers: authHeaders() });
+    const headers = await authHeaders();
+    const res = await fetch(url, { headers });
     if (!res.ok) return;
     const blob = await res.blob();
     window.open(URL.createObjectURL(blob), '_blank');
