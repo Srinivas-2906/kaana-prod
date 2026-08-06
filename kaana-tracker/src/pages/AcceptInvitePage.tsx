@@ -73,6 +73,7 @@ function useInviteFlow(signedIn: boolean, authReady: boolean) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
+  const [autoTried, setAutoTried] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -94,6 +95,16 @@ function useInviteFlow(signedIn: boolean, authReady: boolean) {
       setAccepting(false);
     }
   }
+
+  // Auto-accept after sign-in so invite links land straight in the project.
+  useEffect(() => {
+    if (!signedIn || !authReady) return;
+    if (!token || !preview) return;
+    if (accepting || autoTried) return;
+    setAutoTried(true);
+    onAccept();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, authReady, token, preview, accepting, autoTried]);
 
   if (!authReady || loading) {
     return (
