@@ -1,6 +1,7 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { trackerClerkAppearance } from '../lib/clerkAppearance';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
 export function LoginPage() {
@@ -17,7 +18,13 @@ export function LoginPage() {
         <div className="card login-card clerk-auth-card">
           <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
           <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
-          <SignIn routing="path" path="/login" signUpUrl="/sign-up" forceRedirectUrl={redirectUrl} />
+          <SignIn
+            routing="path"
+            path="/login"
+            signUpUrl="/sign-up"
+            forceRedirectUrl={redirectUrl}
+            appearance={trackerClerkAppearance}
+          />
         </div>
       </div>
     );

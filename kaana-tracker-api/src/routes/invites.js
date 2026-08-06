@@ -42,7 +42,13 @@ export function mountProjectInviteRoutes(projectsRouter) {
         Number(req.params.id),
         role,
         req.user.sub,
-        { expiresInDays, maxUses, email, inviterName: req.user.name },
+        {
+          expiresInDays,
+          maxUses,
+          email,
+          inviterName: req.user.name,
+          senderEmail: req.user.email,
+        },
       );
       if (result.error) return res.status(result.status || 400).json({ error: result.error });
       res.status(201).json(result);

@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { Copy, Mail, Trash2, UserPlus } from 'lucide-react';
 import { createProjectInvite, fetchProjectInvites, revokeProjectInvite } from '../lib/api';
 import type { ProjectInvite } from '../types';
@@ -33,6 +34,8 @@ function ShareProjectContent({
   const [success, setSuccess] = useState('');
   const [copied, setCopied] = useState('');
   const [sending, setSending] = useState(false);
+  const { user } = useUser();
+  const senderEmail = user?.primaryEmailAddress?.emailAddress;
 
   function reload() {
     fetchProjectInvites(projectId)
@@ -48,12 +51,22 @@ function ShareProjectContent({
     setSuccess('');
     setSending(true);
     try {
-      await createProjectInvite(projectId, role, email.trim());
+      const result = await createProjectInvite(projectId, role, email.trim());
       const sentTo = email.trim();
       setEmail('');
-      setSuccess(`Invitation sent to ${sentTo}`);
+      if (result.emailWarning) {
+        setError(result.emailWarning);
+        setCopied(result.invite.url);
+        try {
+          await navigator.clipboard.writeText(result.invite.url);
+        } catch {
+          // Clipboard may be blocked; link still shown in UI.
+        }
+      } else {
+        setSuccess(`Invitation sent to ${sentTo}`);
+        onDone?.();
+      }
       reload();
-      onDone?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send invitation');
     } finally {
@@ -91,6 +104,11 @@ function ShareProjectContent({
         <h4 style={{ margin: '0 0 0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Mail size={16} /> Invite by email
         </h4>
+        {senderEmail && (
+          <p className="muted" style={{ margin: '0 0 0.75rem', fontSize: '0.875rem' }}>
+            Invitation email will be sent from <strong>{senderEmail}</strong>
+          </p>
+        )}
         <div className="form-row">
           <input
             type="email"
@@ -123,7 +141,11 @@ function ShareProjectContent({
           </select>
           <button type="button" className="btn btn-ghost" onClick={onCopyLink}>Create & copy link</button>
         </div>
-        {copied && <p className="muted" style={{ margin: '0.75rem 0 0' }}>Copied: {copied}</p>}
+        {copied && (
+          <p className="muted" style={{ margin: '0.75rem 0 0', wordBreak: 'break-all' }}>
+            Invite link{copied.startsWith('http') ? '' : ' copied'}: {copied}
+          </p>
+        )}
       </div>
 
       {invites.length > 0 && (

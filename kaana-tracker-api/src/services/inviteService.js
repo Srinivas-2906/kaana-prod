@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { getPool } from '../db/index.js';
 import { logActivity } from './activityService.js';
 import { sendProjectInviteEmail } from './emailService.js';
+import { isAllowedSenderEmail } from './gmailService.js';
 import {
   assertProjectAccess,
   ensureProjectOwnerMembership,
@@ -98,8 +99,16 @@ export async function createInvite(projectId, role, actorId, options = {}) {
     maxUses || 1,
   ]);
 
-  const [actorRows] = await pool.query('SELECT name FROM users WHERE id = ?', [actorId]);
+  const [actorRows] = await pool.query('SELECT name, email FROM users WHERE id = ?', [actorId]);
   const inviterName = options.inviterName || actorRows[0]?.name || 'Someone';
+  const senderEmail = options.senderEmail || actorRows[0]?.email || null;
+
+  if (inviteeEmail && senderEmail && !isAllowedSenderEmail(senderEmail)) {
+    return {
+      error: 'Sign in with your @kaana.in Google Workspace email to send invitations',
+      status: 400,
+    };
+  }
 
   const [rows] = await pool.query(`
     SELECT i.*, c.name AS project_name
@@ -117,10 +126,22 @@ export async function createInvite(projectId, role, actorId, options = {}) {
       projectName: rows[0].project_name,
       inviteUrl: invite.url,
       role: inviteRole,
+      senderEmail,
     });
     if (emailResult.error) {
-      await pool.query('UPDATE project_invites SET revoked_at = CURRENT_TIMESTAMP, status = ? WHERE id = ?', ['revoked', result.insertId]);
-      return { error: emailResult.error, status: 400 };
+      await logActivity({
+        eventType: 'invite_created',
+        entityType: 'cluster',
+        entityId: projectId,
+        projectId,
+        actorId,
+        summary: `Invitation link created for ${inviteeEmail} (email not delivered)`,
+        payload: { invite_id: result.insertId, role: inviteRole, email: inviteeEmail },
+      });
+      return {
+        invite,
+        emailWarning: emailResult.error,
+      };
     }
   }
 

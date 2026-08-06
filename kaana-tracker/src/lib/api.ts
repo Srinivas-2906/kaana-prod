@@ -1,4 +1,4 @@
-import { authHeaders, clearLegacyToken } from './auth';
+import { authHeaders, clearLegacyToken, isClerkEnabled } from './auth';
 import type {
   Attachment,
   CalendarDayGlimpses,
@@ -34,7 +34,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (res.status === 401) {
     clearLegacyToken();
-    throw new Error('Unauthorized');
+    if (isClerkEnabled() && !window.location.pathname.startsWith('/login')) {
+      window.location.href = `/login?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    }
+    throw new Error('Session expired. Please sign in again.');
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -398,7 +401,7 @@ export function createProjectInvite(
   role: 'viewer' | 'contributor' | 'manager',
   email?: string,
 ) {
-  return request<{ invite: import('../types').ProjectInvite }>(`/projects/${projectId}/invites`, {
+  return request<{ invite: import('../types').ProjectInvite; emailWarning?: string }>(`/projects/${projectId}/invites`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
