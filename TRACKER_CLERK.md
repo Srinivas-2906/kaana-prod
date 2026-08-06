@@ -1,8 +1,6 @@
 # Kaana Tracker — Clerk auth
 
-Tracker supports **Clerk** (recommended) with **legacy JWT login** kept during migration.
-
-Pattern matches [Faralin](../faralin/) (`clerkMiddleware` + `@clerk/backend` verify + `users.clerk_user_id` mapping).
+Dedicated Clerk application (**Kaana Tracker**, not Faralin). Legacy JWT login remains during migration.
 
 ## Architecture
 
@@ -13,40 +11,42 @@ Express API → verifyToken(@clerk/backend) → users.clerk_user_id → internal
 Clerk webhook → POST /api/auth/webhooks/clerk → sync user create/update/delete
 ```
 
-## Local setup
+## Clerk Dashboard setup (one-time)
 
-### 1) Create a Clerk application
+Application name: **Kaana Tracker**
 
-1. [Clerk Dashboard](https://dashboard.clerk.com) → **Add application**
-2. Allowed origins:
-   - `http://localhost:5190`
-   - `https://tracker.kaana.in`
-3. Copy keys:
-   - **Publishable key** → frontend
-   - **Secret key** → API
-4. Webhook endpoint (production):
-   - URL: `https://tracker.kaana.in/api/auth/webhooks/clerk`
-   - Events: `user.created`, `user.updated`, `user.deleted`
-   - Copy **Signing secret** → API
+### Paths
 
-### 2) Configure env
+| Setting | Value |
+|---------|--------|
+| Sign-in URL | `/login` |
+| Sign-up URL | `/sign-up` |
+| After sign-in | `/` |
+| After sign-up | `/` |
 
-Tracker reuses the **same Clerk application** as Faralin. Map env names:
+### Allowed origins (no custom domain required)
 
-| Faralin (`.env`) | Tracker |
-|------------------|---------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` or `CLERK_PUBLISHABLE_KEY` | `kaana-tracker/.env` → `VITE_CLERK_PUBLISHABLE_KEY` |
-| `CLERK_SECRET_KEY` | `kaana-tracker-api/.env` → `CLERK_SECRET_KEY` |
-| `CLERK_WEBHOOK_SECRET` | `kaana-tracker-api/.env` → `CLERK_WEBHOOK_SECRET` |
-| `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` | Tracker uses **`/login`** (already set in `AuthProvider`) |
-| `NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up` | Tracker uses **`/sign-up`** |
+- `https://tracker.kaana.in`
+- `http://localhost:5190`
 
-**API** (`kaana-tracker-api/.env`):
+### Sign-up like Faralin — no email OTP
 
-```env
-CLERK_SECRET_KEY=sk_test_...
-CLERK_WEBHOOK_SECRET=whsec_...   # not whsec_placeholder — copy from Clerk → Webhooks
-```
+1. **Configure → Email, phone, username → Email**
+2. Turn **ON** “Sign-up with email” and **password**
+3. Turn **OFF** “Verify at sign-up” / email verification code
+4. Save
+
+Users then sign up with **email + password only** — no code sent to inbox.
+
+Optional: enable Google/Apple under **Social connections** (no OTP for social sign-in).
+
+### Webhook (production)
+
+- URL: `https://tracker.kaana.in/api/auth/webhooks/clerk`
+- Events: `user.created`, `user.updated`, `user.deleted`
+- Copy signing secret → `CLERK_WEBHOOK_SECRET`
+
+## Local env
 
 **Frontend** (`kaana-tracker/.env`):
 
@@ -54,35 +54,23 @@ CLERK_WEBHOOK_SECRET=whsec_...   # not whsec_placeholder — copy from Clerk →
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 ```
 
-Leave Clerk keys blank to keep legacy email/password login locally.
+**API** (`kaana-tracker-api/.env`):
 
-**Clerk Dashboard → Paths:** set Sign-in URL to `/login` for tracker.kaana.in (Faralin keeps `/sign-in`).
-
-### 3) Run
-
-```bash
-# Terminal 1
-cd kaana-tracker-api && npm install && npm run dev
-
-# Terminal 2
-cd kaana-tracker && npm install && npm run dev
+```env
+CLERK_SECRET_KEY=sk_test_...
+CLERK_WEBHOOK_SECRET=whsec_...
 ```
 
-Open http://localhost:5190 — you should see Clerk Sign-in.
+Leave Clerk keys blank to use legacy email/password login locally.
 
 ## Production (GCP)
 
-Create Secret Manager entries in `kaana-prod`:
+Secrets in `kaana-prod`:
 
-```bash
-gcloud secrets create kaana-tracker-clerk-secret-key --project kaana-prod --replication-policy=automatic
-printf '%s' 'sk_live_...' | gcloud secrets versions add kaana-tracker-clerk-secret-key --project kaana-prod --data-file=-
+- `kaana-tracker-clerk-secret-key` → `CLERK_SECRET_KEY`
+- `kaana-tracker-clerk-webhook-secret` → `CLERK_WEBHOOK_SECRET`
 
-gcloud secrets create kaana-tracker-clerk-webhook-secret --project kaana-prod --replication-policy=automatic
-printf '%s' 'whsec_...' | gcloud secrets versions add kaana-tracker-clerk-webhook-secret --project kaana-prod --data-file=-
-```
-
-Update `cloudbuild.tracker.yaml` substitution `_VITE_CLERK_PUBLISHABLE_KEY` to your live publishable key (or pass via trigger).
+Publishable key is baked into the frontend via `cloudbuild.tracker.yaml` → `_VITE_CLERK_PUBLISHABLE_KEY`.
 
 Deploy:
 
@@ -90,13 +78,6 @@ Deploy:
 gcloud builds submit --config cloudbuild.tracker.yaml --project kaana-prod .
 ```
 
-## User migration
+## User linking
 
-- Existing DB users are linked **by email** on first Clerk sign-in or `user.created` webhook.
-- Legacy `/api/auth/login` still works when Clerk token verification fails (dual-auth phase).
-- Clerk-only users get a placeholder password hash in MySQL (not used for login).
-
-## Next phase (optional)
-
-- Disable legacy login UI when all users are on Clerk
-- Remove `JWT_SECRET` and `/api/auth/login`
+Existing DB users merge **by email** on first Clerk sign-in or `user.created` webhook.

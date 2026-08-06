@@ -97,7 +97,7 @@ substitutions:
   _SECRET_RESEND: kaana-resend-api-key
   _SECRET_RESEND_FROM: kaana-resend-from
   _SECRET_GMAIL_SA: kaana-tracker-gmail-sa
-  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_bmVhcmJ5LWdlbGRpbmctNDIuY2xlcmsuYWNjb3VudHMuZGV2JA
+  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_Z2VudWluZS1sZW11ci04MS5jbGVyay5hY2NvdW50cy5kZXYk
 
 options:
   logging: CLOUD_LOGGING_ONLY

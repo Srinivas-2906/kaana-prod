@@ -2,6 +2,7 @@ import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { KaanaAuthFooter } from '../components/KaanaAuthFooter';
+import { CLERK_AFTER_AUTH_URL, CLERK_SIGN_IN_URL, CLERK_SIGN_UP_URL } from '../lib/clerkAuth';
 import { trackerClerkAppearance } from '../lib/clerkAppearance';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
@@ -21,9 +22,10 @@ export function LoginPage() {
           <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
           <SignIn
             routing="path"
-            path="/login"
-            signUpUrl="/sign-up"
+            path={CLERK_SIGN_IN_URL}
+            signUpUrl={CLERK_SIGN_UP_URL}
             forceRedirectUrl={redirectUrl}
+            fallbackRedirectUrl={CLERK_AFTER_AUTH_URL}
             appearance={trackerClerkAppearance}
           />
           <KaanaAuthFooter />
