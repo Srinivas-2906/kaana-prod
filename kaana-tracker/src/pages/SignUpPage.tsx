@@ -1,12 +1,23 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import { AuthModeSwitch } from '../components/AuthModeSwitch';
 import { ClerkSignUpForm } from '../components/ClerkAuthForms';
 import { isClerkEnabled } from '../lib/auth';
+
+function safeRedirectUrl(input: string | null) {
+  if (!input) return '/';
+  return input.startsWith('/') ? input : '/';
+}
 
 export function SignUpPage() {
   if (!isClerkEnabled()) {
     return <Navigate to="/login" replace />;
   }
+
+  const { isLoaded, isSignedIn } = useAuth();
+  const [params] = useSearchParams();
+  const redirectUrl = safeRedirectUrl(params.get('redirect_url'));
+  if (isLoaded && isSignedIn) return <Navigate to={redirectUrl} replace />;
 
   return (
     <div className="login-page">
