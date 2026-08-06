@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { KaanaAuthFooter } from '../components/KaanaAuthFooter';
+import { CLERK_SIGN_UP_URL } from '../lib/clerkAuth';
 import { acceptProjectInvite, fetchInvitePreview } from '../lib/api';
 import { isClerkEnabled, isLegacyAuthenticated } from '../lib/auth';
 import type { InvitePreview } from '../types';
@@ -28,13 +28,11 @@ function InviteCard({
   token: string;
 }) {
   const loginHref = `/login?redirect_url=${encodeURIComponent(`/invite/${token}`)}`;
+  const signUpHref = `${CLERK_SIGN_UP_URL}?redirect_url=${encodeURIComponent(`/invite/${token}`)}`;
 
   return (
     <div className="login-page">
       <div className="card login-card">
-        <p className="kaana-auth-footer muted" style={{ margin: '0 0 1rem', textAlign: 'left' }}>
-          Kaana Tracker
-        </p>
         <h1 style={{ marginTop: 0 }}>Join project</h1>
         <p>
           <strong style={{ color: preview.project_color }}>{preview.project_name}</strong>
@@ -53,7 +51,10 @@ function InviteCard({
             <Link to={loginHref} className="btn btn-primary" style={{ display: 'inline-block', marginTop: '1rem' }}>
               Sign in to accept
             </Link>
-            <KaanaAuthFooter />
+            <p className="auth-mode-switch muted">
+              New to Kaana Tracker?{' '}
+              <Link to={signUpHref}>Create an account</Link>
+            </p>
           </>
         ) : (
           <button type="button" className="btn btn-primary" style={{ marginTop: '1rem' }} disabled={accepting} onClick={onAccept}>

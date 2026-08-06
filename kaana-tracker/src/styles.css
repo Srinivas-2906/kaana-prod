@@ -144,27 +144,26 @@ button, input, select, textarea { font: inherit; }
 .clerk-auth-card .cl-rootBox,
 .clerk-auth-card .cl-cardBox { width: 100%; box-shadow: none; }
 
-/* Hide Clerk / Faralin chrome (shared Clerk app) */
-.clerk-auth-card .cl-footer,
+/* Hide Clerk branding only — keep sign-up / sign-in footer links */
 .clerk-auth-card .cl-footerPages,
-.clerk-auth-card .cl-footerAction,
 .clerk-auth-card .cl-badge,
 .clerk-auth-card .cl-devBar {
   display: none !important;
 }
 
-.kaana-auth-footer {
+.auth-mode-switch {
   margin: 1.25rem 0 0;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
 }
 
-.kaana-auth-footer-link {
+.auth-mode-switch a {
   color: var(--primary);
+  font-weight: 600;
   text-decoration: none;
 }
 
-.kaana-auth-footer-link:hover {
+.auth-mode-switch a:hover {
   text-decoration: underline;
 }
 

@@ -1,4 +1,4 @@
-/** Kaana Tracker Clerk theme — hide shared-app (Faralin) and Clerk chrome. */
+/** Kaana Tracker Clerk theme — hide Clerk branding, keep sign-in/sign-up links. */
 export const trackerClerkAppearance = {
   layout: {
     socialButtonsPlacement: 'top' as const,
@@ -11,13 +11,19 @@ export const trackerClerkAppearance = {
     header: { display: 'none' },
     headerTitle: { display: 'none' },
     headerSubtitle: { display: 'none' },
-    footer: { display: 'none' },
     footerPages: { display: 'none' },
-    footerAction: { display: 'none' },
-    footerActionLink: { display: 'none' },
-    footerActionText: { display: 'none' },
     logoBox: { display: 'none' },
     logoImage: { display: 'none' },
+    footer: {
+      background: 'transparent',
+      padding: 0,
+      margin: 0,
+    },
+    footerAction: {
+      justifyContent: 'center',
+      padding: 0,
+      margin: '1rem 0 0',
+    },
     formButtonPrimary: {
       fontSize: '0.9375rem',
       fontWeight: 600,

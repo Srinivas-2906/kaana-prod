@@ -1,7 +1,7 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { KaanaAuthFooter } from '../components/KaanaAuthFooter';
+import { AuthModeSwitch } from '../components/AuthModeSwitch';
 import { CLERK_AFTER_AUTH_URL, CLERK_SIGN_IN_URL, CLERK_SIGN_UP_URL } from '../lib/clerkAuth';
 import { trackerClerkAppearance } from '../lib/clerkAppearance';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
@@ -28,7 +28,7 @@ export function LoginPage() {
             fallbackRedirectUrl={CLERK_AFTER_AUTH_URL}
             appearance={trackerClerkAppearance}
           />
-          <KaanaAuthFooter />
+          <AuthModeSwitch mode="sign-in" />
         </div>
       </div>
     );
