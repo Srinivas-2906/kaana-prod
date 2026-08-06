@@ -1,6 +1,7 @@
 import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { KaanaAuthFooter } from '../components/KaanaAuthFooter';
 import { trackerClerkAppearance } from '../lib/clerkAppearance';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
@@ -25,6 +26,7 @@ export function LoginPage() {
             forceRedirectUrl={redirectUrl}
             appearance={trackerClerkAppearance}
           />
+          <KaanaAuthFooter />
         </div>
       </div>
     );

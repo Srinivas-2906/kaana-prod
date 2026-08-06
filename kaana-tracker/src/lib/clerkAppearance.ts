@@ -1,7 +1,8 @@
-/** Tracker shares Clerk with Faralin — hide/replace Faralin-branded Clerk chrome. */
+/** Kaana Tracker Clerk theme — hide shared-app (Faralin) and Clerk chrome. */
 export const trackerClerkAppearance = {
   layout: {
     socialButtonsPlacement: 'top' as const,
+    unsafe_disableDevelopmentModeWarnings: true,
   },
   elements: {
     rootBox: { width: '100%' },
@@ -10,8 +11,13 @@ export const trackerClerkAppearance = {
     header: { display: 'none' },
     headerTitle: { display: 'none' },
     headerSubtitle: { display: 'none' },
-    footer: { background: 'transparent' },
-    footerAction: { justifyContent: 'center' },
+    footer: { display: 'none' },
+    footerPages: { display: 'none' },
+    footerAction: { display: 'none' },
+    footerActionLink: { display: 'none' },
+    footerActionText: { display: 'none' },
+    logoBox: { display: 'none' },
+    logoImage: { display: 'none' },
     formButtonPrimary: {
       fontSize: '0.9375rem',
       fontWeight: 600,

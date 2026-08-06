@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
+import { KaanaAuthFooter } from '../components/KaanaAuthFooter';
 import { acceptProjectInvite, fetchInvitePreview } from '../lib/api';
 import { isClerkEnabled, isLegacyAuthenticated } from '../lib/auth';
 import type { InvitePreview } from '../types';
@@ -31,6 +32,9 @@ function InviteCard({
   return (
     <div className="login-page">
       <div className="card login-card">
+        <p className="kaana-auth-footer muted" style={{ margin: '0 0 1rem', textAlign: 'left' }}>
+          Kaana Tracker
+        </p>
         <h1 style={{ marginTop: 0 }}>Join project</h1>
         <p>
           <strong style={{ color: preview.project_color }}>{preview.project_name}</strong>
@@ -49,6 +53,7 @@ function InviteCard({
             <Link to={loginHref} className="btn btn-primary" style={{ display: 'inline-block', marginTop: '1rem' }}>
               Sign in to accept
             </Link>
+            <KaanaAuthFooter />
           </>
         ) : (
           <button type="button" className="btn btn-primary" style={{ marginTop: '1rem' }} disabled={accepting} onClick={onAccept}>
