@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchActivity, fetchFinanceSummary, fetchProjects, fetchWorkStats } from '../lib/api';
 import { currentMonth, todayISO } from '../lib/dates';
 import type { ActivityEvent, FinanceSummary, Project, WorkStats } from '../types';
 import { ActivityTimeline } from '../components/ActivityTimeline';
 
 export function HubPage() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<WorkStats | null>(null);
   const [finance, setFinance] = useState<FinanceSummary | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -22,13 +23,25 @@ export function HubPage() {
       fetchFinanceSummary(month),
     ])
       .then(([s, p, act, fin]) => {
+        // Landing behavior:
+        // - If user has no projects, send them straight to Projects to create one
+        // - If user has exactly one project (common for shared/guest accounts), open it directly
+        if (p.projects.length === 0) {
+          navigate('/projects', { replace: true });
+          return;
+        }
+        if (p.projects.length === 1) {
+          navigate(`/projects/${p.projects[0].id}/board`, { replace: true });
+          return;
+        }
+
         setStats(s.stats);
         setProjects(p.projects.slice(0, 5));
         setActivity(act.events);
         setFinance(fin.summary);
       })
       .catch((e) => setError(e.message));
-  }, [today, month]);
+  }, [today, month, navigate]);
 
   return (
     <>
