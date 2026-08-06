@@ -1,8 +1,20 @@
 import { Router } from 'express';
-import { loginUser, getUserById } from '../services/authService.js';
+import { loginUser, getUserById, registerClerkUser } from '../services/authService.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
+
+router.post('/register', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    const result = await registerClerkUser(email, password);
+    if (result.error) return res.status(400).json({ error: result.error });
+    res.status(201).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
 
 router.post('/login', async (req, res) => {
   try {

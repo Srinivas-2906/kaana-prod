@@ -2,13 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSignIn, useSignUp } from '@clerk/clerk-react';
 import { CLERK_AFTER_AUTH_URL } from '../lib/clerkAuth';
-
-type SignUpAttempt = {
-  status: string | null;
-  createdSessionId: string | null;
-  missingFields?: string[] | null;
-  unverifiedFields?: string[] | null;
-};
+import { clerkRegister } from '../lib/auth';
 
 function clerkErrorMessage(err: unknown) {
   const clerkErr = err as { errors?: Array<{ longMessage?: string; message?: string }> };
@@ -17,25 +11,18 @@ function clerkErrorMessage(err: unknown) {
     || (err instanceof Error ? err.message : 'Something went wrong');
 }
 
-function signUpIncompleteMessage(attempt: SignUpAttempt) {
-  if (attempt.unverifiedFields?.includes('email_address')) {
-    return 'Email verification is still enabled in Clerk. In Dashboard → Email → turn OFF "Verify at sign-up".';
-  }
-  if (attempt.missingFields?.length) {
-    return `Additional sign-up fields are required: ${attempt.missingFields.join(', ')}. Contact support if this persists.`;
-  }
-  return `Sign-up could not be completed (status: ${attempt.status ?? 'unknown'}). Please try again.`;
-}
-
-async function completeSignUpIfReady(
-  attempt: SignUpAttempt,
+async function signInWithPassword(
+  signIn: NonNullable<ReturnType<typeof useSignIn>['signIn']>,
   setActive: (params: { session: string | null }) => Promise<void>,
+  email: string,
+  password: string,
 ) {
-  if (attempt.status === 'complete' && attempt.createdSessionId) {
-    await setActive({ session: attempt.createdSessionId });
-    return true;
+  await signIn.create({ identifier: email.trim() });
+  const attempt = await signIn.attemptFirstFactor({ strategy: 'password', password });
+  if (attempt.status !== 'complete' || !attempt.createdSessionId) {
+    throw new Error('Sign-in could not be completed. Try signing in from the login page.');
   }
-  return false;
+  await setActive({ session: attempt.createdSessionId });
 }
 
 const inputStyle: React.CSSProperties = {
@@ -48,7 +35,8 @@ const inputStyle: React.CSSProperties = {
 };
 
 export function ClerkSignUpForm() {
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded, signUp } = useSignUp();
+  const { isLoaded: signInLoaded, signIn, setActive } = useSignIn();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const redirectUrl = params.get('redirect_url') || CLERK_AFTER_AUTH_URL;
@@ -73,26 +61,13 @@ export function ClerkSignUpForm() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!isLoaded || !signUp) return;
+    if (!isLoaded || !signInLoaded || !signIn) return;
     setLoading(true);
     setError('');
     try {
-      let attempt = await signUp.create({ emailAddress: email.trim(), password });
-
-      if (await completeSignUpIfReady(attempt, setActive)) {
-        navigate(redirectUrl, { replace: true });
-        return;
-      }
-
-      if (attempt.status === 'missing_requirements' && attempt.missingFields?.includes('legal_accepted')) {
-        attempt = await signUp.update({ legalAccepted: true });
-        if (await completeSignUpIfReady(attempt, setActive)) {
-          navigate(redirectUrl, { replace: true });
-          return;
-        }
-      }
-
-      setError(signUpIncompleteMessage(attempt));
+      await clerkRegister(email.trim(), password);
+      await signInWithPassword(signIn, setActive, email, password);
+      navigate(redirectUrl, { replace: true });
     } catch (err) {
       setError(clerkErrorMessage(err));
     } finally {
@@ -127,8 +102,7 @@ export function ClerkSignUpForm() {
         onChange={(e) => setPassword(e.target.value)}
         style={{ ...inputStyle, marginBottom: '1.25rem' }}
       />
-      <div id="clerk-captcha" />
-      <button type="submit" className="btn btn-primary auth-submit" disabled={loading || !isLoaded}>
+      <button type="submit" className="btn btn-primary auth-submit" disabled={loading || !isLoaded || !signInLoaded}>
         {loading ? 'Creating account…' : 'Create account'}
       </button>
     </form>
@@ -165,14 +139,8 @@ export function ClerkSignInForm() {
     setLoading(true);
     setError('');
     try {
-      await signIn.create({ identifier: email.trim() });
-      const attempt = await signIn.attemptFirstFactor({ strategy: 'password', password });
-      if (attempt.status === 'complete') {
-        await setActive({ session: attempt.createdSessionId });
-        navigate(redirectUrl, { replace: true });
-        return;
-      }
-      setError('Additional verification is required. Try signing in with Google or contact support.');
+      await signInWithPassword(signIn, setActive, email, password);
+      navigate(redirectUrl, { replace: true });
     } catch (err) {
       setError(clerkErrorMessage(err));
     } finally {
