@@ -5,6 +5,11 @@ import { resolveClerkUser } from '../services/authService.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'tracker-dev-secret-change-me';
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
 const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || '';
+const CLERK_AUTHORIZED_PARTIES = (process.env.CLERK_AUTHORIZED_PARTIES
+  || 'https://tracker.kaana.in,http://localhost:5190')
+  .split(',')
+  .map((entry) => entry.trim())
+  .filter(Boolean);
 
 if (process.env.NODE_ENV === 'production') {
   const hasClerk = Boolean(CLERK_SECRET_KEY);
@@ -37,7 +42,10 @@ export async function authMiddleware(req, res, next) {
 
   if (CLERK_SECRET_KEY) {
     try {
-      const payload = await verifyClerkToken(token, { secretKey: CLERK_SECRET_KEY });
+      const payload = await verifyClerkToken(token, {
+        secretKey: CLERK_SECRET_KEY,
+        authorizedParties: CLERK_AUTHORIZED_PARTIES,
+      });
       const user = await resolveClerkUser(payload.sub, payload);
       req.user = {
         sub: user.id,
@@ -47,7 +55,8 @@ export async function authMiddleware(req, res, next) {
         authProvider: 'clerk',
       };
       return next();
-    } catch {
+    } catch (err) {
+      console.warn('Clerk token verification failed:', err?.message || err);
       // Fall through to legacy JWT during dual-auth migration.
     }
   }
