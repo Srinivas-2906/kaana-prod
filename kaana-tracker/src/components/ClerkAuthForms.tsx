@@ -11,18 +11,28 @@ function clerkErrorMessage(err: unknown) {
     || (err instanceof Error ? err.message : 'Something went wrong');
 }
 
+type SignInAttempt = {
+  status?: string | null;
+  createdSessionId?: string | null;
+  supportedFirstFactors?: Array<{ strategy?: string; emailAddressId?: string }>;
+  supportedSecondFactors?: Array<{ strategy?: string }>;
+};
+
 async function signInWithPassword(
   signIn: NonNullable<ReturnType<typeof useSignIn>['signIn']>,
-  setActive: (params: { session: string | null }) => Promise<void>,
   email: string,
   password: string,
-) {
+): Promise<SignInAttempt> {
   await signIn.create({ identifier: email.trim() });
-  const attempt = await signIn.attemptFirstFactor({ strategy: 'password', password });
-  if (attempt.status !== 'complete' || !attempt.createdSessionId) {
-    throw new Error('Sign-in could not be completed. Try signing in from the login page.');
-  }
-  await setActive({ session: attempt.createdSessionId });
+  return signIn.attemptFirstFactor({ strategy: 'password', password }) as Promise<SignInAttempt>;
+}
+
+function getEmailCodeFactorEmailId(
+  signIn: NonNullable<ReturnType<typeof useSignIn>['signIn']>,
+  attempt: SignInAttempt,
+) {
+  const factors = attempt.supportedFirstFactors || (signIn as unknown as SignInAttempt).supportedFirstFactors || [];
+  return factors.find((f) => f.strategy === 'email_code' && f.emailAddressId)?.emailAddressId || null;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -42,6 +52,9 @@ export function ClerkSignUpForm() {
   const redirectUrl = params.get('redirect_url') || CLERK_AFTER_AUTH_URL;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [step, setStep] = useState<'password' | 'email_code'>('password');
+  const [emailAddressId, setEmailAddressId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -66,13 +79,98 @@ export function ClerkSignUpForm() {
     setError('');
     try {
       await clerkRegister(email.trim(), password);
-      await signInWithPassword(signIn, setActive, email, password);
-      navigate(redirectUrl, { replace: true });
+      const attempt = await signInWithPassword(signIn, email, password);
+      if (attempt.status === 'complete' && attempt.createdSessionId) {
+        await setActive({ session: attempt.createdSessionId });
+        navigate(redirectUrl, { replace: true });
+        return;
+      }
+
+      const id = getEmailCodeFactorEmailId(signIn, attempt);
+      if (id) {
+        await signIn.prepareFirstFactor({ strategy: 'email_code', emailAddressId: id });
+        setEmailAddressId(id);
+        setStep('email_code');
+        return;
+      }
+
+      setError(`Sign-in needs additional verification (status: ${attempt.status || 'unknown'}).`);
     } catch (err) {
       setError(clerkErrorMessage(err));
     } finally {
       setLoading(false);
     }
+  }
+
+  async function onVerifyCode(e: FormEvent) {
+    e.preventDefault();
+    if (!signInLoaded || !signIn) return;
+    setLoading(true);
+    setError('');
+    try {
+      const attempt = await signIn.attemptFirstFactor({ strategy: 'email_code', code: code.trim() }) as SignInAttempt;
+      if (attempt.status === 'complete' && attempt.createdSessionId) {
+        await setActive({ session: attempt.createdSessionId });
+        navigate(redirectUrl, { replace: true });
+        return;
+      }
+      setError(`Verification not complete (status: ${attempt.status || 'unknown'}).`);
+    } catch (err) {
+      setError(clerkErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (step === 'email_code') {
+    return (
+      <form className="kaana-auth-form" onSubmit={onVerifyCode}>
+        {error && <p className="auth-form-error">{error}</p>}
+        <label className="muted auth-label">Email verification code</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          required
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          style={{ ...inputStyle, marginBottom: '1.25rem' }}
+        />
+        <button type="submit" className="btn btn-primary auth-submit" disabled={loading || !signInLoaded}>
+          {loading ? 'Verifying…' : 'Verify'}
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost auth-oauth-btn"
+          disabled={loading || !emailAddressId}
+          onClick={async () => {
+            if (!signIn || !emailAddressId) return;
+            setError('');
+            try {
+              await signIn.prepareFirstFactor({ strategy: 'email_code', emailAddressId });
+            } catch (err) {
+              setError(clerkErrorMessage(err));
+            }
+          }}
+        >
+          Resend code
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost auth-oauth-btn"
+          disabled={loading}
+          onClick={() => {
+            setStep('password');
+            setCode('');
+            setEmailAddressId(null);
+            setError('');
+            (signIn as unknown as { reset?: () => void })?.reset?.();
+          }}
+        >
+          Start over
+        </button>
+      </form>
+    );
   }
 
   return (
@@ -116,6 +214,9 @@ export function ClerkSignInForm() {
   const redirectUrl = params.get('redirect_url') || CLERK_AFTER_AUTH_URL;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [step, setStep] = useState<'password' | 'email_code'>('password');
+  const [emailAddressId, setEmailAddressId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -139,13 +240,98 @@ export function ClerkSignInForm() {
     setLoading(true);
     setError('');
     try {
-      await signInWithPassword(signIn, setActive, email, password);
-      navigate(redirectUrl, { replace: true });
+      const attempt = await signInWithPassword(signIn, email, password);
+      if (attempt.status === 'complete' && attempt.createdSessionId) {
+        await setActive({ session: attempt.createdSessionId });
+        navigate(redirectUrl, { replace: true });
+        return;
+      }
+
+      const id = getEmailCodeFactorEmailId(signIn, attempt);
+      if (id) {
+        await signIn.prepareFirstFactor({ strategy: 'email_code', emailAddressId: id });
+        setEmailAddressId(id);
+        setStep('email_code');
+        return;
+      }
+
+      setError(`Sign-in needs additional verification (status: ${attempt.status || 'unknown'}).`);
     } catch (err) {
       setError(clerkErrorMessage(err));
     } finally {
       setLoading(false);
     }
+  }
+
+  async function onVerifyCode(e: FormEvent) {
+    e.preventDefault();
+    if (!isLoaded || !signIn) return;
+    setLoading(true);
+    setError('');
+    try {
+      const attempt = await signIn.attemptFirstFactor({ strategy: 'email_code', code: code.trim() }) as SignInAttempt;
+      if (attempt.status === 'complete' && attempt.createdSessionId) {
+        await setActive({ session: attempt.createdSessionId });
+        navigate(redirectUrl, { replace: true });
+        return;
+      }
+      setError(`Verification not complete (status: ${attempt.status || 'unknown'}).`);
+    } catch (err) {
+      setError(clerkErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (step === 'email_code') {
+    return (
+      <form className="kaana-auth-form" onSubmit={onVerifyCode}>
+        {error && <p className="auth-form-error">{error}</p>}
+        <label className="muted auth-label">Email verification code</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          required
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          style={{ ...inputStyle, marginBottom: '1.25rem' }}
+        />
+        <button type="submit" className="btn btn-primary auth-submit" disabled={loading || !isLoaded}>
+          {loading ? 'Verifying…' : 'Verify'}
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost auth-oauth-btn"
+          disabled={loading || !emailAddressId}
+          onClick={async () => {
+            if (!signIn || !emailAddressId) return;
+            setError('');
+            try {
+              await signIn.prepareFirstFactor({ strategy: 'email_code', emailAddressId });
+            } catch (err) {
+              setError(clerkErrorMessage(err));
+            }
+          }}
+        >
+          Resend code
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost auth-oauth-btn"
+          disabled={loading}
+          onClick={() => {
+            setStep('password');
+            setCode('');
+            setEmailAddressId(null);
+            setError('');
+            (signIn as unknown as { reset?: () => void })?.reset?.();
+          }}
+        >
+          Start over
+        </button>
+      </form>
+    );
   }
 
   return (
