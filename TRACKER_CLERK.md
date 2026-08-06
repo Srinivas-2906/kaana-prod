@@ -1,6 +1,6 @@
 # Kaana Tracker — Clerk auth
 
-Dedicated Clerk application (**Kaana Tracker**, not Faralin). Legacy JWT login remains during migration.
+Using the **Faralin** Clerk application to match its OTP-less sign-up behavior. Legacy JWT login remains during migration.
 
 ## Architecture
 
@@ -13,7 +13,7 @@ Clerk webhook → POST /api/auth/webhooks/clerk → sync user create/update/dele
 
 ## Clerk Dashboard setup (one-time)
 
-Application name: **Kaana Tracker**
+Application name: **Faralin** (shared)
 
 ### Paths
 
@@ -36,7 +36,7 @@ Application name: **Kaana Tracker**
 3. Turn **OFF** “Verify at sign-up” / email verification code
 4. Save
 
-Tracker uses **custom sign-up forms** (not Clerk’s prebuilt UI), so when verification is off you go straight into the app after **Create account**.
+Tracker uses **custom sign-up forms** backed by `POST /api/auth/register`, which creates the Clerk user via the Backend API (no email OTP). After registration, the browser signs in with email + password.
 
 Optional: enable Google under **Social connections** (no OTP for social sign-in).
 

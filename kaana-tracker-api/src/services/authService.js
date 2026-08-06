@@ -108,6 +108,47 @@ export async function deactivateClerkUser(clerkUserId) {
   await pool.query('UPDATE users SET clerk_user_id = NULL WHERE clerk_user_id = ?', [clerkUserId]);
 }
 
+export async function registerClerkUser(email, password) {
+  if (!process.env.CLERK_SECRET_KEY) {
+    return { error: 'Clerk registration is not configured' };
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail || !normalizedEmail.includes('@')) {
+    return { error: 'Enter a valid email address' };
+  }
+  if (!password || String(password).length < 8) {
+    return { error: 'Password must be at least 8 characters' };
+  }
+
+  const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
+  try {
+    const clerkUser = await clerk.users.createUser({
+      emailAddress: [normalizedEmail],
+      password: String(password),
+    });
+    const primaryId = clerkUser.primaryEmailAddressId;
+    const userEmail = normalizeEmail(
+      clerkUser.emailAddresses?.find((entry) => entry.id === primaryId)?.emailAddress
+      || clerkUser.emailAddresses?.[0]?.emailAddress
+      || normalizedEmail,
+    );
+    const name = userEmail.split('@')[0] || 'User';
+    await upsertClerkUser(clerkUser.id, userEmail, name);
+    return { ok: true, email: userEmail };
+  } catch (err) {
+    const clerkErrors = err?.errors || err?.clerkError?.errors || [];
+    const first = clerkErrors[0];
+    if (first?.code === 'form_identifier_exists') {
+      return { error: 'An account with this email already exists. Sign in instead.' };
+    }
+    return {
+      error: first?.longMessage || first?.message || err?.message || 'Registration failed',
+    };
+  }
+}
+
 export async function loginUser(email, password) {
   const pool = getPool();
   const [rows] = await pool.query(

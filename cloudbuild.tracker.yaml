@@ -92,12 +92,12 @@ substitutions:
   _DB_USER: tracker
   _SECRET_DB_PASSWORD: kaana-tracker-db-password
   _SECRET_JWT: kaana-jwt-secret
-  _SECRET_CLERK: kaana-tracker-clerk-secret-key
-  _SECRET_CLERK_WEBHOOK: kaana-tracker-clerk-webhook-secret
+  _SECRET_CLERK: faralin_clerk_secret_key
+  _SECRET_CLERK_WEBHOOK: faralin_clerk_webhook_secret
   _SECRET_RESEND: kaana-resend-api-key
   _SECRET_RESEND_FROM: kaana-resend-from
   _SECRET_GMAIL_SA: kaana-tracker-gmail-sa
-  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_Z2VudWluZS1sZW11ci04MS5jbGVyay5hY2NvdW50cy5kZXYk
+  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_bmVhcmJ5LWdlbGRpbmctNDIuY2xlcmsuYWNjb3VudHMuZGV2JA
 
 options:
   logging: CLOUD_LOGGING_ONLY
