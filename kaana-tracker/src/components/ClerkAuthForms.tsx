@@ -3,11 +3,39 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSignIn, useSignUp } from '@clerk/clerk-react';
 import { CLERK_AFTER_AUTH_URL } from '../lib/clerkAuth';
 
+type SignUpAttempt = {
+  status: string | null;
+  createdSessionId: string | null;
+  missingFields?: string[] | null;
+  unverifiedFields?: string[] | null;
+};
+
 function clerkErrorMessage(err: unknown) {
   const clerkErr = err as { errors?: Array<{ longMessage?: string; message?: string }> };
   return clerkErr.errors?.[0]?.longMessage
     || clerkErr.errors?.[0]?.message
     || (err instanceof Error ? err.message : 'Something went wrong');
+}
+
+function signUpIncompleteMessage(attempt: SignUpAttempt) {
+  if (attempt.unverifiedFields?.includes('email_address')) {
+    return 'Email verification is still enabled in Clerk. In Dashboard → Email → turn OFF "Verify at sign-up".';
+  }
+  if (attempt.missingFields?.length) {
+    return `Additional sign-up fields are required: ${attempt.missingFields.join(', ')}. Contact support if this persists.`;
+  }
+  return `Sign-up could not be completed (status: ${attempt.status ?? 'unknown'}). Please try again.`;
+}
+
+async function completeSignUpIfReady(
+  attempt: SignUpAttempt,
+  setActive: (params: { session: string | null }) => Promise<void>,
+) {
+  if (attempt.status === 'complete' && attempt.createdSessionId) {
+    await setActive({ session: attempt.createdSessionId });
+    return true;
+  }
+  return false;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -49,15 +77,22 @@ export function ClerkSignUpForm() {
     setLoading(true);
     setError('');
     try {
-      await signUp.create({ emailAddress: email.trim(), password });
-      if (signUp.status === 'complete') {
-        await setActive({ session: signUp.createdSessionId });
+      let attempt = await signUp.create({ emailAddress: email.trim(), password });
+
+      if (await completeSignUpIfReady(attempt, setActive)) {
         navigate(redirectUrl, { replace: true });
         return;
       }
-      setError(
-        'Email verification is still required by Clerk. In Clerk Dashboard → Email → turn OFF "Verify at sign-up".',
-      );
+
+      if (attempt.status === 'missing_requirements' && attempt.missingFields?.includes('legal_accepted')) {
+        attempt = await signUp.update({ legalAccepted: true });
+        if (await completeSignUpIfReady(attempt, setActive)) {
+          navigate(redirectUrl, { replace: true });
+          return;
+        }
+      }
+
+      setError(signUpIncompleteMessage(attempt));
     } catch (err) {
       setError(clerkErrorMessage(err));
     } finally {
@@ -92,6 +127,7 @@ export function ClerkSignUpForm() {
         onChange={(e) => setPassword(e.target.value)}
         style={{ ...inputStyle, marginBottom: '1.25rem' }}
       />
+      <div id="clerk-captcha" />
       <button type="submit" className="btn btn-primary auth-submit" disabled={loading || !isLoaded}>
         {loading ? 'Creating account…' : 'Create account'}
       </button>
