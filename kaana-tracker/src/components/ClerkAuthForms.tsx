@@ -11,6 +11,13 @@ function clerkErrorMessage(err: unknown) {
     || (err instanceof Error ? err.message : 'Something went wrong');
 }
 
+function absoluteRedirectUrl(redirectUrl: string) {
+  const trimmed = String(redirectUrl || '').trim();
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  if (trimmed.startsWith('/')) return `${window.location.origin}${trimmed}`;
+  return `${window.location.origin}/`;
+}
+
 type SignInAttempt = {
   status?: string | null;
   createdSessionId?: string | null;
@@ -65,7 +72,7 @@ export function ClerkSignUpForm() {
       await signUp.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: `${window.location.origin}/sso-callback`,
-        redirectUrlComplete: redirectUrl,
+        redirectUrlComplete: absoluteRedirectUrl(redirectUrl),
       });
     } catch (err) {
       setError(clerkErrorMessage(err));
@@ -227,7 +234,7 @@ export function ClerkSignInForm() {
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: `${window.location.origin}/sso-callback`,
-        redirectUrlComplete: redirectUrl,
+        redirectUrlComplete: absoluteRedirectUrl(redirectUrl),
       });
     } catch (err) {
       setError(clerkErrorMessage(err));
