@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { AuthModeSwitch } from '../components/AuthModeSwitch';
-import { ClerkSignInForm } from '../components/ClerkAuthForms';
+import { SignIn } from '@clerk/clerk-react';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
+import { trackerClerkAppearance } from '../lib/clerkAppearance';
 
 function safeRedirectUrl(input: string | null) {
   if (!input) return '/';
@@ -27,8 +27,13 @@ export function LoginPage() {
         <div className="card login-card">
           <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
           <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
-          <ClerkSignInForm />
-          <AuthModeSwitch mode="sign-in" />
+          <SignIn
+            routing="path"
+            path="/login"
+            signUpUrl="/sign-up"
+            fallbackRedirectUrl="/"
+            appearance={trackerClerkAppearance}
+          />
         </div>
       </div>
     );

@@ -1,8 +1,8 @@
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { AuthModeSwitch } from '../components/AuthModeSwitch';
-import { ClerkSignUpForm } from '../components/ClerkAuthForms';
+import { SignUp } from '@clerk/clerk-react';
 import { isClerkEnabled } from '../lib/auth';
+import { trackerClerkAppearance } from '../lib/clerkAppearance';
 
 function safeRedirectUrl(input: string | null) {
   if (!input) return '/';
@@ -26,8 +26,13 @@ export function SignUpPage() {
         <p className="muted" style={{ marginBottom: '1.5rem' }}>
           Create your account with email and password.
         </p>
-        <ClerkSignUpForm />
-        <AuthModeSwitch mode="sign-up" />
+        <SignUp
+          routing="path"
+          path="/sign-up"
+          signInUrl="/login"
+          fallbackRedirectUrl="/"
+          appearance={trackerClerkAppearance}
+        />
       </div>
     </div>
   );
