@@ -21,6 +21,11 @@ import type {
 
 const API = import.meta.env.VITE_TRACKER_API || '/api';
 
+function safeRedirectUrl(pathname: string, search: string) {
+  const p = `${pathname || '/'}${search || ''}`;
+  return p.startsWith('/') ? p : '/';
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -35,7 +40,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 401) {
     clearLegacyToken();
     if (isClerkEnabled() && !window.location.pathname.startsWith('/login')) {
-      window.location.href = `/login?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      const redirectBack = safeRedirectUrl(window.location.pathname, window.location.search);
+      const loginUrl = `/login?redirect_url=${encodeURIComponent(redirectBack)}`;
+      // If Clerk session is stale/unauthorized, sign out to prevent "already signed in" 400s.
+      const clerk = (window as unknown as { Clerk?: { signOut?: (opts?: { redirectUrl?: string }) => Promise<void> } }).Clerk;
+      if (clerk?.signOut) {
+        clerk.signOut({ redirectUrl: loginUrl }).catch(() => { window.location.href = loginUrl; });
+      } else {
+        window.location.href = loginUrl;
+      }
     }
     throw new Error('Session expired. Please sign in again.');
   }

@@ -1,18 +1,27 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import { AuthModeSwitch } from '../components/AuthModeSwitch';
 import { ClerkSignInForm } from '../components/ClerkAuthForms';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
+function safeRedirectUrl(input: string | null) {
+  if (!input) return '/';
+  // Prevent open-redirects; only allow in-app paths.
+  return input.startsWith('/') ? input : '/';
+}
+
 export function LoginPage() {
   const [params] = useSearchParams();
-  const redirectUrl = params.get('redirect_url') || '/';
+  const redirectUrl = safeRedirectUrl(params.get('redirect_url'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (isClerkEnabled()) {
+    const { isLoaded, isSignedIn } = useAuth();
+    if (isLoaded && isSignedIn) return <Navigate to={redirectUrl} replace />;
     return (
       <div className="login-page">
         <div className="card login-card">
