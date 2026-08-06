@@ -36,9 +36,9 @@ Application name: **Kaana Tracker**
 3. Turn **OFF** “Verify at sign-up” / email verification code
 4. Save
 
-Users then sign up with **email + password only** — no code sent to inbox.
+Tracker uses **custom sign-up forms** (not Clerk’s prebuilt UI), so when verification is off you go straight into the app after **Create account**.
 
-Optional: enable Google/Apple under **Social connections** (no OTP for social sign-in).
+Optional: enable Google under **Social connections** (no OTP for social sign-in).
 
 ### Webhook (production)
 

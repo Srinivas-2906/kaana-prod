@@ -1,9 +1,7 @@
-import { SignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AuthModeSwitch } from '../components/AuthModeSwitch';
-import { CLERK_AFTER_AUTH_URL, CLERK_SIGN_IN_URL, CLERK_SIGN_UP_URL } from '../lib/clerkAuth';
-import { trackerClerkAppearance } from '../lib/clerkAppearance';
+import { ClerkSignInForm } from '../components/ClerkAuthForms';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
 
 export function LoginPage() {
@@ -17,17 +15,10 @@ export function LoginPage() {
   if (isClerkEnabled()) {
     return (
       <div className="login-page">
-        <div className="card login-card clerk-auth-card">
+        <div className="card login-card">
           <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
           <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
-          <SignIn
-            routing="path"
-            path={CLERK_SIGN_IN_URL}
-            signUpUrl={CLERK_SIGN_UP_URL}
-            forceRedirectUrl={redirectUrl}
-            fallbackRedirectUrl={CLERK_AFTER_AUTH_URL}
-            appearance={trackerClerkAppearance}
-          />
+          <ClerkSignInForm />
           <AuthModeSwitch mode="sign-in" />
         </div>
       </div>
