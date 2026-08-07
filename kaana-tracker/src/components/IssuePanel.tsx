@@ -11,6 +11,10 @@ import { WORK_PRIORITIES, WORK_STATUSES, statusLabel, workTypeColor } from '../t
 import { AttachmentPanel } from './AttachmentPanel';
 import { SubtaskSection } from './SubtaskSection';
 
+function userLabel(user: User) {
+  return user.email ? `${user.name} · ${user.email}` : user.name;
+}
+
 export function IssuePanel({
   itemId,
   onClose,
@@ -132,7 +136,7 @@ export function IssuePanel({
                 onChange={(e) => saveField({ owner_id: e.target.value ? Number(e.target.value) : null })}
               >
                 <option value="">Unassigned</option>
-                {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                {users.map((u) => <option key={u.id} value={u.id}>{userLabel(u)}</option>)}
               </select>
             </label>
             <label>

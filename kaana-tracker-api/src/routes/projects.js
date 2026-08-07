@@ -48,7 +48,9 @@ router.post('/', async (req, res) => {
 
 router.get('/meta/users', async (req, res) => {
   try {
-    const access = await assertProjectAccess(Number(req.query.projectId), req.user.sub, 'manage');
+    const projectId = Number(req.query.projectId);
+    if (!projectId) return res.status(400).json({ error: 'projectId is required' });
+    const access = await assertProjectAccess(projectId, req.user.sub, 'edit');
     if (access.error) return res.status(403).json({ error: access.error });
     res.json({ users: await listUsers() });
   } catch (err) {
