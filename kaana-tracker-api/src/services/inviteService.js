@@ -81,7 +81,9 @@ export async function createInvite(projectId, role, actorId, options = {}) {
   }
 
   const expiresInDays = Number(options.expiresInDays) || 14;
-  const maxUses = inviteeEmail ? 1 : (options.maxUses == null ? 1 : Number(options.maxUses));
+  const maxUses = inviteeEmail
+    ? 1
+    : (options.maxUses === undefined ? null : Number(options.maxUses));
   const token = crypto.randomBytes(24).toString('base64url');
   const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
 
@@ -208,7 +210,7 @@ export async function revokeInvite(projectId, inviteId, actorId) {
   return { ok: true };
 }
 
-export async function getInvitePreview(token) {
+export async function loadInviteByToken(token) {
   const pool = getPool();
   const [rows] = await pool.query(`
     SELECT i.*, c.name AS project_name, c.color AS project_color, u.name AS created_by_name
@@ -225,9 +227,17 @@ export async function getInvitePreview(token) {
   if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
     return { error: 'This invitation has expired' };
   }
-  if (invite.max_uses != null && invite.use_count >= invite.max_uses) {
-    return { error: 'This invitation has already been accepted' };
-  }
+
+  return { invite };
+}
+
+export async function getInvitePreview(token) {
+  const loaded = await loadInviteByToken(token);
+  if (loaded.error) return loaded;
+
+  const { invite } = loaded;
+  const alreadyAccepted = invite.status === 'accepted'
+    || (invite.max_uses != null && invite.use_count >= invite.max_uses);
 
   return {
     invite: {
@@ -238,17 +248,18 @@ export async function getInvitePreview(token) {
       created_by_name: invite.created_by_name,
       expires_at: invite.expires_at,
       invitee_email: invite.invitee_email,
+      project_url: `/projects/${invite.project_id}/board`,
+      already_accepted: alreadyAccepted,
     },
   };
 }
 
 export async function acceptInvite(token, userId, userEmail) {
-  const preview = await getInvitePreview(token);
-  if (preview.error) return { error: preview.error };
+  const loaded = await loadInviteByToken(token);
+  if (loaded.error) return loaded;
 
   const pool = getPool();
-  const [rows] = await pool.query('SELECT * FROM project_invites WHERE token = ? LIMIT 1', [token]);
-  const invite = rows[0];
+  const invite = loaded.invite;
   const projectId = invite.project_id;
   const role = invite.role;
 
@@ -282,27 +293,30 @@ export async function acceptInvite(token, userId, userEmail) {
     );
   }
 
-  await pool.query(`
-    UPDATE project_invites
-    SET use_count = use_count + 1, status = 'accepted', accepted_at = CURRENT_TIMESTAMP, accepted_by = ?
-    WHERE id = ?
-  `, [userId, invite.id]);
+  const firstAccept = invite.use_count === 0 && invite.status !== 'accepted';
+  if (firstAccept) {
+    await pool.query(`
+      UPDATE project_invites
+      SET use_count = use_count + 1, status = 'accepted', accepted_at = CURRENT_TIMESTAMP, accepted_by = ?
+      WHERE id = ?
+    `, [userId, invite.id]);
 
-  const [users] = await pool.query('SELECT name, email FROM users WHERE id = ?', [userId]);
+    const [users] = await pool.query('SELECT name, email FROM users WHERE id = ?', [userId]);
 
-  await logActivity({
-    eventType: 'invite_accepted',
-    entityType: 'cluster',
-    entityId: projectId,
-    projectId,
-    actorId: userId,
-    summary: `${users[0]?.name || 'Someone'} accepted invitation (${role})`,
-    payload: { invite_id: invite.id, role, email: users[0]?.email },
-  });
+    await logActivity({
+      eventType: 'invite_accepted',
+      entityType: 'cluster',
+      entityId: projectId,
+      projectId,
+      actorId: userId,
+      summary: `${users[0]?.name || 'Someone'} accepted invitation (${role})`,
+      payload: { invite_id: invite.id, role, email: users[0]?.email },
+    });
+  }
 
   return {
     projectId,
-    role,
+    role: existing[0]?.role || role,
     projectUrl: `/projects/${projectId}/board`,
   };
 }

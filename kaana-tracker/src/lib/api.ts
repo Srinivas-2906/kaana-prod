@@ -420,8 +420,7 @@ export function createProjectInvite(
     body: JSON.stringify({
       role,
       expiresInDays: 14,
-      maxUses: 1,
-      ...(email ? { email } : {}),
+      ...(email ? { email, maxUses: 1 } : {}),
     }),
   });
 }

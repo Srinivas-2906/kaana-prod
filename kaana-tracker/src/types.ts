@@ -239,6 +239,8 @@ export type InvitePreview = {
   created_by_name: string;
   expires_at: string | null;
   invitee_email?: string | null;
+  project_url?: string;
+  already_accepted?: boolean;
 };
 
 export type EntityLink = {
