@@ -1,8 +1,6 @@
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
-import { SignUp } from '@clerk/clerk-react';
+import { useAuth, SignUp } from '@clerk/clerk-react';
 import { isClerkEnabled } from '../lib/auth';
-import { trackerClerkAppearance } from '../lib/clerkAppearance';
 
 function safeRedirectUrl(input: string | null) {
   if (!input) return '/';
@@ -21,19 +19,12 @@ export function SignUpPage() {
 
   return (
     <div className="login-page">
-      <div className="card login-card">
-        <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
-        <p className="muted" style={{ marginBottom: '1.5rem' }}>
-          Create your account with email and password.
-        </p>
-        <SignUp
-          routing="path"
-          path="/sign-up"
-          signInUrl="/login"
-          fallbackRedirectUrl="/"
-          appearance={trackerClerkAppearance}
-        />
-      </div>
+      <SignUp
+        routing="path"
+        path="/sign-up"
+        signInUrl="/login"
+        forceRedirectUrl="/"
+      />
     </div>
   );
 }
