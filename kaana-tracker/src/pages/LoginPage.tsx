@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth, SignIn } from '@clerk/clerk-react';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
-
-function safeRedirectUrl(input: string | null) {
-  if (!input) return '/';
-  return input.startsWith('/') ? input : '/';
-}
+import { authUrlWithRedirect, CLERK_SIGN_UP_URL, safeRedirectUrl } from '../lib/clerkAuth';
 
 export function LoginPage() {
   const [params] = useSearchParams();
@@ -24,8 +20,8 @@ export function LoginPage() {
         <SignIn
           routing="path"
           path="/login"
-          signUpUrl="/sign-up"
-          forceRedirectUrl="/"
+          signUpUrl={authUrlWithRedirect(CLERK_SIGN_UP_URL, redirectUrl)}
+          forceRedirectUrl={redirectUrl}
         />
       </div>
     );
