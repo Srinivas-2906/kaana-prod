@@ -48,17 +48,6 @@ export function legacyLogout() {
 
 const API = import.meta.env.VITE_TRACKER_API || '/api';
 
-export async function clerkRegister(email: string, password: string) {
-  const res = await fetch(`${API}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Registration failed');
-  return data;
-}
-
 export async function legacyLogin(email: string, password: string) {
   const res = await fetch(`${API}/auth/login`, {
     method: 'POST',

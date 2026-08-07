@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
-import { SignIn } from '@clerk/clerk-react';
+import { useAuth, SignIn } from '@clerk/clerk-react';
 import { isClerkEnabled, legacyLogin } from '../lib/auth';
-import { trackerClerkAppearance } from '../lib/clerkAppearance';
 
 function safeRedirectUrl(input: string | null) {
   if (!input) return '/';
-  // Prevent open-redirects; only allow in-app paths.
   return input.startsWith('/') ? input : '/';
 }
 
@@ -24,17 +21,12 @@ export function LoginPage() {
     if (isLoaded && isSignedIn) return <Navigate to={redirectUrl} replace />;
     return (
       <div className="login-page">
-        <div className="card login-card">
-          <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
-          <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
-          <SignIn
-            routing="path"
-            path="/login"
-            signUpUrl="/sign-up"
-            fallbackRedirectUrl="/"
-            appearance={trackerClerkAppearance}
-          />
-        </div>
+        <SignIn
+          routing="path"
+          path="/login"
+          signUpUrl="/sign-up"
+          forceRedirectUrl="/"
+        />
       </div>
     );
   }

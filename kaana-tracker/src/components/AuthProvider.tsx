@@ -1,6 +1,5 @@
 import { ClerkProvider, useAuth } from '@clerk/clerk-react';
 import { useEffect, useState } from 'react';
-import { trackerClerkAppearance } from '../lib/clerkAppearance';
 import { CLERK_SIGN_IN_URL, CLERK_SIGN_UP_URL } from '../lib/clerkAuth';
 import { isClerkEnabled, setTokenGetter } from '../lib/auth';
 
@@ -67,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInUrl={CLERK_SIGN_IN_URL}
       signUpUrl={CLERK_SIGN_UP_URL}
       afterSignOutUrl="/login"
-      appearance={trackerClerkAppearance}
     >
       <ClerkSession>{children}</ClerkSession>
     </ClerkProvider>
