@@ -293,6 +293,7 @@ export type Discussion = {
   created_by: number;
   created_by_name: string;
   created_at: string;
+  edited_at?: string | null;
   reactions?: DiscussionReaction[];
 };
 
@@ -316,7 +317,23 @@ export type DiscussionTopic = {
   unread_count?: number;
   created_at: string;
   updated_at: string;
+  title_edited_at?: string | null;
   last_reply_at: string;
+};
+
+export type TopicContentEdit = {
+  id: number;
+  entity_type: string;
+  entity_id: number;
+  field_name: string;
+  old_value: string | null;
+  new_value: string | null;
+  actor_id: number;
+  actor_name: string;
+  created_at: string;
+  target_type: 'topic_title' | 'discussion';
+  target_id: number;
+  discussion_id?: number;
 };
 
 export type TopicUnreadSummary = {

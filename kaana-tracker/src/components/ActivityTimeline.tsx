@@ -15,6 +15,8 @@ const EVENT_ICONS: Record<string, string> = {
   topic_created: '💬',
   topic_reply_added: '↩',
   topic_status_changed: '✓',
+  topic_title_edited: '✎',
+  discussion_edited: '✎',
   vibe_changed: '✨',
   team_poked: '🫵',
   member_added: '👤',

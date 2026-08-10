@@ -296,6 +296,39 @@ export function updateProjectTopicStatus(
   );
 }
 
+export function updateProjectTopicTitle(projectId: number, topicId: number, title: string) {
+  return request<{ topic: import('../types').DiscussionTopic; replies: Discussion[] }>(
+    `/projects/${projectId}/topics/${topicId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title }),
+    },
+  );
+}
+
+export function updateProjectTopicReply(
+  projectId: number,
+  topicId: number,
+  replyId: number,
+  content: string,
+) {
+  return request<{ topic: import('../types').DiscussionTopic; replies: Discussion[] }>(
+    `/projects/${projectId}/topics/${topicId}/replies/${replyId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    },
+  );
+}
+
+export function fetchProjectTopicEdits(projectId: number, topicId: number) {
+  return request<{ edits: import('../types').TopicContentEdit[] }>(
+    `/projects/${projectId}/topics/${topicId}/edits`,
+  );
+}
+
 export function markProjectTopicRead(projectId: number, topicId: number) {
   return request<{ ok: boolean }>(`/projects/${projectId}/topics/${topicId}/read`, {
     method: 'POST',
