@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   addProjectMember, createTransaction, createWorkItem, fetchActivity, fetchFinanceSummary, fetchProject,
-  fetchProjectMembers, fetchTransactionMeta, fetchTransactions, fetchUsers, fetchWorkItems,
+  fetchProjectMembers, fetchProjectTopicUnreadSummary, fetchTransactionMeta, fetchTransactions, fetchUsers, fetchWorkItems,
   removeProjectMember,
 } from '../lib/api';
 import { WorkBoard } from '../components/WorkBoard';
@@ -11,6 +11,7 @@ import { PlanView } from '../components/PlanView';
 import { AttachmentPanel } from '../components/AttachmentPanel';
 import { ProjectSharePanel, ProjectShareDialog } from '../components/ProjectShareDialog';
 import { ActivityTimeline } from '../components/ActivityTimeline';
+import { ProjectUpdatesPanel } from '../components/ProjectUpdatesPanel';
 import { currentMonth, todayISO } from '../lib/dates';
 import type {
   ActivityEvent, FinanceSummary, Project, ProjectMember, ProjectTab, Transaction, TransactionMeta, User, WorkItem,
@@ -75,6 +76,7 @@ export function ProjectPage() {
   const [creator, setCreator] = useState<Project | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const [unreadUpdates, setUnreadUpdates] = useState(0);
   const [error, setError] = useState('');
   const month = currentMonth();
   const canEdit = project?.can_edit !== false;
@@ -89,6 +91,9 @@ export function ProjectPage() {
   useEffect(() => {
     if (!projectId) return;
     fetchProject(projectId).then((p) => setProject(p.project)).catch((e) => setError(e.message));
+    fetchProjectTopicUnreadSummary(projectId)
+      .then((r) => setUnreadUpdates(r.unread_count))
+      .catch(() => {});
   }, [projectId]);
 
   useEffect(() => { reloadItems(); }, [projectId]);
@@ -186,18 +191,37 @@ export function ProjectPage() {
           <div className="card" style={{ marginBottom: '1rem', borderLeft: '3px solid #f59e0b' }}>
             <strong>View-only access</strong>
             <p className="muted" style={{ margin: '0.25rem 0 0' }}>
-              Your role is {project?.my_role || 'viewer'}. You can browse this project but cannot make changes.
+              Your role is {project?.my_role || 'viewer'}. You can browse the board and post in Updates &amp; Q&amp;A, but cannot edit stories or finances.
             </p>
           </div>
         )}
         {project?.description && <p className="muted" style={{ marginTop: 0 }}>{project.description}</p>}
-        <ProjectTabs basePath={basePath} />
+        <ProjectTabs
+          basePath={basePath}
+          unreadUpdates={unreadUpdates}
+          highlightUpdates={project?.my_role === 'viewer'}
+        />
 
         {tab === 'board' && (
           <>
             {canEdit && <BoardQuickAdd projectId={projectId} stories={stories} onAdded={reloadItems} />}
             <WorkBoard items={boardItems} onChange={reloadItems} readOnly={!canEdit} />
           </>
+        )}
+
+        {tab === 'updates' && (
+          <ProjectUpdatesPanel
+            projectId={projectId}
+            projectName={project?.name || 'Project'}
+            stories={stories}
+            canEdit={canEdit}
+            vibeEmoji={project?.vibe_emoji}
+            vibeMessage={project?.vibe_message}
+            onVibeUpdate={(emoji, message) => {
+              setProject((p) => (p ? { ...p, vibe_emoji: emoji, vibe_message: message } : p));
+            }}
+            onUnreadChange={setUnreadUpdates}
+          />
         )}
 
         {tab === 'plan' && (

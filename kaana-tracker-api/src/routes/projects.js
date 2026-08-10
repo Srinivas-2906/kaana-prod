@@ -10,6 +10,8 @@ import {
 import { listMembers, addMember, removeMember, listUsers } from '../services/membershipService.js';
 import { assertProjectAccess, canEdit, canManageMembers } from '../services/authorizationService.js';
 import { mountProjectInviteRoutes } from './invites.js';
+import { mountProjectTopicRoutes } from './topics.js';
+import { pokeTeam, updateProjectVibe } from '../services/vibeService.js';
 
 const router = Router();
 
@@ -48,12 +50,39 @@ router.post('/', async (req, res) => {
 
 router.get('/meta/users', async (req, res) => {
   try {
-    const access = await assertProjectAccess(Number(req.query.projectId), req.user.sub, 'manage');
+    const projectId = Number(req.query.projectId);
+    if (!projectId) return res.status(400).json({ error: 'projectId is required' });
+    const access = await assertProjectAccess(projectId, req.user.sub, 'edit');
     if (access.error) return res.status(403).json({ error: access.error });
     res.json({ users: await listUsers() });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to list users' });
+  }
+});
+
+mountProjectInviteRoutes(router);
+mountProjectTopicRoutes(router);
+
+router.patch('/:id/vibe', async (req, res) => {
+  try {
+    const result = await updateProjectVibe(Number(req.params.id), req.body || {}, req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update vibe' });
+  }
+});
+
+router.post('/:id/poke', async (req, res) => {
+  try {
+    const result = await pokeTeam(Number(req.params.id), req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to poke team' });
   }
 });
 
@@ -155,7 +184,5 @@ router.delete('/:id/members/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to remove member' });
   }
 });
-
-mountProjectInviteRoutes(router);
 
 export default router;

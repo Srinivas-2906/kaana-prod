@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { fetchActivity, fetchFinanceSummary, fetchProjects, fetchWorkStats } from '../lib/api';
 import { currentMonth, todayISO } from '../lib/dates';
 import type { ActivityEvent, FinanceSummary, Project, WorkStats } from '../types';
+import { projectDefaultTab } from '../types';
 import { ActivityTimeline } from '../components/ActivityTimeline';
 
 export function HubPage() {
@@ -31,7 +32,8 @@ export function HubPage() {
           return;
         }
         if (p.projects.length === 1) {
-          navigate(`/projects/${p.projects[0].id}/board`, { replace: true });
+          const proj = p.projects[0];
+          navigate(`/projects/${proj.id}/${projectDefaultTab(proj.my_role)}`, { replace: true });
           return;
         }
 
@@ -86,7 +88,7 @@ export function HubPage() {
         <h2 style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>Projects</h2>
         <div className="grid-2">
           {projects.map((p) => (
-            <Link key={p.id} to={`/projects/${p.id}/board`} className="card card-link" style={{ borderLeft: `4px solid ${p.color}` }}>
+            <Link key={p.id} to={`/projects/${p.id}/${projectDefaultTab(p.my_role)}`} className="card card-link" style={{ borderLeft: `4px solid ${p.color}` }}>
               <strong>{p.name}</strong>
               <p className="muted">{p.open_count} open · {p.item_count} total</p>
             </Link>

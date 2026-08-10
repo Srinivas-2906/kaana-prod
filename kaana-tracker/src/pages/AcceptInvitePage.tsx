@@ -33,7 +33,7 @@ function InviteCard({
   return (
     <div className="login-page">
       <div className="card login-card">
-        <h1 style={{ marginTop: 0 }}>Join project</h1>
+        <h1 style={{ marginTop: 0 }}>{preview.already_accepted ? 'Open project' : 'Join project'}</h1>
         <p>
           <strong style={{ color: preview.project_color }}>{preview.project_name}</strong>
         </p>
@@ -47,9 +47,13 @@ function InviteCard({
 
         {!signedIn ? (
           <>
-            <p className="muted">Sign in to accept this invite and access the project.</p>
+            <p className="muted">
+              {preview.already_accepted
+                ? 'Sign in to open this project.'
+                : 'Sign in to accept this invite and access the project.'}
+            </p>
             <Link to={loginHref} className="btn btn-primary" style={{ display: 'inline-block', marginTop: '1rem' }}>
-              Sign in to accept
+              {preview.already_accepted ? 'Sign in to open project' : 'Sign in to accept'}
             </Link>
             <p className="auth-mode-switch muted">
               New to Kaana Tracker?{' '}
@@ -58,7 +62,7 @@ function InviteCard({
           </>
         ) : (
           <button type="button" className="btn btn-primary" style={{ marginTop: '1rem' }} disabled={accepting} onClick={onAccept}>
-            {accepting ? 'Joining…' : 'Accept invite'}
+            {accepting ? 'Opening…' : preview.already_accepted ? 'Open project' : 'Accept invite'}
           </button>
         )}
       </div>

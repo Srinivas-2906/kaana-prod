@@ -200,7 +200,11 @@ export function WorkItemPage() {
               onChange={(e) => patch({ owner_id: e.target.value ? Number(e.target.value) : null })}
             >
               <option value="">Who&apos;s on this?</option>
-              {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.email ? `${u.name} · ${u.email}` : u.name}
+                </option>
+              ))}
             </select>
           </label>
           <span className="wi-meta-chip wi-meta-static">

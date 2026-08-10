@@ -56,7 +56,10 @@ export async function authMiddleware(req, res, next) {
       };
       return next();
     } catch (err) {
-      console.warn('Clerk token verification failed:', err?.message || err);
+      console.error('Clerk auth failed:', err?.message || err);
+      if (err?.code === 'ECONNREFUSED' || err?.code === 'ER_ACCESS_DENIED_ERROR') {
+        return res.status(503).json({ error: 'Database unavailable. Is MySQL running?' });
+      }
       // Fall through to legacy JWT during dual-auth migration.
     }
   }

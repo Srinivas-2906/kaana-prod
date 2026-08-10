@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk, useUser } from '@clerk/clerk-react';
 import {
   LayoutDashboard,
   Layers,
@@ -9,7 +10,62 @@ import {
   Compass,
   LogOut,
 } from 'lucide-react';
+import { fetchMe } from '../lib/api';
 import { isClerkEnabled, legacyLogout } from '../lib/auth';
+import type { User } from '../types';
+
+function initials(name: string) {
+  return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || '?';
+}
+
+function AccountBadge({ name, email }: { name: string; email?: string | null }) {
+  return (
+    <div className="sidebar-account" title={email || name}>
+      <div className="sidebar-account-avatar" aria-hidden>{initials(name)}</div>
+      <div className="sidebar-account-text">
+        <strong>{name}</strong>
+        {email && <span className="muted">{email}</span>}
+      </div>
+    </div>
+  );
+}
+
+function AccountBadgeClerk() {
+  const { isLoaded, user } = useUser();
+  if (!isLoaded) {
+    return (
+      <div className="sidebar-account">
+        <div className="sidebar-account-text"><span className="muted">Loading account…</span></div>
+      </div>
+    );
+  }
+
+  const name = user?.fullName || user?.firstName || user?.username || 'Account';
+  const email = user?.primaryEmailAddress?.emailAddress || null;
+  return <AccountBadge name={name} email={email} />;
+}
+
+function AccountBadgeLegacy() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    fetchMe().then((r) => setUser(r.user)).catch(() => setUser(null));
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="sidebar-account">
+        <div className="sidebar-account-text"><span className="muted">Signed in</span></div>
+      </div>
+    );
+  }
+
+  return <AccountBadge name={user.name} email={user.email} />;
+}
+
+function SidebarAccount() {
+  return isClerkEnabled() ? <AccountBadgeClerk /> : <AccountBadgeLegacy />;
+}
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Hub', end: true },
@@ -25,7 +81,7 @@ function LogoutButtonClerk() {
     <button
       type="button"
       className="nav-link"
-      style={{ marginTop: 'auto', border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
+      style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
       onClick={() => signOut({ redirectUrl: '/login' })}
     >
       <LogOut size={18} /> Logout
@@ -38,7 +94,7 @@ function LogoutButtonLegacy() {
     <button
       type="button"
       className="nav-link"
-      style={{ marginTop: 'auto', border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
+      style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
       onClick={legacyLogout}
     >
       <LogOut size={18} /> Logout
@@ -63,9 +119,15 @@ export function AppShell() {
             {item.label}
           </NavLink>
         ))}
-        {isClerkEnabled() ? <LogoutButtonClerk /> : <LogoutButtonLegacy />}
+        <div className="sidebar-footer">
+          <SidebarAccount />
+          {isClerkEnabled() ? <LogoutButtonClerk /> : <LogoutButtonLegacy />}
+        </div>
       </aside>
       <div className="main-area">
+        <div className="mobile-account-bar">
+          <SidebarAccount />
+        </div>
         <Outlet />
       </div>
     </div>

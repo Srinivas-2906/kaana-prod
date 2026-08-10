@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "dev:check": "bash scripts/dev-with-check.sh",
     "start": "node src/index.js"
   },
   "dependencies": {

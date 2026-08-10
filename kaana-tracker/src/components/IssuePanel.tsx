@@ -11,6 +11,10 @@ import { WORK_PRIORITIES, WORK_STATUSES, statusLabel, workTypeColor } from '../t
 import { AttachmentPanel } from './AttachmentPanel';
 import { SubtaskSection } from './SubtaskSection';
 
+function userLabel(user: User) {
+  return user.email ? `${user.name} · ${user.email}` : user.name;
+}
+
 export function IssuePanel({
   itemId,
   onClose,
@@ -132,7 +136,7 @@ export function IssuePanel({
                 onChange={(e) => saveField({ owner_id: e.target.value ? Number(e.target.value) : null })}
               >
                 <option value="">Unassigned</option>
-                {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                {users.map((u) => <option key={u.id} value={u.id}>{userLabel(u)}</option>)}
               </select>
             </label>
             <label>
@@ -211,12 +215,8 @@ export function IssuePanel({
             </div>
             <form onSubmit={onComment} className="comment-compose">
               {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-              {!readOnly && (
-                <>
-                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
-                  <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
-                </>
-              )}
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
             </form>
           </div>
 

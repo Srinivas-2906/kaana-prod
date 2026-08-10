@@ -221,13 +221,15 @@ export async function updateWorkItem(id, data, userId) {
     payload.story_points ?? null,
     payload.due_date || null,
     payload.start_date || null,
-    payload.owner_id ?? existing.owner_id,
+    Object.prototype.hasOwnProperty.call(data, 'owner_id') ? (payload.owner_id ?? null) : existing.owner_id,
     id,
   ]);
 
   const fields = ['title', 'status', 'priority', 'due_date', 'start_date', 'idea_stage', 'owner_id', 'story_points', 'acceptance_criteria', 'implementation_notes', 'parent_id'];
   for (const f of fields) {
-    const newVal = f === 'idea_stage' ? ideaStage : data[f] ?? existing[f];
+    const newVal = f === 'idea_stage'
+      ? ideaStage
+      : (Object.prototype.hasOwnProperty.call(data, f) ? data[f] : existing[f]);
     const oldVal = existing[f];
     if (String(oldVal ?? '') !== String(newVal ?? '')) {
       await logFieldChange('work_item', id, f, oldVal, newVal, userId);

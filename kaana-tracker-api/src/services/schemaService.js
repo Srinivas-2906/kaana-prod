@@ -377,3 +377,91 @@ export async function ensureClerkSchema() {
   ]);
   clerkDone = true;
 }
+
+let topicDone = false;
+
+export async function ensureTopicSchema() {
+  if (topicDone) return;
+  await ensureInviteSchema();
+
+  const pool = getPool();
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS discussion_topics (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        project_id INT UNSIGNED NOT NULL,
+        title VARCHAR(200) NOT NULL,
+        status ENUM('open', 'answered', 'closed') NOT NULL DEFAULT 'open',
+        work_item_id INT UNSIGNED NULL,
+        created_by INT UNSIGNED NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_project (project_id),
+        INDEX idx_status (status),
+        FOREIGN KEY (project_id) REFERENCES clusters(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+  } catch (e) {
+    console.warn('Schema create warning:', e.message);
+  }
+
+  await runAlters([
+    'ALTER TABLE discussions ADD COLUMN topic_id INT UNSIGNED NULL AFTER entity_id',
+    'ALTER TABLE discussions ADD INDEX idx_topic (topic_id)',
+    'ALTER TABLE discussions MODIFY entity_type VARCHAR(30) NOT NULL',
+    'ALTER TABLE discussion_topics ADD CONSTRAINT fk_topic_work_item FOREIGN KEY (work_item_id) REFERENCES work_items(id) ON DELETE SET NULL',
+  ]);
+
+  topicDone = true;
+}
+
+let engagementDone = false;
+
+export async function ensureEngagementSchema() {
+  if (engagementDone) return;
+  await ensureTopicSchema();
+
+  await runCreates([
+    `CREATE TABLE IF NOT EXISTS topic_read_state (
+      user_id INT UNSIGNED NOT NULL,
+      topic_id INT UNSIGNED NOT NULL,
+      last_read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      last_read_discussion_id INT UNSIGNED NULL,
+      PRIMARY KEY (user_id, topic_id),
+      INDEX idx_topic (topic_id),
+      FOREIGN KEY (topic_id) REFERENCES discussion_topics(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ]);
+
+  engagementDone = true;
+}
+
+let funDone = false;
+
+export async function ensureFunSchema() {
+  if (funDone) return;
+  await ensureEngagementSchema();
+
+  await runAlters([
+    'ALTER TABLE clusters ADD COLUMN vibe_emoji VARCHAR(16) NULL',
+    'ALTER TABLE clusters ADD COLUMN vibe_message VARCHAR(120) NULL',
+  ]);
+
+  await runCreates([
+    `CREATE TABLE IF NOT EXISTS discussion_reactions (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      discussion_id INT UNSIGNED NOT NULL,
+      user_id INT UNSIGNED NOT NULL,
+      emoji VARCHAR(16) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uniq_discussion_reaction (discussion_id, user_id, emoji),
+      INDEX idx_discussion (discussion_id),
+      FOREIGN KEY (discussion_id) REFERENCES discussions(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ]);
+
+  funDone = true;
+}

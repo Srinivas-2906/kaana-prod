@@ -78,6 +78,7 @@ function CardMain({
       <div className="work-card-title">{item.title}</div>
       <div className="muted work-card-meta">
         {statusLabel(item.status)}
+        {item.owner_name && ` · ${item.owner_name}`}
         {item.priority !== 'medium' && ` · ${item.priority}`}
         {item.due_date && ` · due ${dateOnly(item.due_date)}`}
         {commentCount ? ` · 💬 ${commentCount}` : ''}
