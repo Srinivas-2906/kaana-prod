@@ -16,6 +16,7 @@ import { TransactionsPage } from './pages/TransactionsPage';
 import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { SsoCallbackPage } from './pages/SsoCallbackPage';
 import { WorkItemPage } from './pages/WorkItemPage';
+import { ProjectDefaultRedirect } from './components/ProjectDefaultRedirect';
 
 function RequireAuthClerk() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -64,7 +65,7 @@ export default function App() {
           <Route index element={<HubPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/:id/:tab" element={<ProjectPage />} />
-          <Route path="projects/:id" element={<Navigate to="board" replace />} />
+          <Route path="projects/:id" element={<ProjectDefaultRedirect />} />
           <Route path="my-work" element={<MyWorkPage />} />
           <Route path="work/:id" element={<WorkItemPage />} />
           <Route path="daybook" element={<Navigate to="/plan" replace />} />

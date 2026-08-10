@@ -16,6 +16,8 @@ export type Project = {
   my_role?: 'owner' | 'manager' | 'contributor' | 'viewer';
   can_edit?: boolean;
   can_manage?: boolean;
+  vibe_emoji?: string | null;
+  vibe_message?: string | null;
 };
 
 export type WorkItemContentSection = {
@@ -286,10 +288,42 @@ export type Discussion = {
   id: number;
   entity_type: string;
   entity_id: number | null;
+  topic_id?: number | null;
   content: string;
   created_by: number;
   created_by_name: string;
   created_at: string;
+  reactions?: DiscussionReaction[];
+};
+
+export type DiscussionReaction = {
+  emoji: string;
+  count: number;
+  users: string[];
+  mine: boolean;
+};
+
+export type DiscussionTopic = {
+  id: number;
+  project_id: number;
+  title: string;
+  status: 'open' | 'answered' | 'closed';
+  work_item_id: number | null;
+  work_item_title?: string | null;
+  created_by: number;
+  created_by_name: string;
+  reply_count: number;
+  unread_count?: number;
+  created_at: string;
+  updated_at: string;
+  last_reply_at: string;
+};
+
+export type TopicUnreadSummary = {
+  unread_count: number;
+  open_count: number;
+  answered_this_week: number;
+  last_activity_at: string | null;
 };
 
 export type Whiteboard = {
@@ -323,6 +357,7 @@ export const NOTE_COLORS = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fed7aa
 
 export const PROJECT_TABS = [
   'board',
+  'updates',
   'plan',
   'finance',
   'people',
@@ -330,6 +365,19 @@ export const PROJECT_TABS = [
 ] as const;
 
 export type ProjectTab = (typeof PROJECT_TABS)[number];
+
+export const PROJECT_TAB_LABELS: Record<ProjectTab, string> = {
+  board: 'Board',
+  updates: 'Updates & Q&A',
+  plan: 'Plan',
+  finance: 'Finance',
+  people: 'People',
+  activity: 'Activity',
+};
+
+export function projectDefaultTab(role?: string): ProjectTab {
+  return role === 'viewer' ? 'updates' : 'board';
+}
 
 export function workTypeColor(type: string) {
   return { idea: '#eab308', story: '#8b5cf6', task: '#3b82f6', work: '#22c55e' }[type] || '#64748b';

@@ -4,6 +4,7 @@ import { UserPlus } from 'lucide-react';
 import { createProject, fetchProjects } from '../lib/api';
 import { ProjectShareDialog } from '../components/ProjectShareDialog';
 import type { Project } from '../types';
+import { projectDefaultTab } from '../types';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#22c55e', '#14b8a6'];
 
@@ -40,7 +41,7 @@ export function ProjectsPage() {
             {projects.map((p) => (
               <div key={p.id} className="card project-card" style={{ borderLeft: `4px solid ${p.color}` }}>
                 <div className="project-card-row">
-                  <Link to={`/projects/${p.id}/board`} className="project-card-link">
+                  <Link to={`/projects/${p.id}/${projectDefaultTab(p.my_role)}`} className="project-card-link">
                     <strong style={{ fontSize: '1.0625rem' }}>{p.name}</strong>
                     {p.description && <p className="muted">{p.description}</p>}
                     <p className="muted">{p.open_count} open · {p.item_count} total</p>

@@ -317,6 +317,6 @@ export async function acceptInvite(token, userId, userEmail) {
   return {
     projectId,
     role: existing[0]?.role || role,
-    projectUrl: `/projects/${projectId}/board`,
+    projectUrl: `/projects/${projectId}/${role === 'viewer' ? 'updates' : 'board'}`,
   };
 }

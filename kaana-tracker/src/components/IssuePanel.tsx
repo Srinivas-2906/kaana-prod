@@ -215,12 +215,8 @@ export function IssuePanel({
             </div>
             <form onSubmit={onComment} className="comment-compose">
               {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-              {!readOnly && (
-                <>
-                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
-                  <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
-                </>
-              )}
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
             </form>
           </div>
 

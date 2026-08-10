@@ -244,6 +244,96 @@ export function postDiscussion(data: { entityType: string; entityId?: number | n
   });
 }
 
+export function fetchProjectTopics(projectId: number, status?: 'open' | 'answered' | 'closed') {
+  const q = new URLSearchParams();
+  if (status) q.set('status', status);
+  const qs = q.toString();
+  return request<{ topics: import('../types').DiscussionTopic[] }>(
+    `/projects/${projectId}/topics${qs ? `?${qs}` : ''}`,
+  );
+}
+
+export function fetchProjectTopic(projectId: number, topicId: number) {
+  return request<{ topic: import('../types').DiscussionTopic; replies: Discussion[] }>(
+    `/projects/${projectId}/topics/${topicId}`,
+  );
+}
+
+export function createProjectTopic(
+  projectId: number,
+  data: { title: string; content: string; work_item_id?: number | null },
+) {
+  return request<{ topic: import('../types').DiscussionTopic; replies: Discussion[] }>(
+    `/projects/${projectId}/topics`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+export function postProjectTopicReply(projectId: number, topicId: number, content: string) {
+  return request<{ reply: Discussion }>(`/projects/${projectId}/topics/${topicId}/replies`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+}
+
+export function updateProjectTopicStatus(
+  projectId: number,
+  topicId: number,
+  status: 'open' | 'answered' | 'closed',
+) {
+  return request<{ topic: import('../types').DiscussionTopic; replies: Discussion[] }>(
+    `/projects/${projectId}/topics/${topicId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    },
+  );
+}
+
+export function markProjectTopicRead(projectId: number, topicId: number) {
+  return request<{ ok: boolean }>(`/projects/${projectId}/topics/${topicId}/read`, {
+    method: 'POST',
+  });
+}
+
+export function fetchProjectTopicUnreadSummary(projectId: number) {
+  return request<import('../types').TopicUnreadSummary>(`/projects/${projectId}/topics-unread`);
+}
+
+export function updateProjectVibe(projectId: number, data: { emoji: string; message?: string }) {
+  return request<{ vibe: { vibe_emoji: string; vibe_message: string | null } }>(
+    `/projects/${projectId}/vibe`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    },
+  );
+}
+
+export function pokeProjectTeam(projectId: number) {
+  return request<{ ok: boolean; message: string }>(`/projects/${projectId}/poke`, {
+    method: 'POST',
+  });
+}
+
+export function toggleDiscussionReaction(discussionId: number, emoji: string) {
+  return request<{ toggled: 'on' | 'off'; emoji: string }>(
+    `/discussions/${discussionId}/reactions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emoji }),
+    },
+  );
+}
+
 export function fetchWhiteboards() {
   return request<{ whiteboards: Whiteboard[] }>('/whiteboards');
 }
