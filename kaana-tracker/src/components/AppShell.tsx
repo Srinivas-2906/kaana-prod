@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { useClerk, useUser } from '@clerk/clerk-react';
+import { useClerk } from '@clerk/clerk-react';
 import {
   LayoutDashboard,
   Layers,
@@ -9,8 +9,9 @@ import {
   Wallet,
   Compass,
   LogOut,
+  Pencil,
 } from 'lucide-react';
-import { fetchMe } from '../lib/api';
+import { fetchMe, updateMe } from '../lib/api';
 import { isClerkEnabled, legacyLogout } from '../lib/auth';
 import type { User } from '../types';
 
@@ -18,21 +19,37 @@ function initials(name: string) {
   return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || '?';
 }
 
-function AccountBadge({ name, email }: { name: string; email?: string | null }) {
-  return (
-    <div className="sidebar-account" title={email || name}>
-      <div className="sidebar-account-avatar" aria-hidden>{initials(name)}</div>
-      <div className="sidebar-account-text">
-        <strong>{name}</strong>
-        {email && <span className="muted">{email}</span>}
-      </div>
-    </div>
-  );
-}
+function TrackerAccountBadge() {
+  const [user, setUser] = useState<User | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
-function AccountBadgeClerk() {
-  const { isLoaded, user } = useUser();
-  if (!isLoaded) {
+  const loadUser = useCallback(() => {
+    fetchMe().then((r) => setUser(r.user)).catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => { loadUser(); }, [loadUser]);
+
+  async function onSave(e: FormEvent) {
+    e.preventDefault();
+    const name = nameDraft.trim();
+    if (!name) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await updateMe({ name });
+      setUser(result.user);
+      setEditing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update name');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!user) {
     return (
       <div className="sidebar-account">
         <div className="sidebar-account-text"><span className="muted">Loading account…</span></div>
@@ -40,31 +57,54 @@ function AccountBadgeClerk() {
     );
   }
 
-  const name = user?.fullName || user?.firstName || user?.username || 'Account';
-  const email = user?.primaryEmailAddress?.emailAddress || null;
-  return <AccountBadge name={name} email={email} />;
-}
-
-function AccountBadgeLegacy() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    fetchMe().then((r) => setUser(r.user)).catch(() => setUser(null));
-  }, []);
-
-  if (!user) {
-    return (
-      <div className="sidebar-account">
-        <div className="sidebar-account-text"><span className="muted">Signed in</span></div>
+  return (
+    <div className="sidebar-account">
+      <div className="sidebar-account-avatar" aria-hidden>{initials(user.name)}</div>
+      <div className="sidebar-account-text">
+        {editing ? (
+          <form className="sidebar-account-edit" onSubmit={onSave}>
+            <input
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              maxLength={100}
+              autoFocus
+              disabled={busy}
+              aria-label="Display name"
+            />
+            <div className="sidebar-account-edit-actions">
+              <button type="submit" className="btn btn-primary btn-compact" disabled={busy || !nameDraft.trim()}>
+                Save
+              </button>
+              <button type="button" className="btn btn-ghost btn-compact" disabled={busy} onClick={() => setEditing(false)}>
+                Cancel
+              </button>
+            </div>
+            {error && <span className="sidebar-account-error">{error}</span>}
+          </form>
+        ) : (
+          <>
+            <div className="sidebar-account-name-row">
+              <strong title={user.name}>{user.name}</strong>
+              <button
+                type="button"
+                className="sidebar-account-edit-btn"
+                title="Edit display name"
+                aria-label="Edit display name"
+                onClick={() => {
+                  setNameDraft(user.name);
+                  setEditing(true);
+                  setError('');
+                }}
+              >
+                <Pencil size={12} />
+              </button>
+            </div>
+            {user.email && <span className="muted">{user.email}</span>}
+          </>
+        )}
       </div>
-    );
-  }
-
-  return <AccountBadge name={user.name} email={user.email} />;
-}
-
-function SidebarAccount() {
-  return isClerkEnabled() ? <AccountBadgeClerk /> : <AccountBadgeLegacy />;
+    </div>
+  );
 }
 
 const NAV = [
@@ -120,13 +160,13 @@ export function AppShell() {
           </NavLink>
         ))}
         <div className="sidebar-footer">
-          <SidebarAccount />
+          <TrackerAccountBadge />
           {isClerkEnabled() ? <LogoutButtonClerk /> : <LogoutButtonLegacy />}
         </div>
       </aside>
       <div className="main-area">
         <div className="mobile-account-bar">
-          <SidebarAccount />
+          <TrackerAccountBadge />
         </div>
         <Outlet />
       </div>

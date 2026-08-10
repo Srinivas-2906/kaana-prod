@@ -63,6 +63,14 @@ export function fetchMe() {
   return request<{ user: User }>('/auth/me');
 }
 
+export function updateMe(data: { name: string }) {
+  return request<{ user: User }>('/auth/me', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
 export function fetchProjects() {
   return request<{ projects: Project[] }>('/projects');
 }

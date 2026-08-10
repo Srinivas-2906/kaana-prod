@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginUser, getUserById, registerClerkUser } from '../services/authService.js';
+import { loginUser, getUserById, registerClerkUser, updateUserProfile } from '../services/authService.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
@@ -43,6 +43,24 @@ router.get('/me', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
+
+router.patch('/me', authMiddleware, async (req, res) => {
+  try {
+    const result = await updateUserProfile(req.user.sub, req.body || {});
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json({
+      user: {
+        id: result.id,
+        name: result.name,
+        email: result.email,
+        authProvider: req.user.authProvider || 'legacy',
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 });
 
