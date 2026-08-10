@@ -1,5 +1,5 @@
 import { getPool } from '../db/index.js';
-import { logActivity } from './activityService.js';
+import { logActivity, logFieldChange, listEntityVersions } from './activityService.js';
 import { assertProjectAccess, canEdit } from './authorizationService.js';
 import { sendTopicReplyEmail } from './emailService.js';
 import { getReactionsForDiscussions } from './reactionService.js';
@@ -20,6 +20,7 @@ function mapTopicRow(row) {
     unread_count: Number(row.unread_count || 0),
     created_at: row.created_at,
     updated_at: row.updated_at,
+    title_edited_at: row.title_edited_at || null,
     last_reply_at: row.last_reply_at || row.updated_at,
   };
 }
@@ -143,6 +144,7 @@ export async function getTopic(projectId, topicId, actorId) {
   const reactionMap = await getReactionsForDiscussions(replyIds, actorId);
   const repliesWithReactions = replies.map((r) => ({
     ...r,
+    edited_at: r.edited_at || null,
     reactions: reactionMap[r.id] || [],
   }));
 
@@ -290,6 +292,127 @@ export async function updateTopicStatus(projectId, topicId, status, actorId) {
   });
 
   return getTopic(projectId, topicId, actorId);
+}
+
+function canEditContent(access, authorId, actorId) {
+  return authorId === actorId || canEdit(access.role);
+}
+
+export async function updateTopicTitle(projectId, topicId, title, actorId) {
+  const access = await assertProjectAccess(projectId, actorId, 'view');
+  if (access.error) return { error: access.error, status: access.status };
+
+  const nextTitle = String(title || '').trim();
+  if (!nextTitle) return { error: 'Title is required', status: 400 };
+
+  const pool = getPool();
+  const [topics] = await pool.query(
+    'SELECT id, title, created_by FROM discussion_topics WHERE id = ? AND project_id = ? LIMIT 1',
+    [topicId, projectId],
+  );
+  if (!topics[0]) return { error: 'Topic not found', status: 404 };
+  if (!canEditContent(access, topics[0].created_by, actorId)) {
+    return { error: 'Not allowed to edit this topic', status: 403 };
+  }
+
+  const prevTitle = topics[0].title;
+  if (prevTitle === nextTitle) return getTopic(projectId, topicId, actorId);
+
+  await pool.query(
+    'UPDATE discussion_topics SET title = ?, title_edited_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [nextTitle, topicId],
+  );
+
+  await logFieldChange('topic', topicId, 'title', prevTitle, nextTitle, actorId);
+  await logActivity({
+    eventType: 'topic_title_edited',
+    entityType: 'topic',
+    entityId: topicId,
+    projectId,
+    actorId,
+    summary: `Topic title updated: "${prevTitle}" → "${nextTitle}"`,
+    payload: { topic_id: topicId, previous_title: prevTitle, new_title: nextTitle },
+  });
+
+  return getTopic(projectId, topicId, actorId);
+}
+
+export async function updateDiscussionContent(projectId, topicId, discussionId, content, actorId) {
+  const access = await assertProjectAccess(projectId, actorId, 'view');
+  if (access.error) return { error: access.error, status: access.status };
+
+  const nextContent = String(content || '').trim();
+  if (!nextContent) return { error: 'Message is required', status: 400 };
+
+  const pool = getPool();
+  const [rows] = await pool.query(`
+    SELECT d.id, d.content, d.created_by
+    FROM discussions d
+    WHERE d.id = ? AND d.topic_id = ? AND d.entity_id = ?
+    LIMIT 1
+  `, [discussionId, topicId, projectId]);
+
+  if (!rows[0]) return { error: 'Message not found', status: 404 };
+  if (!canEditContent(access, rows[0].created_by, actorId)) {
+    return { error: 'Not allowed to edit this message', status: 403 };
+  }
+
+  const prevContent = rows[0].content;
+  if (prevContent === nextContent) return getTopic(projectId, topicId, actorId);
+
+  await pool.query(
+    'UPDATE discussions SET content = ?, edited_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [nextContent, discussionId],
+  );
+  await pool.query(
+    'UPDATE discussion_topics SET updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [topicId],
+  );
+
+  await logFieldChange('discussion', discussionId, 'content', prevContent, nextContent, actorId);
+  await logActivity({
+    eventType: 'discussion_edited',
+    entityType: 'discussion',
+    entityId: discussionId,
+    projectId,
+    actorId,
+    summary: `Message edited in topic #${topicId}`,
+    payload: { topic_id: topicId, discussion_id: discussionId },
+  });
+
+  return getTopic(projectId, topicId, actorId);
+}
+
+export async function getTopicEditHistory(projectId, topicId, actorId) {
+  const access = await assertProjectAccess(projectId, actorId, 'view');
+  if (access.error) return { error: access.error, status: access.status };
+
+  const pool = getPool();
+  const [topics] = await pool.query(
+    'SELECT id FROM discussion_topics WHERE id = ? AND project_id = ? LIMIT 1',
+    [topicId, projectId],
+  );
+  if (!topics[0]) return { error: 'Topic not found', status: 404 };
+
+  const [discussions] = await pool.query(
+    'SELECT id FROM discussions WHERE topic_id = ?',
+    [topicId],
+  );
+  const discussionIds = discussions.map((d) => d.id);
+
+  const titleEdits = await listEntityVersions('topic', topicId, 50);
+  const discussionEdits = [];
+  for (const id of discussionIds) {
+    const versions = await listEntityVersions('discussion', id, 50);
+    discussionEdits.push(...versions.map((v) => ({ ...v, discussion_id: id })));
+  }
+
+  const edits = [
+    ...titleEdits.map((e) => ({ ...e, target_type: 'topic_title', target_id: topicId })),
+    ...discussionEdits.map((e) => ({ ...e, target_type: 'discussion', target_id: e.discussion_id })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  return { edits };
 }
 
 export async function markTopicRead(projectId, topicId, actorId) {

@@ -465,3 +465,17 @@ export async function ensureFunSchema() {
 
   funDone = true;
 }
+
+let editDone = false;
+
+export async function ensureEditSchema() {
+  if (editDone) return;
+  await ensureFunSchema();
+
+  await runAlters([
+    'ALTER TABLE discussions ADD COLUMN edited_at TIMESTAMP NULL',
+    'ALTER TABLE discussion_topics ADD COLUMN title_edited_at TIMESTAMP NULL',
+  ]);
+
+  editDone = true;
+}

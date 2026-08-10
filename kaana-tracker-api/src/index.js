@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { initDatabase } from './db/index.js';
-import { ensureBaseSchema, ensureM4Schema, ensureClerkSchema, ensureInviteSchema, ensureTopicSchema, ensureEngagementSchema, ensureFunSchema } from './services/schemaService.js';
+import { ensureBaseSchema, ensureM4Schema, ensureClerkSchema, ensureInviteSchema, ensureTopicSchema, ensureEngagementSchema, ensureFunSchema, ensureEditSchema } from './services/schemaService.js';
 import { corsMiddleware } from './middleware/cors.js';
 import authRouter from './routes/auth.js';
 import { handleClerkWebhook } from './services/authService.js';
@@ -29,6 +29,7 @@ await ensureInviteSchema();
 await ensureTopicSchema();
 await ensureEngagementSchema();
 await ensureFunSchema();
+await ensureEditSchema();
 
 app.post('/api/auth/webhooks/clerk', express.raw({ type: 'application/json' }), handleClerkWebhook);
 app.use(express.json({ limit: '10mb' }));

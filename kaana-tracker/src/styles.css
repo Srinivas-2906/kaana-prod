@@ -1339,6 +1339,117 @@ label input, label select, label textarea {
   gap: 0.75rem;
 }
 
+.topic-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.topic-title-edit {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.topic-title-edit input {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.content-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  margin-left: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.content-edit-btn:hover {
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.content-edited-label {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.content-edit-form {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.content-edit-actions {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.topic-edit-history {
+  margin: 0 1.25rem 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: #f8fafc;
+}
+
+.topic-edit-history summary {
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.topic-edit-history-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.625rem;
+}
+
+.topic-edit-history-item {
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.topic-edit-history-item:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.topic-edit-history-head {
+  font-size: 0.8125rem;
+}
+
+.topic-edit-history-diff {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.project-updates-body header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem;
+}
+
 .project-updates-legacy {
   border-left: 4px solid #94a3b8;
 }

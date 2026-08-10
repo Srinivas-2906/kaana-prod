@@ -1,24 +1,28 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Bell, MessageSquare, Plus, SmilePlus } from 'lucide-react';
+import { Bell, MessageSquare, Pencil, Plus, SmilePlus } from 'lucide-react';
 import {
   createProjectTopic,
   fetchDiscussions,
+  fetchMe,
   fetchProjectTopic,
+  fetchProjectTopicEdits,
   fetchProjectTopicUnreadSummary,
   fetchProjectTopics,
   markProjectTopicRead,
   pokeProjectTeam,
   postProjectTopicReply,
   toggleDiscussionReaction,
+  updateProjectTopicReply,
   updateProjectTopicStatus,
+  updateProjectTopicTitle,
 } from '../lib/api';
 import { formatRelativeTime } from '../lib/dates';
 import { FormattedContent } from './FormattedContent';
 import { FormattedTextarea } from './FormattedTextarea';
 import { ProjectVibeBar } from './ProjectVibeBar';
 import type {
-  Discussion, DiscussionReaction, DiscussionTopic, TopicUnreadSummary, WorkItem,
+  Discussion, DiscussionReaction, DiscussionTopic, TopicContentEdit, TopicUnreadSummary, WorkItem,
 } from '../types';
 
 type StatusFilter = 'all' | 'open' | 'answered' | 'closed';
@@ -156,11 +160,27 @@ function ReactionPicker({
 function ReplyBubble({
   reply,
   isQuestion,
+  canEditMessage,
+  editing,
+  editDraft,
+  onEditDraftChange,
+  onStartEdit,
+  onSaveEdit,
+  onCancelEdit,
   onReact,
+  busy,
 }: {
   reply: Discussion;
   isQuestion?: boolean;
+  canEditMessage: boolean;
+  editing: boolean;
+  editDraft: string;
+  onEditDraftChange: (value: string) => void;
+  onStartEdit: () => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
   onReact: (discussionId: number, emoji: string) => void;
+  busy: boolean;
 }) {
   const reactions = reply.reactions || [];
   return (
@@ -176,17 +196,49 @@ function ReplyBubble({
         <header>
           <strong>{reply.created_by_name}</strong>
           <span className="muted"> · {formatRelativeTime(reply.created_at)}</span>
+          {reply.edited_at && (
+            <span className="content-edited-label" title={`Edited ${formatRelativeTime(reply.edited_at)}`}>
+              edited
+            </span>
+          )}
           {isQuestion && <span className="topic-question-label">Original question</span>}
+          {canEditMessage && !editing && (
+            <button type="button" className="content-edit-btn" onClick={onStartEdit} title="Edit message">
+              <Pencil size={13} />
+            </button>
+          )}
         </header>
-        <div className="project-updates-body-text">
-          <FormattedContent text={reply.content} />
-        </div>
-        <ReactionSummary reactions={reactions} />
-        <ReactionPicker
-          replyId={reply.id}
-          reactions={reactions}
-          onToggle={(emoji) => onReact(reply.id, emoji)}
-        />
+        {editing ? (
+          <div className="content-edit-form">
+            <FormattedTextarea
+              value={editDraft}
+              onChange={onEditDraftChange}
+              rows={4}
+            />
+            <div className="content-edit-actions">
+              <button type="button" className="btn btn-primary btn-compact" disabled={busy || !editDraft.trim()} onClick={onSaveEdit}>
+                Save
+              </button>
+              <button type="button" className="btn btn-ghost btn-compact" disabled={busy} onClick={onCancelEdit}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="project-updates-body-text">
+            <FormattedContent text={reply.content} />
+          </div>
+        )}
+        {!editing && (
+          <>
+            <ReactionSummary reactions={reactions} />
+            <ReactionPicker
+              replyId={reply.id}
+              reactions={reactions}
+              onToggle={(emoji) => onReact(reply.id, emoji)}
+            />
+          </>
+        )}
       </div>
     </article>
   );
@@ -237,6 +289,13 @@ export function ProjectUpdatesPanel({
   const [toast, setToast] = useState('');
   const [busy, setBusy] = useState(false);
   const [notifying, setNotifying] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
+  const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
+  const [editHistory, setEditHistory] = useState<TopicContentEdit[]>([]);
+  const [showEditHistory, setShowEditHistory] = useState(false);
   const statsLine = summaryText(summary);
 
   function showToast(msg: string) {
@@ -272,6 +331,8 @@ export function ProjectUpdatesPanel({
       .then((r) => {
         setSelectedTopic(r.topic);
         setReplies(r.replies);
+        setEditingTitle(false);
+        setEditingReplyId(null);
         if (markRead) {
           markProjectTopicRead(projectId, topicId)
             .then(() => { loadTopics(); loadSummary(); })
@@ -281,8 +342,17 @@ export function ProjectUpdatesPanel({
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load topic'));
   }, [projectId, loadTopics, loadSummary]);
 
+  const loadEditHistory = useCallback((topicId: number) => {
+    fetchProjectTopicEdits(projectId, topicId)
+      .then((r) => setEditHistory(r.edits))
+      .catch(() => setEditHistory([]));
+  }, [projectId]);
+
   useEffect(() => { loadTopics(); }, [loadTopics]);
   useEffect(() => { loadLegacy(); }, [loadLegacy]);
+  useEffect(() => {
+    fetchMe().then((r) => setCurrentUserId(r.user.id)).catch(() => setCurrentUserId(null));
+  }, []);
 
   useEffect(() => {
     const topicParam = searchParams.get('topic');
@@ -293,12 +363,15 @@ export function ProjectUpdatesPanel({
   }, [searchParams]);
 
   useEffect(() => {
-    if (selectedId) loadTopicDetail(selectedId);
-    else {
+    if (selectedId) {
+      loadTopicDetail(selectedId);
+      loadEditHistory(selectedId);
+    } else {
       setSelectedTopic(null);
       setReplies([]);
+      setEditHistory([]);
     }
-  }, [selectedId, loadTopicDetail]);
+  }, [selectedId, loadTopicDetail, loadEditHistory]);
 
   useEffect(() => {
     if (!selectedId && topics.length > 0 && !searchParams.get('topic')) {
@@ -417,6 +490,62 @@ export function ProjectUpdatesPanel({
     } finally {
       setNotifying(false);
     }
+  }
+
+  function canEditMessage(authorId: number) {
+    if (currentUserId == null) return false;
+    return authorId === currentUserId || canEdit;
+  }
+
+  function canEditTopicTitle() {
+    if (!selectedTopic || currentUserId == null) return false;
+    return selectedTopic.created_by === currentUserId || canEdit;
+  }
+
+  async function onSaveTitle() {
+    if (!selectedId || !titleDraft.trim()) return;
+    setBusy(true);
+    try {
+      const result = await updateProjectTopicTitle(projectId, selectedId, titleDraft.trim());
+      setSelectedTopic(result.topic);
+      setReplies(result.replies);
+      setEditingTitle(false);
+      loadTopics();
+      loadEditHistory(selectedId);
+      showToast('Title updated');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update title');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onSaveReplyEdit(replyId: number) {
+    if (!selectedId || !replyDraft.trim()) return;
+    setBusy(true);
+    try {
+      const result = await updateProjectTopicReply(projectId, selectedId, replyId, replyDraft.trim());
+      setSelectedTopic(result.topic);
+      setReplies(result.replies);
+      setEditingReplyId(null);
+      loadEditHistory(selectedId);
+      showToast('Message updated');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update message');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function editHistoryLabel(edit: TopicContentEdit) {
+    if (edit.target_type === 'topic_title') return 'Topic title';
+    return 'Message';
+  }
+
+  function editHistoryPreview(value: string | null, max = 120) {
+    if (!value) return '(empty)';
+    const flat = value.replace(/\s+/g, ' ').trim();
+    return flat.length > max ? `${flat.slice(0, max)}…` : flat;
   }
 
   return (
@@ -546,13 +675,54 @@ export function ProjectUpdatesPanel({
               <>
                 <div className="topic-detail-head">
                   <div>
-                    <h4 style={{ margin: '0 0 0.25rem' }}>{selectedTopic.title}</h4>
+                    {editingTitle ? (
+                      <div className="topic-title-edit">
+                        <input
+                          value={titleDraft}
+                          onChange={(e) => setTitleDraft(e.target.value)}
+                          maxLength={200}
+                        />
+                        <div className="content-edit-actions">
+                          <button type="button" className="btn btn-primary btn-compact" disabled={busy || !titleDraft.trim()} onClick={onSaveTitle}>
+                            Save
+                          </button>
+                          <button type="button" className="btn btn-ghost btn-compact" disabled={busy} onClick={() => setEditingTitle(false)}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="topic-title-row">
+                        <h4 style={{ margin: '0 0 0.25rem' }}>{selectedTopic.title}</h4>
+                        {canEditTopicTitle() && (
+                          <button
+                            type="button"
+                            className="content-edit-btn"
+                            title="Edit title"
+                            onClick={() => {
+                              setTitleDraft(selectedTopic.title);
+                              setEditingTitle(true);
+                            }}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <p className="muted" style={{ margin: 0 }}>
                       Started by {selectedTopic.created_by_name}
                       {' · '}
                       <span className={statusClass(selectedTopic.status)}>
                         {STATUS_LABELS[selectedTopic.status]}
                       </span>
+                      {selectedTopic.title_edited_at && (
+                        <>
+                          {' · '}
+                          <span className="content-edited-label" title={`Title edited ${formatRelativeTime(selectedTopic.title_edited_at)}`}>
+                            title edited
+                          </span>
+                        </>
+                      )}
                     </p>
                     {selectedTopic.work_item_id && selectedTopic.work_item_title && (
                       <p className="muted" style={{ margin: '0.375rem 0 0' }}>
@@ -588,10 +758,46 @@ export function ProjectUpdatesPanel({
                       key={reply.id}
                       reply={reply}
                       isQuestion={idx === 0}
+                      canEditMessage={canEditMessage(reply.created_by)}
+                      editing={editingReplyId === reply.id}
+                      editDraft={replyDraft}
+                      onEditDraftChange={setReplyDraft}
+                      onStartEdit={() => {
+                        setEditingReplyId(reply.id);
+                        setReplyDraft(reply.content);
+                      }}
+                      onSaveEdit={() => onSaveReplyEdit(reply.id)}
+                      onCancelEdit={() => setEditingReplyId(null)}
                       onReact={onReact}
+                      busy={busy}
                     />
                   ))}
                 </div>
+
+                {editHistory.length > 0 && (
+                  <details
+                    className="topic-edit-history"
+                    open={showEditHistory}
+                    onToggle={(e) => setShowEditHistory((e.target as HTMLDetailsElement).open)}
+                  >
+                    <summary>Edit history ({editHistory.length})</summary>
+                    <ul className="topic-edit-history-list">
+                      {editHistory.map((edit) => (
+                        <li key={edit.id} className="topic-edit-history-item">
+                          <div className="topic-edit-history-head">
+                            <strong>{edit.actor_name}</strong>
+                            <span className="muted"> · {editHistoryLabel(edit)} · {formatRelativeTime(edit.created_at)}</span>
+                          </div>
+                          <p className="muted topic-edit-history-diff">
+                            <span>{editHistoryPreview(edit.old_value)}</span>
+                            {' → '}
+                            <span>{editHistoryPreview(edit.new_value)}</span>
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
 
                 <form onSubmit={onReply} className="topic-reply-form">
                   <FormattedTextarea
@@ -621,7 +827,19 @@ export function ProjectUpdatesPanel({
           <p className="muted">Messages posted before topics were enabled.</p>
           <div className="project-updates-thread">
             {legacyMessages.map((d) => (
-              <ReplyBubble key={d.id} reply={d} onReact={onReact} />
+              <ReplyBubble
+                key={d.id}
+                reply={d}
+                canEditMessage={false}
+                editing={false}
+                editDraft=""
+                onEditDraftChange={() => {}}
+                onStartEdit={() => {}}
+                onSaveEdit={() => {}}
+                onCancelEdit={() => {}}
+                onReact={onReact}
+                busy={false}
+              />
             ))}
           </div>
         </details>
