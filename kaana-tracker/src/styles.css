@@ -117,6 +117,57 @@ button, input, select, textarea { font: inherit; }
   white-space: nowrap;
 }
 
+.sidebar-account-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.sidebar-account-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sidebar-account-edit-btn:hover {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.sidebar-account-edit {
+  display: grid;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+.sidebar-account-edit input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.sidebar-account-edit-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.sidebar-account-error {
+  font-size: 0.6875rem;
+  color: #dc2626;
+}
+
 .mobile-account-bar {
   display: none;
 }

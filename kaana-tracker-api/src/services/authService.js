@@ -171,10 +171,27 @@ export async function loginUser(email, password) {
 export async function getUserById(id) {
   const pool = getPool();
   const [rows] = await pool.query(
-    'SELECT id, name, email, clerk_user_id, created_at FROM users WHERE id = ? LIMIT 1',
+    'SELECT id, name, email, clerk_user_id, name_customized, created_at FROM users WHERE id = ? LIMIT 1',
     [id],
   );
   return rows[0] || null;
+}
+
+export async function updateUserProfile(userId, data) {
+  const name = String(data.name || '').trim();
+  if (!name) return { error: 'Name is required', status: 400 };
+  if (name.length > 100) return { error: 'Name is too long (max 100 characters)', status: 400 };
+
+  const pool = getPool();
+  const [rows] = await pool.query('SELECT id FROM users WHERE id = ? LIMIT 1', [userId]);
+  if (!rows[0]) return { error: 'User not found', status: 404 };
+
+  await pool.query(
+    'UPDATE users SET name = ?, name_customized = 1 WHERE id = ?',
+    [name, userId],
+  );
+
+  return getUserById(userId);
 }
 
 export function handleClerkWebhook(req, res) {
@@ -238,7 +255,10 @@ async function handleClerkWebhookEvent(payload) {
     if (email || name) {
       const pool = getPool();
       await pool.query(
-        'UPDATE users SET email = COALESCE(?, email), name = COALESCE(?, name) WHERE clerk_user_id = ?',
+        `UPDATE users SET
+          email = COALESCE(?, email),
+          name = CASE WHEN name_customized = 1 THEN name ELSE COALESCE(?, name) END
+        WHERE clerk_user_id = ?`,
         [email ? normalizeEmail(email) : null, name || null, clerkUserId],
       );
     }

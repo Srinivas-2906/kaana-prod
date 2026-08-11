@@ -475,6 +475,7 @@ export async function ensureEditSchema() {
   await runAlters([
     'ALTER TABLE discussions ADD COLUMN edited_at TIMESTAMP NULL',
     'ALTER TABLE discussion_topics ADD COLUMN title_edited_at TIMESTAMP NULL',
+    'ALTER TABLE users ADD COLUMN name_customized TINYINT(1) NOT NULL DEFAULT 0',
   ]);
 
   editDone = true;
