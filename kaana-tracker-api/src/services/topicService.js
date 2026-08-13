@@ -3,6 +3,7 @@ import { logActivity, logFieldChange, listEntityVersions } from './activityServi
 import { assertProjectAccess, canEdit } from './authorizationService.js';
 import { sendTopicReplyEmail } from './emailService.js';
 import { getReactionsForDiscussions } from './reactionService.js';
+import { listAttachmentsByDiscussionIds } from './attachmentService.js';
 
 const TOPIC_STATUSES = ['open', 'answered', 'closed'];
 
@@ -142,10 +143,12 @@ export async function getTopic(projectId, topicId, actorId) {
 
   const replyIds = replies.map((r) => r.id);
   const reactionMap = await getReactionsForDiscussions(replyIds, actorId);
+  const attachmentMap = await listAttachmentsByDiscussionIds(replyIds);
   const repliesWithReactions = replies.map((r) => ({
     ...r,
     edited_at: r.edited_at || null,
     reactions: reactionMap[r.id] || [],
+    attachments: attachmentMap[r.id] || [],
   }));
 
   return { topic: mapTopicRow(rows[0]), replies: repliesWithReactions };
@@ -258,7 +261,7 @@ export async function addTopicReply(projectId, topicId, content, actorId) {
     content: text,
   }).catch(() => {});
 
-  return { reply: rows[0] };
+  return { reply: { ...rows[0], attachments: [] } };
 }
 
 export async function updateTopicStatus(projectId, topicId, status, actorId) {

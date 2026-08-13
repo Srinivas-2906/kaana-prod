@@ -37,7 +37,7 @@ steps:
           --cpu 1 \
           --add-cloudsql-instances "${_CLOUDSQL_INSTANCE}" \
           --set-secrets "DB_PASS=${_SECRET_DB_PASSWORD}:latest,JWT_SECRET=${_SECRET_JWT}:latest,CLERK_SECRET_KEY=${_SECRET_CLERK}:latest,CLERK_WEBHOOK_SECRET=${_SECRET_CLERK_WEBHOOK}:latest,RESEND_API_KEY=${_SECRET_RESEND}:latest,INVITE_FROM_EMAIL=${_SECRET_RESEND_FROM}:latest,GMAIL_SERVICE_ACCOUNT_JSON=${_SECRET_GMAIL_SA}:latest" \
-          --set-env-vars "NODE_ENV=production,DB_NAME=${_DB_NAME},DB_USER=${_DB_USER},DB_SOCKET=/cloudsql/${_CLOUDSQL_INSTANCE},CORS_ORIGIN=https://tracker.kaana.in,TRACKER_PUBLIC_URL=https://tracker.kaana.in,GMAIL_ALLOWED_DOMAINS=kaana.in,CLERK_AUTHORIZED_PARTIES=https://tracker.kaana.in"
+          --set-env-vars "NODE_ENV=production,DB_NAME=${_DB_NAME},DB_USER=${_DB_USER},DB_SOCKET=/cloudsql/${_CLOUDSQL_INSTANCE},CORS_ORIGIN=https://tracker.kaana.in,TRACKER_PUBLIC_URL=https://tracker.kaana.in,GMAIL_ALLOWED_DOMAINS=kaana.in,CLERK_AUTHORIZED_PARTIES=https://tracker.kaana.in,UPLOADS_DIR=/tmp/kaana-tracker-uploads"
 
   # ── Frontend (same Cloud Run service name → tracker.kaana.in unchanged) ─
   - id: build-tracker

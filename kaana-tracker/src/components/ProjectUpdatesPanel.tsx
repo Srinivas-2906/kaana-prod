@@ -20,6 +20,11 @@ import {
 import { formatRelativeTime } from '../lib/dates';
 import { FormattedContent } from './FormattedContent';
 import { FormattedTextarea } from './FormattedTextarea';
+import {
+  MessageAttachments,
+  MessageFilePicker,
+  uploadFilesToDiscussion,
+} from './MessageAttachments';
 import { ProjectVibeBar } from './ProjectVibeBar';
 import type {
   Discussion, DiscussionReaction, DiscussionTopic, TopicContentEdit, TopicUnreadSummary, WorkItem,
@@ -169,6 +174,8 @@ function ReplyBubble({
   onCancelEdit,
   onReact,
   busy,
+  canManageFiles,
+  onAttachmentsChange,
 }: {
   reply: Discussion;
   isQuestion?: boolean;
@@ -181,6 +188,8 @@ function ReplyBubble({
   onCancelEdit: () => void;
   onReact: (discussionId: number, emoji: string) => void;
   busy: boolean;
+  canManageFiles: boolean;
+  onAttachmentsChange?: () => void;
 }) {
   const reactions = reply.reactions || [];
   return (
@@ -228,6 +237,15 @@ function ReplyBubble({
           <div className="project-updates-body-text">
             <FormattedContent text={reply.content} />
           </div>
+        )}
+        {reply.id > 0 && (
+          <MessageAttachments
+            discussionId={reply.id}
+            initialAttachments={reply.attachments || []}
+            canUpload={canManageFiles && !editing}
+            canRemove={canEditMessage && !editing}
+            onChange={onAttachmentsChange}
+          />
         )}
         {!editing && (
           <>
@@ -294,6 +312,8 @@ export function ProjectUpdatesPanel({
   const [titleDraft, setTitleDraft] = useState('');
   const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
   const [replyDraft, setReplyDraft] = useState('');
+  const [newTopicFiles, setNewTopicFiles] = useState<File[]>([]);
+  const [replyFiles, setReplyFiles] = useState<File[]>([]);
   const [editHistory, setEditHistory] = useState<TopicContentEdit[]>([]);
   const [showEditHistory, setShowEditHistory] = useState(false);
   const statsLine = summaryText(summary);
@@ -405,9 +425,14 @@ export function ProjectUpdatesPanel({
         content,
         work_item_id: newStoryId ? Number(newStoryId) : null,
       });
+      const firstReplyId = result.replies?.[0]?.id;
+      if (firstReplyId && newTopicFiles.length) {
+        await uploadFilesToDiscussion(firstReplyId, newTopicFiles);
+      }
       setNewTitle('');
       setNewContent('');
       setNewStoryId('');
+      setNewTopicFiles([]);
       setShowNewForm(false);
       selectTopic(result.topic.id);
       loadTopics();
@@ -424,6 +449,7 @@ export function ProjectUpdatesPanel({
     e.preventDefault();
     if (!selectedId || !replyContent.trim()) return;
     const text = replyContent.trim();
+    const filesToUpload = [...replyFiles];
     setError('');
     setBusy(true);
 
@@ -437,17 +463,23 @@ export function ProjectUpdatesPanel({
       created_by_name: 'You',
       created_at: new Date().toISOString(),
       reactions: [],
+      attachments: [],
     };
     setReplies((prev) => [...prev, optimistic]);
     setReplyContent('');
+    setReplyFiles([]);
 
     try {
-      await postProjectTopicReply(projectId, selectedId, text);
+      const result = await postProjectTopicReply(projectId, selectedId, text);
+      if (result.reply?.id && filesToUpload.length) {
+        await uploadFilesToDiscussion(result.reply.id, filesToUpload);
+      }
       loadTopicDetail(selectedId, true);
       loadTopics();
     } catch (err) {
       setReplies((prev) => prev.filter((r) => r.id !== optimistic.id));
       setReplyContent(text);
+      setReplyFiles(filesToUpload);
       setError(err instanceof Error ? err.message : 'Failed to post reply');
     } finally {
       setBusy(false);
@@ -500,6 +532,10 @@ export function ProjectUpdatesPanel({
   function canEditTopicTitle() {
     if (!selectedTopic || currentUserId == null) return false;
     return selectedTopic.created_by === currentUserId || canEdit;
+  }
+
+  function canAttachFiles() {
+    return currentUserId != null;
   }
 
   async function onSaveTitle() {
@@ -629,6 +665,12 @@ export function ProjectUpdatesPanel({
               onChange={setNewContent}
               placeholder="Describe your question or update…"
               rows={3}
+            />
+            <MessageFilePicker
+              id="new-topic-files"
+              files={newTopicFiles}
+              onChange={setNewTopicFiles}
+              disabled={busy}
             />
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button type="submit" className="btn btn-primary" disabled={busy}>Create topic</button>
@@ -770,6 +812,8 @@ export function ProjectUpdatesPanel({
                       onCancelEdit={() => setEditingReplyId(null)}
                       onReact={onReact}
                       busy={busy}
+                      canManageFiles={canAttachFiles()}
+                      onAttachmentsChange={() => selectedId && loadTopicDetail(selectedId, false)}
                     />
                   ))}
                 </div>
@@ -806,6 +850,12 @@ export function ProjectUpdatesPanel({
                     placeholder="Write a reply…"
                     rows={3}
                   />
+                  <MessageFilePicker
+                    id="topic-reply-files"
+                    files={replyFiles}
+                    onChange={setReplyFiles}
+                    disabled={busy}
+                  />
                   <button type="submit" className="btn btn-primary" disabled={busy || !replyContent.trim()}>
                     Reply
                   </button>
@@ -839,6 +889,7 @@ export function ProjectUpdatesPanel({
                 onCancelEdit={() => {}}
                 onReact={onReact}
                 busy={false}
+                canManageFiles={canAttachFiles()}
               />
             ))}
           </div>
