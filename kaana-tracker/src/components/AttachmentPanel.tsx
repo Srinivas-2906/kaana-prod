@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Paperclip, Trash2 } from 'lucide-react';
-import { attachmentDownloadUrl, deleteAttachment, fetchAttachments, uploadAttachment } from '../lib/api';
+import { deleteAttachment, fetchAttachments, uploadAttachment } from '../lib/api';
 import type { Attachment } from '../types';
-import { authHeaders } from '../lib/auth';
+import { downloadAttachmentFile, openAttachmentFile } from './MessageAttachments';
 
 export function AttachmentPanel({
   entityType,
@@ -54,12 +54,15 @@ export function AttachmentPanel({
   }
 
   async function openAttachment(id: number) {
-    const url = attachmentDownloadUrl(id);
-    const headers = await authHeaders();
-    const res = await fetch(url, { headers });
-    if (!res.ok) return;
-    const blob = await res.blob();
-    window.open(URL.createObjectURL(blob), '_blank');
+    const attachment = attachments.find((a) => a.id === id);
+    if (!attachment) return;
+    await openAttachmentFile(attachment);
+  }
+
+  async function saveAttachment(id: number) {
+    const attachment = attachments.find((a) => a.id === id);
+    if (!attachment) return;
+    await downloadAttachmentFile(attachment);
   }
 
   return (
@@ -81,7 +84,7 @@ export function AttachmentPanel({
             type="file"
             multiple
             hidden
-            accept="image/*,.pdf,.txt,.doc,.docx,.xls,.xlsx"
+            accept="image/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
             onChange={(e) => onFiles(e.target.files)}
           />
         </div>
@@ -92,6 +95,9 @@ export function AttachmentPanel({
           <li key={a.id} className="attachment-item">
             <button type="button" className="attachment-link" onClick={() => openAttachment(a.id)}>
               {a.original_name}
+            </button>
+            <button type="button" className="btn btn-ghost btn-compact" title="Download" onClick={() => saveAttachment(a.id)}>
+              ↓
             </button>
             <span className="muted">{(a.file_size / 1024).toFixed(0)} KB · {a.uploaded_by_name}</span>
             {!readOnly && (

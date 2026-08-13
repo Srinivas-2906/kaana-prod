@@ -295,6 +295,7 @@ export type Discussion = {
   created_at: string;
   edited_at?: string | null;
   reactions?: DiscussionReaction[];
+  attachments?: Attachment[];
 };
 
 export type DiscussionReaction = {
