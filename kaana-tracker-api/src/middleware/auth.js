@@ -1,21 +1,11 @@
 import jwt from 'jsonwebtoken';
-import { verifyToken as verifyClerkToken } from '@clerk/backend';
-import { resolveClerkUser } from '../services/authService.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tracker-dev-secret-change-me';
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '7d';
-const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || '';
-const CLERK_AUTHORIZED_PARTIES = (process.env.CLERK_AUTHORIZED_PARTIES
-  || 'https://tracker.kaana.in,http://localhost:5190')
-  .split(',')
-  .map((entry) => entry.trim())
-  .filter(Boolean);
 
 if (process.env.NODE_ENV === 'production') {
-  const hasClerk = Boolean(CLERK_SECRET_KEY);
-  const hasJwt = Boolean(process.env.JWT_SECRET) && JWT_SECRET !== 'tracker-dev-secret-change-me';
-  if (!hasClerk && !hasJwt) {
-    throw new Error('CLERK_SECRET_KEY or JWT_SECRET is required in production');
+  if (!process.env.JWT_SECRET || JWT_SECRET === 'tracker-dev-secret-change-me') {
+    throw new Error('JWT_SECRET is required in production');
   }
 }
 
@@ -27,12 +17,8 @@ export function signToken(user) {
   );
 }
 
-export function verifyLegacyToken(token) {
+export function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET);
-}
-
-export function clerkAuthEnabled() {
-  return Boolean(CLERK_SECRET_KEY);
 }
 
 export async function authMiddleware(req, res, next) {
@@ -40,35 +26,14 @@ export async function authMiddleware(req, res, next) {
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Authentication required' });
 
-  if (CLERK_SECRET_KEY) {
-    try {
-      const payload = await verifyClerkToken(token, {
-        secretKey: CLERK_SECRET_KEY,
-        authorizedParties: CLERK_AUTHORIZED_PARTIES,
-      });
-      const user = await resolveClerkUser(payload.sub, payload);
-      req.user = {
-        sub: user.id,
-        email: user.email,
-        name: user.name,
-        clerkUserId: payload.sub,
-        authProvider: 'clerk',
-      };
-      return next();
-    } catch (err) {
-      console.error('Clerk auth failed:', err?.message || err);
-      if (err?.code === 'ECONNREFUSED' || err?.code === 'ER_ACCESS_DENIED_ERROR') {
-        return res.status(503).json({ error: 'Database unavailable. Is MySQL running?' });
-      }
-      // Fall through to legacy JWT during dual-auth migration.
-    }
-  }
-
   try {
-    const legacy = verifyLegacyToken(token);
-    req.user = { ...legacy, authProvider: 'legacy' };
+    const payload = verifyToken(token);
+    req.user = { ...payload, sub: payload.sub, authProvider: 'jwt' };
     return next();
-  } catch {
+  } catch (err) {
+    if (err?.code === 'ECONNREFUSED' || err?.code === 'ER_ACCESS_DENIED_ERROR') {
+      return res.status(503).json({ error: 'Database unavailable. Is MySQL running?' });
+    }
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }

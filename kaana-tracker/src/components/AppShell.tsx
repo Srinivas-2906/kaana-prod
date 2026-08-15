@@ -1,6 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { useClerk } from '@clerk/clerk-react';
 import {
   LayoutDashboard,
   Layers,
@@ -12,7 +11,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { fetchMe, updateMe } from '../lib/api';
-import { isClerkEnabled, legacyLogout } from '../lib/auth';
+import { logout } from '../lib/auth';
 import type { User } from '../types';
 
 function initials(name: string) {
@@ -115,27 +114,13 @@ const NAV = [
   { to: '/transactions', icon: Wallet, label: 'Expenses' },
 ];
 
-function LogoutButtonClerk() {
-  const { signOut } = useClerk();
+function LogoutButton() {
   return (
     <button
       type="button"
       className="nav-link"
       style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
-      onClick={() => signOut({ redirectUrl: '/login' })}
-    >
-      <LogOut size={18} /> Logout
-    </button>
-  );
-}
-
-function LogoutButtonLegacy() {
-  return (
-    <button
-      type="button"
-      className="nav-link"
-      style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
-      onClick={legacyLogout}
+      onClick={logout}
     >
       <LogOut size={18} /> Logout
     </button>
@@ -161,7 +146,7 @@ export function AppShell() {
         ))}
         <div className="sidebar-footer">
           <TrackerAccountBadge />
-          {isClerkEnabled() ? <LogoutButtonClerk /> : <LogoutButtonLegacy />}
+          <LogoutButton />
         </div>
       </aside>
       <div className="main-area">

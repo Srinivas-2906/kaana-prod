@@ -6,13 +6,10 @@
  *     node scripts/seed-influmojo.mjs
  */
 import 'dotenv/config';
-import { createClerkClient } from '@clerk/backend';
 import { initDatabase, getPool } from '../src/db/index.js';
 import { ensureBaseSchema, ensureM4Schema, ensureInviteSchema } from '../src/services/schemaService.js';
 import { createProject } from '../src/services/projectService.js';
 import { createWorkItem } from '../src/services/workItemService.js';
-
-const CLERK_PASSWORD_PLACEHOLDER = '$2a$10$clerk.nopassword.kaana.tracker.placeholder';
 
 const OWNER_EMAIL = 'navya-teja9@kaana.in';
 const PROJECT = {
@@ -75,41 +72,7 @@ async function findUserId(email) {
 async function ensureUser(email) {
   const existing = await findUserId(email);
   if (existing) return existing;
-
-  const clerkSecret = process.env.CLERK_SECRET_KEY;
-  if (!clerkSecret) {
-    throw new Error(`User not found: ${email}. Set CLERK_SECRET_KEY to auto-create from Clerk.`);
-  }
-
-  const clerk = createClerkClient({ secretKey: clerkSecret });
-  const { data: users } = await clerk.users.getUserList({ emailAddress: [email], limit: 1 });
-  const clerkUser = users[0];
-  if (!clerkUser) {
-    throw new Error(`User not found in Clerk or Tracker DB: ${email}`);
-  }
-
-  const pool = getPool();
-  const [byClerk] = await pool.query(
-    'SELECT id, name, email FROM users WHERE clerk_user_id = ? LIMIT 1',
-    [clerkUser.id],
-  );
-  if (byClerk[0]) {
-    if (byClerk[0].email !== email) {
-      await pool.query('UPDATE users SET email = ? WHERE id = ?', [email, byClerk[0].id]);
-      console.log(`Updated email for user id ${byClerk[0].id} → ${email}`);
-      return { ...byClerk[0], email };
-    }
-    return byClerk[0];
-  }
-
-  const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ')
-    || email.split('@')[0];
-  const [result] = await pool.query(
-    'INSERT INTO users (name, email, password, clerk_user_id) VALUES (?, ?, ?, ?)',
-    [name, email, CLERK_PASSWORD_PLACEHOLDER, clerkUser.id],
-  );
-  console.log(`Created Tracker user for ${email} (id ${result.insertId})`);
-  return { id: result.insertId, name, email };
+  throw new Error(`User not found: ${email}. Register in Tracker first, then re-run this script.`);
 }
 
 async function projectExists(name, userId) {
@@ -129,7 +92,7 @@ async function main() {
 
   const user = await ensureUser(OWNER_EMAIL);
   if (!user) {
-    console.error(`User not found: ${OWNER_EMAIL}. Sign in to Tracker once so Clerk creates the account.`);
+    console.error(`User not found: ${OWNER_EMAIL}. Register in Tracker first.`);
     process.exit(1);
   }
 

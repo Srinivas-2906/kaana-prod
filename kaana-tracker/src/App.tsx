@@ -1,6 +1,5 @@
 import { Navigate, Outlet, Route, Routes, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
-import { isClerkEnabled, isLegacyAuthenticated } from './lib/auth';
+import { isAuthenticated } from './lib/auth';
 import { AppShell } from './components/AppShell';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
@@ -14,30 +13,12 @@ import { WhiteboardPage } from './pages/WhiteboardPage';
 import { DiscussionsPage } from './pages/DiscussionsPage';
 import { TransactionsPage } from './pages/TransactionsPage';
 import { AcceptInvitePage } from './pages/AcceptInvitePage';
-import { SsoCallbackPage } from './pages/SsoCallbackPage';
 import { WorkItemPage } from './pages/WorkItemPage';
 import { ProjectDefaultRedirect } from './components/ProjectDefaultRedirect';
 
-function RequireAuthClerk() {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) {
-    return (
-      <div className="login-page">
-        <p className="muted">Loading session…</p>
-      </div>
-    );
-  }
-  if (!isSignedIn) return <Navigate to="/login" replace />;
-  return <Outlet />;
-}
-
-function RequireAuthLegacy() {
-  if (!isLegacyAuthenticated()) return <Navigate to="/login" replace />;
-  return <Outlet />;
-}
-
 function RequireAuth() {
-  return isClerkEnabled() ? <RequireAuthClerk /> : <RequireAuthLegacy />;
+  if (!isAuthenticated()) return <Navigate to="/login" replace />;
+  return <Outlet />;
 }
 
 function PlanProjectRedirect() {
@@ -56,9 +37,8 @@ function PlanProjectRedirect() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login/*" element={<LoginPage />} />
-      <Route path="/sign-up/*" element={<SignUpPage />} />
-      <Route path="/sso-callback" element={<SsoCallbackPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/sign-up" element={<SignUpPage />} />
       <Route path="/invite/:token" element={<AcceptInvitePage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>

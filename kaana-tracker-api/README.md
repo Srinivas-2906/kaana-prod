@@ -15,16 +15,20 @@ Health: http://localhost:3011/api/health
 
 ## Auth
 
-- **Clerk (recommended):** set `CLERK_SECRET_KEY`; API verifies Clerk session JWTs and maps `users.clerk_user_id`.
-- **Legacy JWT:** `POST /api/auth/login` still supported during migration.
-- **Webhook:** `POST /api/auth/webhooks/clerk` (Svix-signed; requires raw body).
+JWT email/password + Google Sign-In:
 
-See [TRACKER_CLERK.md](../TRACKER_CLERK.md).
+- `POST /api/auth/register` — public signup
+- `POST /api/auth/login` — sign in
+- `POST /api/auth/google` — Google ID token → JWT (links existing users by email)
+- `GET /api/auth/me` — current user (Bearer token)
+
+Set `JWT_SECRET` and `GOOGLE_CLIENT_ID` in production. See [TRACKER_AUTH.md](../TRACKER_AUTH.md).
 
 ## Routes
 
 | Method | Path | Description |
 |--------|------|-------------|
+| POST | `/api/auth/register` | Email + password → JWT |
 | POST | `/api/auth/login` | Email + password → JWT |
 | GET | `/api/auth/me` | Current user |
 | GET | `/api/projects` | List projects (clusters) |

@@ -36,24 +36,35 @@ steps:
           --memory 512Mi \
           --cpu 1 \
           --add-cloudsql-instances "${_CLOUDSQL_INSTANCE}" \
-          --set-secrets "DB_PASS=${_SECRET_DB_PASSWORD}:latest,JWT_SECRET=${_SECRET_JWT}:latest,CLERK_SECRET_KEY=${_SECRET_CLERK}:latest,CLERK_WEBHOOK_SECRET=${_SECRET_CLERK_WEBHOOK}:latest,RESEND_API_KEY=${_SECRET_RESEND}:latest,INVITE_FROM_EMAIL=${_SECRET_RESEND_FROM}:latest,GMAIL_SERVICE_ACCOUNT_JSON=${_SECRET_GMAIL_SA}:latest" \
-          --set-env-vars "NODE_ENV=production,DB_NAME=${_DB_NAME},DB_USER=${_DB_USER},DB_SOCKET=/cloudsql/${_CLOUDSQL_INSTANCE},CORS_ORIGIN=https://tracker.kaana.in,TRACKER_PUBLIC_URL=https://tracker.kaana.in,GMAIL_ALLOWED_DOMAINS=kaana.in,CLERK_AUTHORIZED_PARTIES=https://tracker.kaana.in,UPLOADS_DIR=/tmp/kaana-tracker-uploads"
+          --set-secrets "DB_PASS=${_SECRET_DB_PASSWORD}:latest,JWT_SECRET=${_SECRET_JWT}:latest,GOOGLE_CLIENT_ID=${_SECRET_GOOGLE_CLIENT}:latest,RESEND_API_KEY=${_SECRET_RESEND}:latest,INVITE_FROM_EMAIL=${_SECRET_RESEND_FROM}:latest,GMAIL_SERVICE_ACCOUNT_JSON=${_SECRET_GMAIL_SA}:latest" \
+          --set-env-vars "NODE_ENV=production,DB_NAME=${_DB_NAME},DB_USER=${_DB_USER},DB_SOCKET=/cloudsql/${_CLOUDSQL_INSTANCE},CORS_ORIGIN=https://tracker.kaana.in,TRACKER_PUBLIC_URL=https://tracker.kaana.in,GMAIL_ALLOWED_DOMAINS=kaana.in,UPLOADS_DIR=/tmp/kaana-tracker-uploads"
 
   # ── Frontend (same Cloud Run service name → tracker.kaana.in unchanged) ─
+  - id: read-google-client-id
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    waitFor: ['deploy-tracker-api']
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        gcloud secrets versions access latest --secret="${_SECRET_GOOGLE_CLIENT}" > /workspace/google_client_id.txt
+
   - id: build-tracker
     name: gcr.io/cloud-builders/docker
-    waitFor: ['deploy-tracker-api']
+    waitFor: ['read-google-client-id']
+    entrypoint: bash
     args:
-      - build
-      - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:$BUILD_ID
-      - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:latest
-      - --build-arg
-      - VITE_TRACKER_API=/api
-      - --build-arg
-      - VITE_CLERK_PUBLISHABLE_KEY=${_VITE_CLERK_PUBLISHABLE_KEY}
-      - ./kaana-tracker
+      - -c
+      - |
+        set -euo pipefail
+        GOOGLE_ID=$$(cat /workspace/google_client_id.txt)
+        docker build \
+          -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:$BUILD_ID \
+          -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:latest \
+          --build-arg VITE_TRACKER_API=/api \
+          --build-arg VITE_GOOGLE_CLIENT_ID="$$GOOGLE_ID" \
+          ./kaana-tracker
 
   - id: push-tracker
     name: gcr.io/cloud-builders/docker
@@ -92,12 +103,10 @@ substitutions:
   _DB_USER: tracker
   _SECRET_DB_PASSWORD: kaana-tracker-db-password
   _SECRET_JWT: kaana-jwt-secret
-  _SECRET_CLERK: faralin_clerk_secret_key
-  _SECRET_CLERK_WEBHOOK: faralin_clerk_webhook_secret
   _SECRET_RESEND: kaana-resend-api-key
   _SECRET_RESEND_FROM: kaana-resend-from
   _SECRET_GMAIL_SA: kaana-tracker-gmail-sa
-  _VITE_CLERK_PUBLISHABLE_KEY: pk_test_bmVhcmJ5LWdlbGRpbmctNDIuY2xlcmsuYWNjb3VudHMuZGV2JA
+  _SECRET_GOOGLE_CLIENT: kaana-tracker-google-client-id
 
 options:
   logging: CLOUD_LOGGING_ONLY

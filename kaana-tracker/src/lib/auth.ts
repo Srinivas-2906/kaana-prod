@@ -1,54 +1,39 @@
-const LEGACY_TOKEN_KEY = 'tracker_token';
-
-let tokenGetter: (() => Promise<string | null>) | null = null;
-
-export function isClerkEnabled() {
-  const key = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  return Boolean(key && !key.includes('placeholder'));
-}
-
-export function setTokenGetter(fn: () => Promise<string | null>) {
-  tokenGetter = fn;
-}
-
-export function getLegacyToken() {
-  return localStorage.getItem(LEGACY_TOKEN_KEY);
-}
-
-export function saveLegacyToken(token: string) {
-  localStorage.setItem(LEGACY_TOKEN_KEY, token);
-}
-
-export function clearLegacyToken() {
-  localStorage.removeItem(LEGACY_TOKEN_KEY);
-}
-
-export async function authHeaders(): Promise<HeadersInit> {
-  if (tokenGetter) {
-    try {
-      const token = await tokenGetter();
-      if (token) return { Authorization: `Bearer ${token}` };
-    } catch {
-      // Fall through to legacy token during migration.
-    }
-  }
-
-  const legacy = getLegacyToken();
-  return legacy ? { Authorization: `Bearer ${legacy}` } : {};
-}
-
-export function isLegacyAuthenticated() {
-  return !!getLegacyToken();
-}
-
-export function legacyLogout() {
-  clearLegacyToken();
-  window.location.href = '/login';
-}
+const TOKEN_KEY = 'tracker_token';
 
 const API = import.meta.env.VITE_TRACKER_API || '/api';
 
-export async function legacyLogin(email: string, password: string) {
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function saveToken(token: string) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+export function isAuthenticated() {
+  return !!getToken();
+}
+
+export function isGoogleAuthEnabled() {
+  const id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  return Boolean(id && !id.includes('placeholder'));
+}
+
+export async function authHeaders(): Promise<HeadersInit> {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export function logout() {
+  clearToken();
+  window.location.href = '/login';
+}
+
+export async function login(email: string, password: string) {
   const res = await fetch(`${API}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -56,6 +41,40 @@ export async function legacyLogin(email: string, password: string) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Login failed');
-  saveLegacyToken(data.token);
+  saveToken(data.token);
   return data;
+}
+
+export async function register(email: string, password: string, name?: string) {
+  const res = await fetch(`${API}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, name }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Registration failed');
+  saveToken(data.token);
+  return data;
+}
+
+export async function loginWithGoogle(credential: string) {
+  const res = await fetch(`${API}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
+  saveToken(data.token);
+  return data;
+}
+
+export function authUrlWithRedirect(basePath: string, redirectUrl: string) {
+  if (redirectUrl === '/') return basePath;
+  return `${basePath}?redirect_url=${encodeURIComponent(redirectUrl)}`;
+}
+
+export function safeRedirectUrl(input: string | null) {
+  if (!input) return '/';
+  return input.startsWith('/') ? input : '/';
 }

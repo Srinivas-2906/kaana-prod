@@ -292,6 +292,12 @@ button, input, select, textarea { font: inherit; }
   background: var(--border);
 }
 
+.google-signin-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .auth-mode-switch {
   margin: 1.25rem 0 0;
   text-align: center;

@@ -1,4 +1,4 @@
-import { authHeaders, clearLegacyToken, isClerkEnabled } from './auth';
+import { authHeaders, clearToken } from './auth';
 import type {
   Attachment,
   CalendarDayGlimpses,
@@ -38,17 +38,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error('Cannot reach tracker API. Start kaana-tracker-api on port 3011.');
   }
   if (res.status === 401) {
-    clearLegacyToken();
-    if (isClerkEnabled() && !window.location.pathname.startsWith('/login')) {
+    clearToken();
+    if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/sign-up')) {
       const redirectBack = safeRedirectUrl(window.location.pathname, window.location.search);
-      const loginUrl = `/login?redirect_url=${encodeURIComponent(redirectBack)}`;
-      // If Clerk session is stale/unauthorized, sign out to prevent "already signed in" 400s.
-      const clerk = (window as unknown as { Clerk?: { signOut?: (opts?: { redirectUrl?: string }) => Promise<void> } }).Clerk;
-      if (clerk?.signOut) {
-        clerk.signOut({ redirectUrl: loginUrl }).catch(() => { window.location.href = loginUrl; });
-      } else {
-        window.location.href = loginUrl;
-      }
+      window.location.href = `/login?redirect_url=${encodeURIComponent(redirectBack)}`;
     }
     throw new Error('Session expired. Please sign in again.');
   }

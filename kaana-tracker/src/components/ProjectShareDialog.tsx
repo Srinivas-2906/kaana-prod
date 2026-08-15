@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { Copy, Mail, Trash2, UserPlus } from 'lucide-react';
-import { createProjectInvite, fetchProjectInvites, revokeProjectInvite } from '../lib/api';
+import { createProjectInvite, fetchMe, fetchProjectInvites, revokeProjectInvite } from '../lib/api';
 import type { ProjectInvite } from '../types';
 
 const ROLE_OPTIONS = [
@@ -34,8 +33,13 @@ function ShareProjectContent({
   const [success, setSuccess] = useState('');
   const [copied, setCopied] = useState('');
   const [sending, setSending] = useState(false);
-  const { user } = useUser();
-  const senderEmail = user?.primaryEmailAddress?.emailAddress;
+  const [senderEmail, setSenderEmail] = useState<string | undefined>();
+
+  useEffect(() => {
+    fetchMe()
+      .then((r) => setSenderEmail(r.user.email))
+      .catch(() => setSenderEmail(undefined));
+  }, []);
 
   function reload() {
     fetchProjectInvites(projectId)

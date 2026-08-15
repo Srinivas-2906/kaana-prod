@@ -20,30 +20,37 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
+
+    env:
+      GCP_PROJECT_ID: crucial-accord-505607-g9
+      GCP_WIF_PROVIDER: projects/888176696307/locations/global/workloadIdentityPools/github/providers/github-provider
+      GCP_DEPLOYER_SA: kaana-cloudbuild-deployer@crucial-accord-505607-g9.iam.gserviceaccount.com
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: ${{ env.GCP_WIF_PROVIDER }}
+          service_account: ${{ env.GCP_DEPLOYER_SA }}
 
       - uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: kaana-prod
+          project_id: ${{ env.GCP_PROJECT_ID }}
 
       - name: Submit Cloud Build
         run: |
           gcloud builds submit \
-            --project kaana-prod \
+            --project "${{ env.GCP_PROJECT_ID }}" \
             --config cloudbuild.tracker.yaml \
-            --service-account=projects/kaana-prod/serviceAccounts/kaana-cloudbuild-deployer@kaana-prod.iam.gserviceaccount.com \
+            --service-account=projects/${{ env.GCP_PROJECT_ID }}/serviceAccounts/${{ env.GCP_DEPLOYER_SA }} \
             .
 
       - name: Verify live site
         run: |
           URL="$(gcloud run services describe kaana-tracker \
-            --project kaana-prod \
+            --project "${{ env.GCP_PROJECT_ID }}" \
             --region asia-south1 \
             --format='value(status.url)')"
           echo "Checking ${URL}/"

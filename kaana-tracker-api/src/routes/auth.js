@@ -1,18 +1,36 @@
 import { Router } from 'express';
-import { loginUser, getUserById, registerClerkUser, updateUserProfile } from '../services/authService.js';
+import {
+  loginUser,
+  loginWithGoogle,
+  getUserById,
+  registerUser,
+  updateUserProfile,
+} from '../services/authService.js';
 import { authMiddleware } from '../middleware/auth.js';
 
 const router = Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { email, password } = req.body || {};
-    const result = await registerClerkUser(email, password);
+    const { email, password, name } = req.body || {};
+    const result = await registerUser(email, password, name);
     if (result.error) return res.status(400).json({ error: result.error });
     res.status(201).json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body || {};
+    const result = await loginWithGoogle(credential);
+    if (result.error) return res.status(401).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Google sign-in failed' });
   }
 });
 
@@ -37,7 +55,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        authProvider: req.user.authProvider || 'legacy',
+        authProvider: req.user.authProvider || 'jwt',
       },
     });
   } catch (err) {
@@ -55,7 +73,7 @@ router.patch('/me', authMiddleware, async (req, res) => {
         id: result.id,
         name: result.name,
         email: result.email,
-        authProvider: req.user.authProvider || 'legacy',
+        authProvider: req.user.authProvider || 'jwt',
       },
     });
   } catch (err) {

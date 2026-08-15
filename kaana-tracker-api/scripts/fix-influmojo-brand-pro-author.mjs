@@ -2,7 +2,6 @@
  * Fix Brand Pro topic author → navya-teja9@kaana.in (name + created_by)
  */
 import 'dotenv/config';
-import { createClerkClient } from '@clerk/backend';
 import { initDatabase, getPool } from '../src/db/index.js';
 import {
   ensureBaseSchema,
@@ -29,17 +28,6 @@ async function resolveDisplayName(pool, email) {
 
   let name = user.name?.trim();
   const generic = !name || name === 'User' || name === email.split('@')[0];
-
-  if (generic && process.env.CLERK_SECRET_KEY && user.clerk_user_id) {
-    try {
-      const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-      const clerkUser = await clerk.users.getUser(user.clerk_user_id);
-      const fromClerk = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ').trim();
-      if (fromClerk) name = fromClerk;
-    } catch (err) {
-      console.warn('Clerk lookup failed:', err?.message || err);
-    }
-  }
 
   if (!name || name === 'User') {
     const local = email.split('@')[0].replace(/[._-]+/g, ' ');

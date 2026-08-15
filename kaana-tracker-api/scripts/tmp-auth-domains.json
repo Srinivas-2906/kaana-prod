@@ -1,0 +1,10 @@
+{
+  "authorizedDomains": [
+    "localhost",
+    "kaana-prod.firebaseapp.com",
+    "kaana-prod.web.app",
+    "reminders-bills-pwa-wtba53dhka-el.a.run.app",
+    "reminders-bills-pwa-851239127958.asia-south1.run.app",
+    "tracker.kaana.in"
+  ]
+}

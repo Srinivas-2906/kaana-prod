@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Navigate, useSearchParams } from 'react-router-dom';
-import { useAuth, SignIn } from '@clerk/clerk-react';
-import { isClerkEnabled, legacyLogin } from '../lib/auth';
-import { authUrlWithRedirect, CLERK_SIGN_UP_URL, safeRedirectUrl } from '../lib/clerkAuth';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { GoogleSignInSection } from '../components/GoogleSignInSection';
+import { authUrlWithRedirect, isAuthenticated, login, safeRedirectUrl } from '../lib/auth';
 
 export function LoginPage() {
   const [params] = useSearchParams();
@@ -12,27 +11,14 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (isClerkEnabled()) {
-    const { isLoaded, isSignedIn } = useAuth();
-    if (isLoaded && isSignedIn) return <Navigate to={redirectUrl} replace />;
-    return (
-      <div className="login-page">
-        <SignIn
-          routing="path"
-          path="/login"
-          signUpUrl={authUrlWithRedirect(CLERK_SIGN_UP_URL, redirectUrl)}
-          forceRedirectUrl={redirectUrl}
-        />
-      </div>
-    );
-  }
+  if (isAuthenticated()) return <Navigate to={redirectUrl} replace />;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      await legacyLogin(email, password);
+      await login(email, password);
       window.location.href = redirectUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -41,26 +27,29 @@ export function LoginPage() {
     }
   }
 
+  const signUpUrl = authUrlWithRedirect('/sign-up', redirectUrl);
+
   return (
     <div className="login-page">
       <form className="card login-card" onSubmit={onSubmit}>
         <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
         <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
         {error && <p style={{ color: '#dc2626', fontSize: '0.875rem' }}>{error}</p>}
-        <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Email or username</label>
+        <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Email</label>
         <input
-          type="text"
-          name="username"
-          autoComplete="username"
+          type="email"
+          name="email"
+          autoComplete="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="kaana or you@company.com"
+          placeholder="you@company.com"
           style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', marginBottom: '1rem' }}
         />
         <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Password</label>
         <input
           type="password"
+          autoComplete="current-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -69,6 +58,11 @@ export function LoginPage() {
         <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
+        <GoogleSignInSection redirectUrl={redirectUrl} onError={setError} disabled={loading} />
+        <p className="auth-mode-switch muted">
+          Don&apos;t have an account?{' '}
+          <Link to={signUpUrl}>Sign up</Link>
+        </p>
       </form>
     </div>
   );

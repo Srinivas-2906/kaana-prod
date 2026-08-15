@@ -4,7 +4,6 @@ import { initDatabase } from './db/index.js';
 import { ensureBaseSchema, ensureM4Schema, ensureClerkSchema, ensureInviteSchema, ensureTopicSchema, ensureEngagementSchema, ensureFunSchema, ensureEditSchema } from './services/schemaService.js';
 import { corsMiddleware } from './middleware/cors.js';
 import authRouter from './routes/auth.js';
-import { handleClerkWebhook } from './services/authService.js';
 import projectsRouter from './routes/projects.js';
 import workItemsRouter from './routes/workItems.js';
 import planRouter from './routes/plan.js';
@@ -31,12 +30,11 @@ await ensureEngagementSchema();
 await ensureFunSchema();
 await ensureEditSchema();
 
-app.post('/api/auth/webhooks/clerk', express.raw({ type: 'application/json' }), handleClerkWebhook);
 app.use(express.json({ limit: '10mb' }));
 app.use(corsMiddleware);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'kaana-tracker-api', version: 'm4-clerk' });
+  res.json({ ok: true, service: 'kaana-tracker-api', version: 'm5-jwt' });
 });
 
 app.use('/api/auth', authRouter);

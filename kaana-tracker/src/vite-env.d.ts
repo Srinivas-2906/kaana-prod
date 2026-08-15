@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_TRACKER_API?: string;
-  readonly VITE_CLERK_PUBLISHABLE_KEY?: string;
+  readonly VITE_GOOGLE_CLIENT_ID?: string;
 }
 
 interface ImportMeta {
