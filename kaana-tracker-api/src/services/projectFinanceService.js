@@ -4,6 +4,7 @@ import { assertProjectAccess } from './authorizationService.js';
 import { listProjectTransactions } from './transactionService.js';
 import { listMembers } from './membershipService.js';
 import { buildFinancialSummary } from '../financial/financialEngine.js';
+import { toDateOnlyString } from '../financial/cashFlowAdjustment.js';
 
 export async function getProjectFinancialSettings(projectId) {
   await ensureFinanceSchema();
@@ -17,8 +18,8 @@ export async function getProjectFinancialSettings(projectId) {
   if (!row) return null;
 
   const startDate = row.financial_start_date
-    ? String(row.financial_start_date).slice(0, 10)
-    : String(row.created_at).slice(0, 10);
+    ? toDateOnlyString(row.financial_start_date)
+    : toDateOnlyString(row.created_at);
 
   return {
     projectId: row.id,

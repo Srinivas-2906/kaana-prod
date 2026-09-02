@@ -7,7 +7,7 @@ import {
 import { computeEconomicBreakEven } from './economicBreakEven.js';
 import { computePartnerExposure } from './partnerExposure.js';
 import { computeTrajectory, computeDay365Summary } from './trajectory.js';
-import { addCalendarDays } from './cashFlowAdjustment.js';
+import { addCalendarDays, toDateOnlyString } from './cashFlowAdjustment.js';
 import { DEFAULT_CAPITAL_ADJUSTMENT_RATE } from './constants.js';
 
 /**
@@ -27,9 +27,11 @@ export function buildFinancialSummary({
   month = null,
 }) {
   const activeTx = transactions.filter((tx) => (tx.status || 'active') === 'active');
-  const startDate = projectStartDate || (activeTx.length
-    ? activeTx.map((t) => String(t.transaction_date).slice(0, 10)).sort()[0]
-    : new Date().toISOString().slice(0, 10));
+  const startDate = projectStartDate
+    ? toDateOnlyString(projectStartDate)
+    : (activeTx.length
+      ? toDateOnlyString(activeTx.map((t) => t.transaction_date).sort()[0])
+      : toDateOnlyString(new Date()));
 
   const rate = capitalAdjustmentRate ?? DEFAULT_CAPITAL_ADJUSTMENT_RATE;
   const resolvedTarget = targetDate || addCalendarDays(startDate, 365);

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { adjustCashFlow, daysBetween, addCalendarDays } from './cashFlowAdjustment.js';
+import { adjustCashFlow, daysBetween, addCalendarDays, toDateOnlyString } from './cashFlowAdjustment.js';
 import { toNumber } from './money.js';
 import { computeAccountingBreakEven, computeActualTotals } from './accountingBreakEven.js';
 import { computeEconomicBreakEven } from './economicBreakEven.js';
@@ -19,6 +19,12 @@ const tx = (overrides) => ({
 });
 
 describe('cashFlowAdjustment', () => {
+  it('normalizes mysql2 Date objects to YYYY-MM-DD', () => {
+    const d = new Date(Date.UTC(2026, 8, 2));
+    assert.equal(toDateOnlyString(d), '2026-09-02');
+    assert.equal(addCalendarDays(d, 365), '2027-09-02');
+  });
+
   it('adjusts expense at Day 365 with 10% rate', () => {
     const adjusted = adjustCashFlow(100000, '2026-01-01', '2027-01-01', 0.10);
     assert.ok(Math.abs(toNumber(adjusted) - 110000) < 1, `Expected ~110000, got ${toNumber(adjusted)}`);

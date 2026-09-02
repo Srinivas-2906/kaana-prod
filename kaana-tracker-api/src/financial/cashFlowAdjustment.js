@@ -2,11 +2,30 @@ import { Decimal } from './money.js';
 import { DAY_COUNT_BASIS } from './constants.js';
 
 /**
+ * Normalize DB/API values to YYYY-MM-DD (handles Date objects from mysql2).
+ */
+export function toDateOnlyString(value) {
+  if (value == null || value === '') return null;
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) throw new Error('Invalid date');
+    const y = value.getUTCFullYear();
+    const m = String(value.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(value.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  const parsed = new Date(s);
+  if (Number.isNaN(parsed.getTime())) throw new Error('Invalid date');
+  return toDateOnlyString(parsed);
+}
+
+/**
  * Parse YYYY-MM-DD as UTC date-only (no timezone drift).
  */
 export function parseDateOnly(dateStr) {
-  if (!dateStr) throw new Error('Date required');
-  const s = String(dateStr).slice(0, 10);
+  const s = toDateOnlyString(dateStr);
+  if (!s) throw new Error('Date required');
   const [y, m, d] = s.split('-').map(Number);
   if (!y || !m || !d) throw new Error('Invalid date');
   return new Date(Date.UTC(y, m - 1, d));
