@@ -9,6 +9,7 @@ import {
   legacyTypeForLedger,
   legacyPaidByForFunding,
 } from '../financial/constants.js';
+import { toDateOnlyString } from '../financial/cashFlowAdjustment.js';
 import { computeLegacyFinanceSummary } from '../financial/financialEngine.js';
 
 const ALL_CATEGORIES = [...new Set([...CATEGORIES, 'Other Income', 'Capital', 'Reimbursement', 'Withdrawal', 'Distribution'])];
@@ -110,6 +111,7 @@ function mapTransactionRow(row) {
     ...row,
     ledger_type: row.ledger_type || row.type,
     amount: Number(row.amount),
+    transaction_date: toDateOnlyString(row.transaction_date) || row.transaction_date,
     reimbursable: Boolean(row.reimbursable),
     partner_user_id: row.partner_user_id ? Number(row.partner_user_id) : null,
     linked_transaction_id: row.linked_transaction_id ? Number(row.linked_transaction_id) : null,
