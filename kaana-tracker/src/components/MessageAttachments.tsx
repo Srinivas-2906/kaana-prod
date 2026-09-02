@@ -8,6 +8,7 @@ import {
 } from '../lib/api';
 import { authHeaders } from '../lib/auth';
 import type { Attachment } from '../types';
+import { FilePreviewModal, useAttachmentPreview } from './FilePreviewModal';
 
 function isImage(mime: string) {
   return mime.startsWith('image/');
@@ -19,7 +20,7 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-async function fetchAttachmentBlob(id: number, download = false) {
+export async function fetchAttachmentBlob(id: number, download = false) {
   const url = `${attachmentDownloadUrl(id)}${download ? '?download=1' : ''}`;
   const headers = await authHeaders();
   const res = await fetch(url, { headers });
@@ -42,6 +43,10 @@ export async function downloadAttachmentFile(attachment: Attachment) {
 export async function openAttachmentFile(attachment: Attachment) {
   const blob = await fetchAttachmentBlob(attachment.id, false);
   window.open(URL.createObjectURL(blob), '_blank', 'noopener,noreferrer');
+}
+
+export function previewAttachment(attachment: Attachment, openPreview: (a: Attachment) => void) {
+  openPreview(attachment);
 }
 
 export function PendingFileList({
@@ -130,6 +135,7 @@ export function MessageAttachments({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [thumbUrls, setThumbUrls] = useState<Record<number, string>>({});
+  const { preview, openPreview, closePreview } = useAttachmentPreview();
 
   useEffect(() => {
     setAttachments(initialAttachments);
@@ -191,10 +197,11 @@ export function MessageAttachments({
 
   return (
     <div className="message-attachments">
+      <FilePreviewModal attachment={preview} onClose={closePreview} />
       {attachments.map((a) => (
         <div key={a.id} className="message-attachment-card">
           {isImage(a.mime_type) && thumbUrls[a.id] ? (
-            <button type="button" className="message-attachment-thumb" onClick={() => openAttachmentFile(a)}>
+            <button type="button" className="message-attachment-thumb" onClick={() => openPreview(a)}>
               <img src={thumbUrls[a.id]} alt={a.original_name} />
             </button>
           ) : (
@@ -203,7 +210,7 @@ export function MessageAttachments({
             </div>
           )}
           <div className="message-attachment-meta">
-            <button type="button" className="message-attachment-name" onClick={() => openAttachmentFile(a)}>
+            <button type="button" className="message-attachment-name" onClick={() => openPreview(a)}>
               {a.original_name}
             </button>
             <span className="muted">{formatSize(a.file_size)}</span>

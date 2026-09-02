@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -9,10 +9,16 @@ import {
   Compass,
   LogOut,
   Pencil,
+  PenSquare,
+  MessageSquare,
+  Search,
+  Calculator,
 } from 'lucide-react';
 import { fetchMe, updateMe } from '../lib/api';
 import { logout } from '../lib/auth';
 import type { User } from '../types';
+import { NotificationBell } from './NotificationBell';
+import { SearchDialog } from './SearchDialog';
 
 function initials(name: string) {
   return name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase() || '?';
@@ -111,7 +117,10 @@ const NAV = [
   { to: '/projects', icon: Layers, label: 'Projects' },
   { to: '/my-work', icon: CheckSquare, label: 'My work' },
   { to: '/plan', icon: CalendarDays, label: 'Calendar' },
+  { to: '/whiteboards', icon: PenSquare, label: 'Whiteboards' },
+  { to: '/discussions', icon: MessageSquare, label: 'Discussions' },
   { to: '/transactions', icon: Wallet, label: 'Expenses' },
+  { to: '/calculator', icon: Calculator, label: 'Calculator' },
 ];
 
 function LogoutButton() {
@@ -127,9 +136,23 @@ function LogoutButton() {
   );
 }
 
-export function AppShell() {
+export function AppShell({ children }: { children?: ReactNode }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="app-shell">
+      <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="sidebar-brand-icon"><Compass size={18} /></div>
@@ -137,6 +160,14 @@ export function AppShell() {
             <strong>Kaana Tracker</strong>
             <div className="muted">Work · Calendar · Expenses</div>
           </div>
+        </div>
+        <div className="sidebar-toolbar">
+          <button type="button" className="sidebar-search-btn" onClick={() => setSearchOpen(true)}>
+            <Search size={16} />
+            <span>Search</span>
+            <kbd>Ctrl K</kbd>
+          </button>
+          <NotificationBell />
         </div>
         {NAV.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
@@ -153,7 +184,7 @@ export function AppShell() {
         <div className="mobile-account-bar">
           <TrackerAccountBadge />
         </div>
-        <Outlet />
+        {children ?? <Outlet />}
       </div>
     </div>
   );

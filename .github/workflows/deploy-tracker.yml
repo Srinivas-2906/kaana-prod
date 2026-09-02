@@ -56,4 +56,4 @@ jobs:
           echo "Checking ${URL}/"
           curl -fsS "${URL}/" -o /dev/null
           curl -fsS "${URL}/api/health" -o /dev/null
-          echo "Deploy OK: ${URL} (prod: https://tracker.kaana.in)"
+          echo "Deploy OK: ${URL} (prod: https://kaanatracker.xyz)"

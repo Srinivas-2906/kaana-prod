@@ -7,6 +7,7 @@ import {
   assertProjectAccess,
   ensureProjectOwnerMembership,
 } from './authorizationService.js';
+import { completeOnboarding } from './authService.js';
 
 const INVITE_ROLES = ['viewer', 'contributor', 'manager'];
 
@@ -15,7 +16,7 @@ function normalizeEmail(email) {
 }
 
 function buildInviteUrl(token) {
-  const base = process.env.TRACKER_PUBLIC_URL || 'https://tracker.kaana.in';
+  const base = process.env.TRACKER_PUBLIC_URL || 'https://kaanatracker.xyz';
   return `${base.replace(/\/$/, '')}/invite/${token}`;
 }
 
@@ -313,6 +314,8 @@ export async function acceptInvite(token, userId, userEmail) {
       payload: { invite_id: invite.id, role, email: users[0]?.email },
     });
   }
+
+  await completeOnboarding(userId);
 
   return {
     projectId,

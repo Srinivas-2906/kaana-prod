@@ -25,11 +25,12 @@ New Google users get a public account automatically.
 
 Google OAuth **Web client IDs cannot be created via gcloud** on standalone projects — use the Console once, then automate the rest:
 
-1. Open [Create OAuth client](https://console.cloud.google.com/auth/clients/create?project=kaana-prod)
+1. Open [Create OAuth client](https://console.cloud.google.com/auth/clients/create?project=crucial-accord-505607-g9)
 2. Application type: **Web application**
 3. Name: `Kaana Tracker Sign-In`
 4. **Authorized JavaScript origins:**
-   - `https://tracker.kaana.in`
+   - `https://kaanatracker.xyz`
+   - `https://www.kaanatracker.xyz`
    - `http://localhost:5190`
 5. Copy the **Client ID** (no redirect URI needed)
 
@@ -41,7 +42,7 @@ cd kaana-tracker-api/scripts
 ```
 
 Already done on GCP automatically:
-- `tracker.kaana.in` added to Identity Platform authorized domains
+- `kaanatracker.xyz` added to Identity Platform authorized domains
 - Secret name: `kaana-tracker-google-client-id`
 - Cloud Build reads Client ID from Secret Manager at deploy time
 

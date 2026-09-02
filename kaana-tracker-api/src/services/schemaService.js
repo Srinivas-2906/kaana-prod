@@ -480,3 +480,159 @@ export async function ensureEditSchema() {
 
   editDone = true;
 }
+
+let proDone = false;
+
+/** Industry features: notifications, diagram whiteboards */
+export async function ensureProSchema() {
+  if (proDone) return;
+  await ensureEditSchema();
+
+  await runAlters([
+    "ALTER TABLE whiteboards ADD COLUMN board_type ENUM('sticky', 'diagram') NOT NULL DEFAULT 'sticky'",
+    'ALTER TABLE whiteboards ADD COLUMN scene_json LONGTEXT NULL',
+  ]);
+
+  await runCreates([
+    `CREATE TABLE IF NOT EXISTS notifications (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      user_id INT UNSIGNED NOT NULL,
+      type VARCHAR(40) NOT NULL,
+      title VARCHAR(200) NOT NULL,
+      body TEXT NULL,
+      link VARCHAR(500) NULL,
+      read_at TIMESTAMP NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_user_unread (user_id, read_at),
+      INDEX idx_user_created (user_id, created_at),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ]);
+
+  proDone = true;
+}
+
+let phase2Done = false;
+
+/** Sprints, labels, project keys, epics */
+export async function ensurePhase2Schema() {
+  if (phase2Done) return;
+  await ensureProSchema();
+
+  await runAlters([
+    'ALTER TABLE clusters ADD COLUMN project_key VARCHAR(12) NULL',
+    'ALTER TABLE work_items ADD COLUMN sprint_id INT UNSIGNED NULL',
+  ]);
+
+  await runCreates([
+    `CREATE TABLE IF NOT EXISTS sprints (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      project_id INT UNSIGNED NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      goal TEXT NULL,
+      start_date DATE NULL,
+      end_date DATE NULL,
+      status ENUM('planning', 'active', 'closed') NOT NULL DEFAULT 'planning',
+      created_by INT UNSIGNED NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_project (project_id),
+      INDEX idx_status (status),
+      FOREIGN KEY (project_id) REFERENCES clusters(id) ON DELETE CASCADE,
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS labels (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      project_id INT UNSIGNED NOT NULL,
+      name VARCHAR(40) NOT NULL,
+      color VARCHAR(20) NOT NULL DEFAULT '#64748b',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uniq_project_label (project_id, name),
+      FOREIGN KEY (project_id) REFERENCES clusters(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+
+    `CREATE TABLE IF NOT EXISTS work_item_labels (
+      work_item_id INT UNSIGNED NOT NULL,
+      label_id INT UNSIGNED NOT NULL,
+      PRIMARY KEY (work_item_id, label_id),
+      FOREIGN KEY (work_item_id) REFERENCES work_items(id) ON DELETE CASCADE,
+      FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+  ]);
+
+  phase2Done = true;
+}
+
+let financeDone = false;
+
+/** Extended ledger, project finance settings */
+export async function ensureFinanceSchema() {
+  if (financeDone) return;
+  await ensurePhase2Schema();
+
+  await runAlters([
+    "ALTER TABLE transactions ADD COLUMN ledger_type ENUM('expense','income','capital_contribution','reimbursement','withdrawal','distribution') NULL AFTER type",
+    "ALTER TABLE transactions ADD COLUMN partner_user_id INT UNSIGNED NULL AFTER paid_by",
+    "ALTER TABLE transactions ADD COLUMN funding_source ENUM('company_account','partner_personal','legacy_unknown') NOT NULL DEFAULT 'legacy_unknown' AFTER partner_user_id",
+    "ALTER TABLE transactions ADD COLUMN linked_transaction_id INT UNSIGNED NULL AFTER funding_source",
+    "ALTER TABLE transactions ADD COLUMN status ENUM('active','void') NOT NULL DEFAULT 'active' AFTER linked_transaction_id",
+    "ALTER TABLE transactions ADD COLUMN currency CHAR(3) NOT NULL DEFAULT 'INR' AFTER status",
+    "ALTER TABLE transactions ADD COLUMN reimbursable TINYINT(1) NOT NULL DEFAULT 0 AFTER currency",
+    "ALTER TABLE transactions ADD COLUMN updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP AFTER created_at",
+    'ALTER TABLE clusters ADD COLUMN currency CHAR(3) NOT NULL DEFAULT \'INR\'',
+    'ALTER TABLE clusters ADD COLUMN financial_start_date DATE NULL',
+    'ALTER TABLE clusters ADD COLUMN economic_break_even_enabled TINYINT(1) NOT NULL DEFAULT 0',
+    'ALTER TABLE clusters ADD COLUMN capital_adjustment_rate DECIMAL(8,6) NULL',
+    'ALTER TABLE clusters ADD COLUMN revenue_target DECIMAL(14,2) NULL',
+  ]);
+
+  const pool = getPool();
+
+  // Backfill ledger_type from legacy type column
+  await pool.query(`
+    UPDATE transactions SET ledger_type = type WHERE ledger_type IS NULL
+  `).catch(() => {});
+
+  // Backfill funding_source from paid_by
+  await pool.query(`
+    UPDATE transactions SET funding_source = 'company_account' WHERE paid_by = 'Company' AND funding_source = 'legacy_unknown'
+  `).catch(() => {});
+  await pool.query(`
+    UPDATE transactions SET funding_source = 'partner_personal' WHERE paid_by IN ('Kaana', 'Partner') AND funding_source = 'legacy_unknown'
+  `).catch(() => {});
+
+  // Default financial_start_date from created_at for projects
+  await pool.query(`
+    UPDATE clusters SET financial_start_date = DATE(created_at) WHERE financial_start_date IS NULL
+  `).catch(() => {});
+
+  financeDone = true;
+}
+
+let onboardingDone = false;
+
+/** User onboarding state for founder first-run wizard */
+export async function ensureOnboardingSchema() {
+  if (onboardingDone) return;
+  await ensureFinanceSchema();
+
+  await runAlters([
+    'ALTER TABLE users ADD COLUMN onboarding_completed_at TIMESTAMP NULL',
+    'ALTER TABLE users ADD COLUMN onboarding_project_id INT UNSIGNED NULL',
+  ]);
+
+  const pool = getPool();
+
+  // Existing users with any project involvement are already onboarded
+  await pool.query(`
+    UPDATE users SET onboarding_completed_at = COALESCE(onboarding_completed_at, NOW())
+    WHERE onboarding_completed_at IS NULL
+      AND (
+        id IN (SELECT created_by FROM clusters)
+        OR id IN (SELECT user_id FROM project_members)
+      )
+  `).catch(() => {});
+
+  onboardingDone = true;
+}

@@ -1,20 +1,20 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  addProjectMember, createTransaction, createWorkItem, fetchActivity, fetchFinanceSummary, fetchProject,
-  fetchProjectMembers, fetchProjectTopicUnreadSummary, fetchTransactionMeta, fetchTransactions, fetchUsers, fetchWorkItems,
+  addProjectMember, createWorkItem, fetchActivity, fetchLabels, fetchProject,
+  fetchProjectMembers, fetchProjectTopicUnreadSummary, fetchSprints, fetchUsers, fetchWorkItems,
   removeProjectMember,
 } from '../lib/api';
+import { ProjectFinancialDashboard } from '../components/finance/ProjectFinancialDashboard';
 import { WorkBoard } from '../components/WorkBoard';
+import { SprintBar } from '../components/SprintBar';
 import { ProjectTabs } from '../components/ProjectTabs';
 import { PlanView } from '../components/PlanView';
 import { AttachmentPanel } from '../components/AttachmentPanel';
 import { ProjectSharePanel, ProjectShareDialog } from '../components/ProjectShareDialog';
 import { ActivityTimeline } from '../components/ActivityTimeline';
 import { ProjectUpdatesPanel } from '../components/ProjectUpdatesPanel';
-import { currentMonth, todayISO } from '../lib/dates';
-import type {
-  ActivityEvent, FinanceSummary, Project, ProjectMember, ProjectTab, Transaction, TransactionMeta, User, WorkItem,
+import type { ActivityEvent, Label, Project, ProjectMember, ProjectTab, Sprint, User, WorkItem,
 } from '../types';
 
 function BoardQuickAdd({ projectId, stories, onAdded }: { projectId: number; stories: WorkItem[]; onAdded: () => void }) {
@@ -69,23 +69,36 @@ export function ProjectPage() {
   const projectId = Number(id);
   const [project, setProject] = useState<Project | null>(null);
   const [items, setItems] = useState<WorkItem[]>([]);
-  const [finance, setFinance] = useState<FinanceSummary | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [txMeta, setTxMeta] = useState<TransactionMeta | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [creator, setCreator] = useState<Project | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [unreadUpdates, setUnreadUpdates] = useState(0);
   const [error, setError] = useState('');
-  const month = currentMonth();
   const canEdit = project?.can_edit !== false;
   const canManage = Boolean(project?.can_manage);
   const [shareOpen, setShareOpen] = useState(false);
+  const [sprints, setSprints] = useState<Sprint[]>([]);
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [sprintFilter, setSprintFilter] = useState<number | 'backlog' | 'all'>('all');
+  const [labelFilter, setLabelFilter] = useState<number | ''>('');
 
   function reloadItems() {
     if (!projectId) return;
-    fetchWorkItems({ projectId }).then((w) => setItems(w.items)).catch((e) => setError(e.message));
+    const params: Parameters<typeof fetchWorkItems>[0] = { projectId };
+    if (sprintFilter !== 'all') params.sprintId = sprintFilter;
+    if (labelFilter) params.labelId = Number(labelFilter);
+    fetchWorkItems(params).then((w) => setItems(w.items)).catch((e) => setError(e.message));
+  }
+
+  function reloadSprints() {
+    if (!projectId) return;
+    fetchSprints(projectId).then((r) => setSprints(r.sprints)).catch(console.error);
+  }
+
+  function reloadLabels() {
+    if (!projectId) return;
+    fetchLabels(projectId).then((r) => setLabels(r.labels)).catch(console.error);
   }
 
   useEffect(() => {
@@ -96,7 +109,15 @@ export function ProjectPage() {
       .catch(() => {});
   }, [projectId]);
 
-  useEffect(() => { reloadItems(); }, [projectId]);
+  useEffect(() => { reloadItems(); }, [projectId, sprintFilter, labelFilter]);
+
+  useEffect(() => {
+    if (!projectId || tab !== 'board') return undefined;
+    reloadSprints();
+    reloadLabels();
+    const timer = window.setInterval(reloadItems, 20000);
+    return () => window.clearInterval(timer);
+  }, [projectId, tab, sprintFilter, labelFilter]);
 
   useEffect(() => {
     if (tab === 'people') {
@@ -112,18 +133,7 @@ export function ProjectPage() {
         .then((r) => setActivity(r.events))
         .catch(console.error);
     }
-    if (tab === 'finance') {
-      Promise.all([
-        fetchFinanceSummary(month, projectId),
-        fetchTransactions({ month, projectId }),
-        fetchTransactionMeta(),
-      ]).then(([s, t, meta]) => {
-        setFinance(s.summary);
-        setTransactions(t.transactions);
-        setTxMeta(meta);
-      }).catch(console.error);
-    }
-  }, [tab, projectId, month, canManage]);
+  }, [tab, projectId, canManage]);
 
   async function onAddMember(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -131,28 +141,6 @@ export function ProjectPage() {
     await addProjectMember(projectId, Number(fd.get('userId')), String(fd.get('role')));
     const m = await fetchProjectMembers(projectId);
     setMembers(m.members);
-    e.currentTarget.reset();
-  }
-
-  async function onAddExpense(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    await createTransaction({
-      type: fd.get('type'),
-      amount: Number(fd.get('amount')),
-      category: fd.get('category'),
-      description: fd.get('description') || null,
-      transaction_date: fd.get('transaction_date') || todayISO(),
-      payment_method: fd.get('payment_method'),
-      paid_by: fd.get('paid_by'),
-      project_id: projectId,
-    });
-    const [s, t] = await Promise.all([
-      fetchFinanceSummary(month, projectId),
-      fetchTransactions({ month, projectId }),
-    ]);
-    setFinance(s.summary);
-    setTransactions(t.transactions);
     e.currentTarget.reset();
   }
 
@@ -204,8 +192,35 @@ export function ProjectPage() {
 
         {tab === 'board' && (
           <>
+            <SprintBar
+              projectId={projectId}
+              sprints={sprints}
+              selectedSprintId={sprintFilter}
+              onSelect={setSprintFilter}
+              onChange={() => { reloadSprints(); reloadItems(); }}
+              canEdit={canEdit}
+            />
+            <div className="board-filters" style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <label className="muted" style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                Label
+                <select value={labelFilter} onChange={(e) => setLabelFilter(e.target.value ? Number(e.target.value) : '')}>
+                  <option value="">All labels</option>
+                  {labels.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                </select>
+              </label>
+              {project?.project_key && (
+                <span className="muted" style={{ fontSize: '0.8125rem' }}>Project key: <strong>{project.project_key}</strong></span>
+              )}
+            </div>
             {canEdit && <BoardQuickAdd projectId={projectId} stories={stories} onAdded={reloadItems} />}
-            <WorkBoard items={boardItems} onChange={reloadItems} readOnly={!canEdit} />
+            <WorkBoard
+              items={boardItems}
+              onChange={reloadItems}
+              readOnly={!canEdit}
+              projectLabels={labels}
+              sprints={sprints}
+              onLabelCreated={reloadLabels}
+            />
           </>
         )}
 
@@ -228,63 +243,8 @@ export function ProjectPage() {
           <PlanView fixedProjectId={projectId} showProjectFilter={false} showIdeaPool={false} />
         )}
 
-        {tab === 'finance' && finance && txMeta && (
-          <>
-            <div className="grid-4" style={{ marginBottom: '1rem' }}>
-              <div className="card"><div className="muted">Income</div><div className="stat-value" style={{ color: '#16a34a' }}>₹{finance.total_income.toLocaleString()}</div></div>
-              <div className="card"><div className="muted">Expense</div><div className="stat-value" style={{ color: '#dc2626' }}>₹{finance.total_expense.toLocaleString()}</div></div>
-              <div className="card"><div className="muted">Net</div><div className="stat-value">₹{finance.net.toLocaleString()}</div></div>
-              <div className="card"><div className="muted">Balance</div><div className="stat-value">₹{finance.balance.toLocaleString()}</div></div>
-            </div>
-            <form className="card" style={{ marginBottom: '1rem' }} onSubmit={onAddExpense}>
-              <h3 style={{ marginTop: 0 }}>Quick expense / income</h3>
-              {canEdit ? (
-                <>
-                  <div className="form-row">
-                    <select name="type" defaultValue="expense">
-                      <option value="expense">Expense</option>
-                      <option value="income">Income</option>
-                    </select>
-                    <input name="amount" type="number" step="0.01" required placeholder="Amount" />
-                    <select name="category" required>
-                      {txMeta.categories.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <input name="transaction_date" type="date" defaultValue={todayISO()} />
-                  </div>
-                  <div className="form-row" style={{ marginTop: '0.5rem' }}>
-                    <select name="payment_method" defaultValue={txMeta.paymentMethods[0]}>
-                      {txMeta.paymentMethods.map((m) => <option key={m} value={m}>{m}</option>)}
-                    </select>
-                    <select name="paid_by" defaultValue={txMeta.paidByOptions[0]}>
-                      {txMeta.paidByOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                    <input name="description" placeholder="Description" style={{ flex: 1 }} />
-                    <button type="submit" className="btn btn-primary">Save</button>
-                  </div>
-                </>
-              ) : (
-                <p className="muted" style={{ margin: 0 }}>Finance entries are read-only for your role.</p>
-              )}
-            </form>
-            <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <h3 style={{ margin: 0 }}>This month</h3>
-                <Link to={`/transactions?projectId=${projectId}`} className="btn btn-ghost">All expenses →</Link>
-              </div>
-              {transactions.map((tx) => (
-                <div key={tx.id} className="tx-row">
-                  <div>
-                    <strong>{tx.category}</strong>
-                    <div className="muted">{tx.transaction_date} · {tx.description || tx.payment_method}</div>
-                  </div>
-                  <strong style={{ color: tx.type === 'income' ? '#16a34a' : '#dc2626' }}>
-                    {tx.type === 'income' ? '+' : '-'}₹{Number(tx.amount).toLocaleString()}
-                  </strong>
-                </div>
-              ))}
-              {!transactions.length && <p className="muted">No expenses this month.</p>}
-            </div>
-          </>
+        {tab === 'finance' && (
+          <ProjectFinancialDashboard projectId={projectId} canEdit={canEdit} />
         )}
 
         {tab === 'people' && (

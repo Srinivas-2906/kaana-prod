@@ -9,7 +9,9 @@ import type {
   Discussion,
   EntityVersion,
   FinanceSummary,
+  NotificationItem,
   Project,
+  SearchResult,
   Transaction,
   TransactionMeta,
   User,
@@ -64,6 +66,20 @@ export function updateMe(data: { name: string }) {
   });
 }
 
+export function updateOnboardingProgress(data: { onboarding_project_id?: number | null }) {
+  return request<{ user: User }>('/auth/onboarding', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function completeOnboarding() {
+  return request<{ user: User }>('/auth/onboarding/complete', {
+    method: 'POST',
+  });
+}
+
 export function fetchProjects() {
   return request<{ projects: Project[] }>('/projects');
 }
@@ -95,6 +111,9 @@ type WorkItemFilters = {
   from?: string;
   to?: string;
   date?: string;
+  sprintId?: number | 'backlog' | '';
+  labelId?: number;
+  q?: string;
 };
 
 export function fetchWorkItems(params?: WorkItemFilters) {
@@ -109,6 +128,9 @@ export function fetchWorkItems(params?: WorkItemFilters) {
   if (params?.from) q.set('from', params.from);
   if (params?.to) q.set('to', params.to);
   if (params?.date) q.set('date', params.date);
+  if (params?.sprintId !== undefined && params.sprintId !== '') q.set('sprintId', String(params.sprintId));
+  if (params?.labelId) q.set('labelId', String(params.labelId));
+  if (params?.q) q.set('q', params.q);
   const qs = q.toString();
   return request<{ items: WorkItem[] }>(`/work-items${qs ? `?${qs}` : ''}`);
 }
@@ -222,6 +244,53 @@ export function fetchTransactions(params?: { type?: string; month?: string; date
 
 export function createTransaction(data: Record<string, unknown>) {
   return request<{ transaction: Transaction }>('/transactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateTransaction(id: number, data: Record<string, unknown>) {
+  return request<{ transaction: Transaction }>(`/transactions/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function voidTransaction(id: number) {
+  return request<{ transaction: Transaction }>(`/transactions/${id}/void`, { method: 'POST' });
+}
+
+export function fetchProjectFinanceSummary(
+  projectId: number,
+  opts?: { targetDate?: string; capitalAdjustmentRate?: number; month?: string; includeTrajectory?: boolean },
+) {
+  const q = new URLSearchParams();
+  if (opts?.targetDate) q.set('targetDate', opts.targetDate);
+  if (opts?.capitalAdjustmentRate != null) q.set('capitalAdjustmentRate', String(opts.capitalAdjustmentRate));
+  if (opts?.month) q.set('month', opts.month);
+  if (opts?.includeTrajectory === false) q.set('includeTrajectory', 'false');
+  const qs = q.toString();
+  return request<{ summary: import('../types').ProjectFinancialSummary; settings: import('../types').ProjectFinancialSettings }>(
+    `/projects/${projectId}/finance/summary${qs ? `?${qs}` : ''}`,
+  );
+}
+
+export function fetchProjectFinancialSettings(projectId: number) {
+  return request<{ settings: import('../types').ProjectFinancialSettings }>(`/projects/${projectId}/finance/settings`);
+}
+
+export function updateProjectFinancialSettings(projectId: number, data: Record<string, unknown>) {
+  return request<{ settings: import('../types').ProjectFinancialSettings }>(`/projects/${projectId}/finance/settings`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function simulateFinance(data: Record<string, unknown>) {
+  return request<{ summary: import('../types').ProjectFinancialSummary }>('/finance/simulate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -376,9 +445,17 @@ export function fetchWhiteboard(id: number) {
   return request<{ whiteboard: Whiteboard; notes: WhiteboardNote[] }>(`/whiteboards/${id}`);
 }
 
-export function createWhiteboard(data: { title: string; description?: string }) {
+export function createWhiteboard(data: { title: string; description?: string; board_type?: 'sticky' | 'diagram' }) {
   return request<{ whiteboard: Whiteboard }>('/whiteboards', {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateWhiteboard(id: number, data: { title?: string; description?: string | null; scene_json?: string | null }) {
+  return request<{ whiteboard: Whiteboard }>(`/whiteboards/${id}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
@@ -590,4 +667,74 @@ export function createReminder(data: Record<string, unknown>) {
 
 export function completeReminder(id: number) {
   return request<{ reminder: import('../types').Reminder }>(`/reminders/${id}/complete`, { method: 'PATCH' });
+}
+
+export function globalSearch(q: string, filters?: {
+  kind?: string;
+  status?: string;
+  labelId?: number;
+  projectId?: number;
+}) {
+  const params = new URLSearchParams({ q });
+  if (filters?.kind) params.set('kind', filters.kind);
+  if (filters?.status) params.set('status', filters.status);
+  if (filters?.labelId) params.set('labelId', String(filters.labelId));
+  if (filters?.projectId) params.set('projectId', String(filters.projectId));
+  return request<{ results: SearchResult[] }>(`/search?${params}`);
+}
+
+export function fetchSprints(projectId: number) {
+  return request<{ sprints: import('../types').Sprint[] }>(`/projects/${projectId}/sprints`);
+}
+
+export function createSprint(projectId: number, data: Partial<import('../types').Sprint>) {
+  return request<{ sprint: import('../types').Sprint }>(`/projects/${projectId}/sprints`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateSprint(projectId: number, sprintId: number, data: Partial<import('../types').Sprint>) {
+  return request<{ sprint: import('../types').Sprint }>(`/projects/${projectId}/sprints/${sprintId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function fetchLabels(projectId: number) {
+  return request<{ labels: import('../types').Label[] }>(`/projects/${projectId}/labels`);
+}
+
+export function createLabel(projectId: number, data: { name: string; color?: string }) {
+  return request<{ label: import('../types').Label }>(`/projects/${projectId}/labels`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function setWorkItemLabels(workItemId: number, labelIds: number[]) {
+  return request<{ ok: boolean; labels: import('../types').Label[] }>(`/work-items/${workItemId}/labels`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ labelIds }),
+  });
+}
+
+export function fetchNotifications() {
+  return request<{ notifications: NotificationItem[] }>('/notifications');
+}
+
+export function fetchUnreadNotificationCount() {
+  return request<{ count: number }>('/notifications/unread-count');
+}
+
+export function markNotificationRead(id: number) {
+  return request<{ ok: boolean }>(`/notifications/${id}/read`, { method: 'POST' });
+}
+
+export function markAllNotificationsRead() {
+  return request<{ ok: boolean }>('/notifications/read-all', { method: 'POST' });
 }

@@ -1,16 +1,21 @@
 import { getPool } from '../db/index.js';
 import { WORK_ITEM_TYPES, WORK_STATUSES, WORK_PRIORITIES } from '../constants.js';
-import { ensureBaseSchema, ensureM4Schema } from './schemaService.js';
+import { ensureBaseSchema, ensureM4Schema, ensurePhase2Schema } from './schemaService.js';
 import { logActivity, logFieldChange } from './activityService.js';
 import { linkWorkItems } from './entityLinkService.js';
+import { formatIssueKey } from './issueKeyService.js';
+import { getLabelsForWorkItems, setWorkItemLabels } from './labelService.js';
+import { notifyAssigneeChange, notifyStatusChange } from './mentionService.js';
 
 const SELECT = `
-  SELECT w.*, c.name AS cluster_name, c.color AS cluster_color,
-    u.name AS created_by_name, o.name AS owner_name
+  SELECT w.*, c.name AS cluster_name, c.color AS cluster_color, c.project_key,
+    u.name AS created_by_name, o.name AS owner_name,
+    s.name AS sprint_name
   FROM work_items w
   LEFT JOIN clusters c ON w.cluster_id = c.id
   JOIN users u ON w.created_by = u.id
   LEFT JOIN users o ON w.owner_id = o.id
+  LEFT JOIN sprints s ON w.sprint_id = s.id
 `;
 
 const IDEA_STAGES = ['captured', 'refining', 'needs_input', 'approved', 'rejected', 'paused'];
@@ -53,6 +58,10 @@ function normalizeWorkItemPayload(data) {
   delete payload.created_by_name;
   delete payload.owner_name;
   delete payload.custom_sections;
+  delete payload.labels;
+  delete payload.issue_key;
+  delete payload.sprint_name;
+  delete payload.project_key;
   payload.story_points = normalizeStoryPoints(payload.story_points);
   payload.due_date = toDateOnly(payload.due_date);
   payload.start_date = toDateOnly(payload.start_date);
@@ -94,6 +103,23 @@ function validateWorkItem(data) {
   return errors;
 }
 
+async function enrichWorkItems(rows) {
+  if (!rows.length) return rows;
+  await ensurePhase2Schema();
+  const labelMap = await getLabelsForWorkItems(rows.map((r) => r.id));
+  return rows.map((row) => ({
+    ...row,
+    labels: labelMap[row.id] || [],
+    issue_key: formatIssueKey(row.project_key, row.id),
+  }));
+}
+
+async function getActorName(userId) {
+  const pool = getPool();
+  const [rows] = await pool.query('SELECT name FROM users WHERE id = ? LIMIT 1', [userId]);
+  return rows[0]?.name || 'Someone';
+}
+
 export async function listWorkItems(filters = {}) {
   const pool = getPool();
   const where = [];
@@ -112,6 +138,19 @@ export async function listWorkItems(filters = {}) {
   if (filters.excludeDone) where.push("w.status != 'done'");
   if (filters.createdBy) { where.push('w.created_by = ?'); params.push(filters.createdBy); }
   if (filters.ownerId) { where.push('w.owner_id = ?'); params.push(filters.ownerId); }
+  if (filters.sprintId != null && filters.sprintId !== '') {
+    if (filters.sprintId === 'backlog') where.push('w.sprint_id IS NULL');
+    else { where.push('w.sprint_id = ?'); params.push(Number(filters.sprintId)); }
+  }
+  if (filters.labelId) {
+    where.push('EXISTS (SELECT 1 FROM work_item_labels wil WHERE wil.work_item_id = w.id AND wil.label_id = ?)');
+    params.push(Number(filters.labelId));
+  }
+  if (filters.q) {
+    const term = `%${String(filters.q).replace(/[%_\\]/g, '\\$&')}%`;
+    where.push('(w.title LIKE ? OR w.description LIKE ?)');
+    params.push(term, term);
+  }
   if (filters.dateFrom && filters.dateTo) {
     where.push('(w.due_date BETWEEN ? AND ? OR w.start_date BETWEEN ? AND ?)');
     params.push(filters.dateFrom, filters.dateTo, filters.dateFrom, filters.dateTo);
@@ -128,13 +167,14 @@ export async function listWorkItems(filters = {}) {
     ORDER BY FIELD(w.priority, 'urgent', 'high', 'medium', 'low'),
       w.due_date IS NULL, w.due_date ASC, w.updated_at DESC
   `, params);
-  return rows;
+  return enrichWorkItems(rows);
 }
 
 export async function getWorkItemById(id) {
   const pool = getPool();
   const [rows] = await pool.query(`${SELECT} WHERE w.id = ?`, [id]);
-  return rows[0] || null;
+  const enriched = await enrichWorkItems(rows);
+  return enriched[0] || null;
 }
 
 export async function createWorkItem(data, userId) {
@@ -147,8 +187,8 @@ export async function createWorkItem(data, userId) {
   const payload = syncLegacySectionFields(normalizeWorkItemPayload(data));
 
   const [result] = await pool.query(`
-    INSERT INTO work_items (cluster_id, parent_id, title, description, acceptance_criteria, implementation_notes, content_sections, item_type, idea_stage, status, priority, story_points, due_date, start_date, source_note_id, owner_id, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO work_items (cluster_id, parent_id, title, description, acceptance_criteria, implementation_notes, content_sections, item_type, idea_stage, status, priority, story_points, due_date, start_date, source_note_id, owner_id, sprint_id, created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     payload.cluster_id || null,
     payload.parent_id || null,
@@ -166,10 +206,15 @@ export async function createWorkItem(data, userId) {
     payload.start_date || null,
     payload.source_note_id || null,
     payload.owner_id || userId,
+    payload.sprint_id || null,
     userId,
   ]);
 
   const item = await getWorkItemById(result.insertId);
+
+  if (Array.isArray(data.label_ids) && data.label_ids.length) {
+    await setWorkItemLabels(item.id, data.label_ids, userId);
+  }
 
   await logActivity({
     eventType: 'work_item_created',
@@ -185,7 +230,7 @@ export async function createWorkItem(data, userId) {
     await linkWorkItems(item.id, data.parent_id, 'belongs_to', userId);
   }
 
-  return { item };
+  return { item: await getWorkItemById(item.id) };
 }
 
 export async function updateWorkItem(id, data, userId) {
@@ -204,7 +249,7 @@ export async function updateWorkItem(id, data, userId) {
     UPDATE work_items
     SET cluster_id = ?, parent_id = ?, title = ?, description = ?, acceptance_criteria = ?, implementation_notes = ?, content_sections = ?,
         item_type = ?, idea_stage = ?, status = ?, priority = ?, story_points = ?,
-        due_date = ?, start_date = ?, owner_id = ?
+        due_date = ?, start_date = ?, owner_id = ?, sprint_id = ?
     WHERE id = ?
   `, [
     payload.cluster_id || null,
@@ -222,10 +267,11 @@ export async function updateWorkItem(id, data, userId) {
     payload.due_date || null,
     payload.start_date || null,
     Object.prototype.hasOwnProperty.call(data, 'owner_id') ? (payload.owner_id ?? null) : existing.owner_id,
+    Object.prototype.hasOwnProperty.call(data, 'sprint_id') ? (payload.sprint_id ?? null) : existing.sprint_id,
     id,
   ]);
 
-  const fields = ['title', 'status', 'priority', 'due_date', 'start_date', 'idea_stage', 'owner_id', 'story_points', 'acceptance_criteria', 'implementation_notes', 'parent_id'];
+  const fields = ['title', 'status', 'priority', 'due_date', 'start_date', 'idea_stage', 'owner_id', 'story_points', 'acceptance_criteria', 'implementation_notes', 'parent_id', 'sprint_id'];
   for (const f of fields) {
     const newVal = f === 'idea_stage'
       ? ideaStage
@@ -241,6 +287,19 @@ export async function updateWorkItem(id, data, userId) {
   }
 
   const item = await getWorkItemById(id);
+
+  if (Array.isArray(data.label_ids)) {
+    await setWorkItemLabels(id, data.label_ids, userId);
+  }
+
+  const actorName = await getActorName(userId);
+  if (Object.prototype.hasOwnProperty.call(data, 'owner_id')) {
+    await notifyAssigneeChange({ workItem: item, previousOwnerId: existing.owner_id, actorId: userId, actorName });
+  }
+  if (existing.status !== item.status) {
+    await notifyStatusChange({ workItem: item, actorId: userId, actorName });
+  }
+
   await logActivity({
     eventType: 'work_item_updated',
     entityType: 'work_item',
@@ -250,7 +309,8 @@ export async function updateWorkItem(id, data, userId) {
     summary: `Updated: ${item.title}`,
   });
 
-  return { item };
+  const finalItem = await getWorkItemById(id);
+  return { item: finalItem };
 }
 
 export async function updateWorkItemStatus(id, status, userId) {
@@ -263,6 +323,9 @@ export async function updateWorkItemStatus(id, status, userId) {
   await pool.query('UPDATE work_items SET status = ? WHERE id = ?', [status, id]);
 
   await logFieldChange('work_item', id, 'status', existing.status, status, userId);
+  const item = await getWorkItemById(id);
+  const actorName = await getActorName(userId);
+  await notifyStatusChange({ workItem: item, actorId: userId, actorName });
   await logActivity({
     eventType: 'status_changed',
     entityType: 'work_item',

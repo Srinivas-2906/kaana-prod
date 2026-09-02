@@ -3,9 +3,10 @@
 # Usage: bash scripts/setup-google-signin.sh [PROJECT_ID]
 set -euo pipefail
 
-PROJECT="${1:-kaana-prod}"
+PROJECT="${1:-crucial-accord-505607-g9}"
 ORIGINS=(
-  "https://tracker.kaana.in"
+  "https://kaanatracker.xyz"
+  "https://www.kaanatracker.xyz"
   "http://localhost:5190"
 )
 

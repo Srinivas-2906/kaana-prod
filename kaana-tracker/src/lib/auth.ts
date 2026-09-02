@@ -19,7 +19,7 @@ export function isAuthenticated() {
 }
 
 export function isGoogleAuthEnabled() {
-  const id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const id = String(import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
   return Boolean(id && !id.includes('placeholder'));
 }
 

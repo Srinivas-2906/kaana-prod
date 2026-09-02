@@ -10,6 +10,8 @@ import type { Discussion, User, WorkItem } from '../types';
 import { WORK_PRIORITIES, WORK_STATUSES, statusLabel, workTypeColor } from '../types';
 import { AttachmentPanel } from './AttachmentPanel';
 import { SubtaskSection } from './SubtaskSection';
+import { LabelPicker } from './LabelPicker';
+import type { Label, Sprint } from '../types';
 
 function userLabel(user: User) {
   return user.email ? `${user.name} · ${user.email}` : user.name;
@@ -20,11 +22,17 @@ export function IssuePanel({
   onClose,
   onUpdate,
   readOnly = false,
+  projectLabels = [],
+  sprints = [],
+  onLabelCreated,
 }: {
   itemId: number;
   onClose: () => void;
   onUpdate?: () => void;
   readOnly?: boolean;
+  projectLabels?: Label[];
+  sprints?: Sprint[];
+  onLabelCreated?: () => void;
 }) {
   const navigate = useNavigate();
   const [item, setItem] = useState<WorkItem | null>(null);
@@ -99,7 +107,7 @@ export function IssuePanel({
         <div className="issue-panel-inner">
           <header className="issue-panel-head">
             <div style={{ flex: 1, minWidth: 0 }}>
-              <span className="issue-type-badge" style={{ background: accent }}>#{item.id} · {item.item_type}</span>
+              <span className="issue-type-badge" style={{ background: accent }}>{item.issue_key || `#${item.id}`} · {item.item_type}</span>
               <h2 style={{ margin: '0.5rem 0 0', fontSize: '1.125rem' }}>{item.title}</h2>
               <p className="muted">{item.cluster_name || 'No project'}</p>
             </div>
@@ -157,6 +165,19 @@ export function IssuePanel({
               </select>
             </label>
             <label>
+              Sprint
+              <select
+                value={item.sprint_id ?? ''}
+                disabled={readOnly}
+                onChange={(e) => saveField({ sprint_id: e.target.value ? Number(e.target.value) : null })}
+              >
+                <option value="">Backlog</option>
+                {sprints.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}{s.status === 'active' ? ' (active)' : ''}</option>
+                ))}
+              </select>
+            </label>
+            <label>
               Due
               <input
                 type="date"
@@ -166,6 +187,24 @@ export function IssuePanel({
               />
             </label>
           </div>
+
+          {item.cluster_id && (
+            <div className="issue-field">
+              <span className="agenda-heading">Labels</span>
+              <LabelPicker
+                projectId={item.cluster_id}
+                labels={projectLabels}
+                selectedIds={(item.labels || []).map((l) => l.id)}
+                workItemId={item.id}
+                readOnly={readOnly}
+                onChange={(labels) => {
+                  setItem((prev) => (prev ? { ...prev, labels } : prev));
+                  onUpdate?.();
+                }}
+                onLabelCreated={() => onLabelCreated?.()}
+              />
+            </div>
+          )}
 
           <SubtaskSection
             parent={item}
@@ -215,7 +254,7 @@ export function IssuePanel({
             </div>
             <form onSubmit={onComment} className="comment-compose">
               {error && <p style={{ color: '#dc2626' }}>{error}</p>}
-              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment…" rows={3} />
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Add a comment… Use @email to mention someone" rows={3} />
               <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>Comment</button>
             </form>
           </div>

@@ -1,10 +1,11 @@
 import { OAuth2Client } from 'google-auth-library';
 
 export async function verifyGoogleIdToken(idToken, clientId) {
-  const client = new OAuth2Client(clientId);
+  const audience = String(clientId || '').trim();
+  const client = new OAuth2Client(audience);
   const ticket = await client.verifyIdToken({
     idToken,
-    audience: clientId,
+    audience,
   });
   const payload = ticket.getPayload();
   if (!payload?.email) {

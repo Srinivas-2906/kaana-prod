@@ -12,6 +12,8 @@ import { assertProjectAccess, canEdit, canManageMembers } from '../services/auth
 import { mountProjectInviteRoutes } from './invites.js';
 import { mountProjectTopicRoutes } from './topics.js';
 import { pokeTeam, updateProjectVibe } from '../services/vibeService.js';
+import { listSprints, createSprint, updateSprint } from '../services/sprintService.js';
+import { listLabels, createLabel } from '../services/labelService.js';
 
 const router = Router();
 
@@ -182,6 +184,61 @@ router.delete('/:id/members/:userId', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to remove member' });
+  }
+});
+
+router.get('/:id/sprints', async (req, res) => {
+  try {
+    const result = await listSprints(Number(req.params.id), req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to list sprints' });
+  }
+});
+
+router.post('/:id/sprints', async (req, res) => {
+  try {
+    const result = await createSprint(Number(req.params.id), req.body || {}, req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.status(201).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create sprint' });
+  }
+});
+
+router.patch('/:id/sprints/:sprintId', async (req, res) => {
+  try {
+    const result = await updateSprint(Number(req.params.id), Number(req.params.sprintId), req.body || {}, req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update sprint' });
+  }
+});
+
+router.get('/:id/labels', async (req, res) => {
+  try {
+    const result = await listLabels(Number(req.params.id), req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to list labels' });
+  }
+});
+
+router.post('/:id/labels', async (req, res) => {
+  try {
+    const result = await createLabel(Number(req.params.id), req.body || {}, req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.status(201).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create label' });
   }
 });
 

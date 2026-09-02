@@ -25,11 +25,13 @@ steps:
       - |
         set -euo pipefail
         IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker-api:$BUILD_ID"
+        printf 'NODE_ENV: production\nDB_NAME: %s\nDB_USER: %s\nDB_SOCKET: /cloudsql/%s\nCORS_ORIGIN: "https://kaanatracker.xyz,https://www.kaanatracker.xyz"\nTRACKER_PUBLIC_URL: https://kaanatracker.xyz\nGMAIL_ALLOWED_DOMAINS: kaana.in\nUPLOADS_DIR: /tmp/kaana-tracker-uploads\n' \
+          "${_DB_NAME}" "${_DB_USER}" "${_CLOUDSQL_INSTANCE}" > /tmp/tracker-api-env.yaml
         gcloud run deploy "${_TRACKER_API_SERVICE}" \
           --image "$$IMAGE" \
           --region "${_REGION}" \
           --platform managed \
-          --allow-unauthenticated \
+          --no-invoker-iam-check \
           --port 8080 \
           --min-instances 0 \
           --max-instances 3 \
@@ -37,9 +39,9 @@ steps:
           --cpu 1 \
           --add-cloudsql-instances "${_CLOUDSQL_INSTANCE}" \
           --set-secrets "DB_PASS=${_SECRET_DB_PASSWORD}:latest,JWT_SECRET=${_SECRET_JWT}:latest,GOOGLE_CLIENT_ID=${_SECRET_GOOGLE_CLIENT}:latest,RESEND_API_KEY=${_SECRET_RESEND}:latest,INVITE_FROM_EMAIL=${_SECRET_RESEND_FROM}:latest,GMAIL_SERVICE_ACCOUNT_JSON=${_SECRET_GMAIL_SA}:latest" \
-          --set-env-vars "NODE_ENV=production,DB_NAME=${_DB_NAME},DB_USER=${_DB_USER},DB_SOCKET=/cloudsql/${_CLOUDSQL_INSTANCE},CORS_ORIGIN=https://tracker.kaana.in,TRACKER_PUBLIC_URL=https://tracker.kaana.in,GMAIL_ALLOWED_DOMAINS=kaana.in,UPLOADS_DIR=/tmp/kaana-tracker-uploads"
+          --env-vars-file /tmp/tracker-api-env.yaml
 
-  # ── Frontend (same Cloud Run service name → tracker.kaana.in unchanged) ─
+  # ── Frontend (kaanatracker.xyz via HTTPS load balancer) ─
   - id: read-google-client-id
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     waitFor: ['deploy-tracker-api']
@@ -58,7 +60,7 @@ steps:
       - -c
       - |
         set -euo pipefail
-        GOOGLE_ID=$$(cat /workspace/google_client_id.txt)
+        GOOGLE_ID=$$(tr -d '\r\n' < /workspace/google_client_id.txt)
         docker build \
           -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:$BUILD_ID \
           -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/tracker:latest \
@@ -85,7 +87,7 @@ steps:
           --image "$$IMAGE" \
           --region "${_REGION}" \
           --platform managed \
-          --allow-unauthenticated \
+          --no-invoker-iam-check \
           --port 8080 \
           --min-instances 0 \
           --max-instances 3 \
@@ -98,7 +100,7 @@ substitutions:
   _ARTIFACT_REPO: kaana
   _TRACKER_SERVICE: kaana-tracker
   _TRACKER_API_SERVICE: kaana-tracker-api
-  _CLOUDSQL_INSTANCE: kaana-prod:asia-south1:kaana-tracker-mysql
+  _CLOUDSQL_INSTANCE: crucial-accord-505607-g9:asia-south1:kaana-tracker-mysql
   _DB_NAME: expense_tracker
   _DB_USER: tracker
   _SECRET_DB_PASSWORD: kaana-tracker-db-password
