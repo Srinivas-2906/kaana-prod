@@ -92,9 +92,9 @@ export function ProjectFinancialDashboard({ projectId, canEdit }: Props) {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1rem' }}>Project financials</h2>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <div className="section-header">
+        <h2 style={{ fontSize: '1rem' }}>Project financials</h2>
+        <div className="topbar-actions">
           <Link to={`/calculator?projectId=${projectId}`} className="btn btn-ghost">Open calculator</Link>
           {canEdit && (
             <button type="button" className="btn btn-ghost" onClick={() => setSettingsOpen(!settingsOpen)}>

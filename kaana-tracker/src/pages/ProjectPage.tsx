@@ -152,11 +152,11 @@ export function ProjectPage() {
   return (
     <>
       <header className="topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ width: 10, height: 10, borderRadius: '50%', background: project?.color || '#ccc' }} />
-          <h1 style={{ margin: 0, fontSize: '1.125rem' }}>{project?.name || 'Project'}</h1>
+        <div className="topbar-title">
+          <span className="project-dot" style={{ background: project?.color || '#ccc' }} />
+          <h1>{project?.name || 'Project'}</h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="topbar-actions">
           {canManage && (
             <button type="button" className="btn btn-ghost" onClick={() => setShareOpen(true)}>
               Share
@@ -200,7 +200,7 @@ export function ProjectPage() {
               onChange={() => { reloadSprints(); reloadItems(); }}
               canEdit={canEdit}
             />
-            <div className="board-filters" style={{ marginBottom: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div className="board-filters">
               <label className="muted" style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                 Label
                 <select value={labelFilter} onChange={(e) => setLabelFilter(e.target.value ? Number(e.target.value) : '')}>

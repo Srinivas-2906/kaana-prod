@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Layers,
@@ -13,6 +13,8 @@ import {
   MessageSquare,
   Search,
   Calculator,
+  Menu,
+  X,
 } from 'lucide-react';
 import { fetchMe, updateMe } from '../lib/api';
 import { logout } from '../lib/auth';
@@ -127,8 +129,7 @@ function LogoutButton() {
   return (
     <button
       type="button"
-      className="nav-link"
-      style={{ border: 'none', background: 'none', width: '100%', cursor: 'pointer', color: '#dc2626' }}
+      className="nav-link nav-link-logout"
       onClick={logout}
     >
       <LogOut size={18} /> Logout
@@ -136,8 +137,55 @@ function LogoutButton() {
   );
 }
 
+type SidebarNavProps = {
+  onNavigate?: () => void;
+  onSearch: () => void;
+};
+
+function SidebarNav({ onNavigate, onSearch }: SidebarNavProps) {
+  return (
+    <>
+      <div className="sidebar-brand">
+        <div className="sidebar-brand-icon"><Compass size={18} /></div>
+        <div>
+          <strong>Kaana Tracker</strong>
+          <div className="muted">Work · Calendar · Expenses</div>
+        </div>
+      </div>
+      <div className="sidebar-toolbar">
+        <button type="button" className="sidebar-search-btn" onClick={onSearch}>
+          <Search size={16} />
+          <span>Search</span>
+          <kbd className="sidebar-search-kbd">Ctrl K</kbd>
+        </button>
+        <NotificationBell />
+      </div>
+      <nav className="sidebar-nav" aria-label="Main">
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+            onClick={onNavigate}
+          >
+            <item.icon size={18} />
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+      <div className="sidebar-footer">
+        <TrackerAccountBadge />
+        <LogoutButton />
+      </div>
+    </>
+  );
+}
+
 export function AppShell({ children }: { children?: ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -145,45 +193,75 @@ export function AppShell({ children }: { children?: ReactNode }) {
         e.preventDefault();
         setSearchOpen(true);
       }
+      if (e.key === 'Escape') {
+        setNavOpen(false);
+        setSearchOpen(false);
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  useEffect(() => {
+    setNavOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.classList.toggle('mobile-nav-open', navOpen);
+    return () => document.body.classList.remove('mobile-nav-open');
+  }, [navOpen]);
+
+  function openSearch() {
+    setSearchOpen(true);
+    setNavOpen(false);
+  }
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell${navOpen ? ' nav-open' : ''}`}>
       <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <div className="sidebar-brand-icon"><Compass size={18} /></div>
-          <div>
-            <strong>Kaana Tracker</strong>
-            <div className="muted">Work · Calendar · Expenses</div>
-          </div>
-        </div>
-        <div className="sidebar-toolbar">
-          <button type="button" className="sidebar-search-btn" onClick={() => setSearchOpen(true)}>
-            <Search size={16} />
-            <span>Search</span>
-            <kbd>Ctrl K</kbd>
-          </button>
-          <NotificationBell />
-        </div>
-        {NAV.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            <item.icon size={18} />
-            {item.label}
-          </NavLink>
-        ))}
-        <div className="sidebar-footer">
-          <TrackerAccountBadge />
-          <LogoutButton />
-        </div>
+      <button
+        type="button"
+        className="sidebar-backdrop"
+        aria-label="Close menu"
+        onClick={() => setNavOpen(false)}
+      />
+      <aside className="sidebar" aria-label="Navigation">
+        <button
+          type="button"
+          className="sidebar-close-btn"
+          aria-label="Close menu"
+          onClick={() => setNavOpen(false)}
+        >
+          <X size={20} />
+        </button>
+        <SidebarNav onNavigate={() => setNavOpen(false)} onSearch={openSearch} />
       </aside>
       <div className="main-area">
-        <div className="mobile-account-bar">
-          <TrackerAccountBadge />
-        </div>
+        <header className="mobile-header">
+          <button
+            type="button"
+            className="mobile-menu-btn btn btn-ghost"
+            aria-label="Open menu"
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen(true)}
+          >
+            <Menu size={20} />
+          </button>
+          <NavLink to="/" className="mobile-header-brand" onClick={() => setNavOpen(false)}>
+            Kaana Tracker
+          </NavLink>
+          <div className="mobile-header-actions">
+            <button
+              type="button"
+              className="btn btn-ghost btn-icon"
+              aria-label="Search"
+              onClick={openSearch}
+            >
+              <Search size={18} />
+            </button>
+            <NotificationBell />
+          </div>
+        </header>
         {children ?? <Outlet />}
       </div>
     </div>
