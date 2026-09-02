@@ -24,7 +24,7 @@ export function TransactionRow({ tx, onVoid, canEdit }: Props) {
           {tx.created_by_name && ` · entered by ${tx.created_by_name}`}
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="tx-row-actions">
         <strong style={{ color: txAmountColor(tx) }}>
           {sign}{formatINR(Number(tx.amount))}
         </strong>
