@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { CSSProperties } from 'react';
 import { CheckSquare, ChevronDown, ChevronRight, ClipboardList, Square } from 'lucide-react';
 import { dateOnly } from '../lib/dates';
 import { taskProgress } from '../lib/boardHierarchy';
@@ -60,7 +61,7 @@ function CardMain({
   return (
     <>
       <div className="work-card-top">
-        <span className="work-card-id">#{item.id}</span>
+        <span className="work-card-id">{item.issue_key || `#${item.id}`}</span>
         <span className="work-card-type">{item.item_type}</span>
         {item.story_points != null && item.story_points > 0 && (
           <span className="work-card-points">{item.story_points} pt</span>
@@ -76,6 +77,15 @@ function CardMain({
         )}
       </div>
       <div className="work-card-title">{item.title}</div>
+      {item.labels && item.labels.length > 0 && (
+        <div className="work-card-labels">
+          {item.labels.map((label) => (
+            <span key={label.id} className="label-chip label-chip-static" style={{ '--label-color': label.color } as CSSProperties}>
+              {label.name}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="muted work-card-meta">
         {statusLabel(item.status)}
         {item.owner_name && ` · ${item.owner_name}`}

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Paperclip, Trash2 } from 'lucide-react';
 import { deleteAttachment, fetchAttachments, uploadAttachment } from '../lib/api';
 import type { Attachment } from '../types';
-import { downloadAttachmentFile, openAttachmentFile } from './MessageAttachments';
+import { downloadAttachmentFile } from './MessageAttachments';
+import { FilePreviewModal, useAttachmentPreview } from './FilePreviewModal';
 
 export function AttachmentPanel({
   entityType,
@@ -19,6 +20,7 @@ export function AttachmentPanel({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const { preview, openPreview, closePreview } = useAttachmentPreview();
 
   const reload = useCallback(() => {
     fetchAttachments(entityType, entityId)
@@ -56,7 +58,7 @@ export function AttachmentPanel({
   async function openAttachment(id: number) {
     const attachment = attachments.find((a) => a.id === id);
     if (!attachment) return;
-    await openAttachmentFile(attachment);
+    openPreview(attachment);
   }
 
   async function saveAttachment(id: number) {
@@ -67,6 +69,7 @@ export function AttachmentPanel({
 
   return (
     <div className="attachment-panel">
+      <FilePreviewModal attachment={preview} onClose={closePreview} />
       {!readOnly && (
         <div
           className="attachment-drop"

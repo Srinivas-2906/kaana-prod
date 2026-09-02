@@ -1,12 +1,13 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   createWhiteboardNote, deleteWhiteboardNote, fetchWhiteboard, promoteNoteToWork,
-  scheduleWhiteboardNote, updateWhiteboardNote,
+  scheduleWhiteboardNote, updateWhiteboard, updateWhiteboardNote,
 } from '../lib/api';
 import { todayISO } from '../lib/dates';
 import type { Whiteboard, WhiteboardNote } from '../types';
 import { NOTE_COLORS } from '../types';
+import { DiagramBoard } from '../components/DiagramBoard';
 
 export function WhiteboardPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,16 +17,17 @@ export function WhiteboardPage() {
   const [notes, setNotes] = useState<WhiteboardNote[]>([]);
   const [editing, setEditing] = useState<number | null>(null);
   const [draft, setDraft] = useState('');
+  const dragRef = useRef<{ id: number; startX: number; startY: number; origX: number; origY: number } | null>(null);
 
-  function load() {
+  const load = useCallback(() => {
     if (!boardId) return;
     fetchWhiteboard(boardId).then((r) => {
       setWhiteboard(r.whiteboard);
       setNotes(r.notes);
     }).catch(console.error);
-  }
+  }, [boardId]);
 
-  useEffect(() => { load(); }, [boardId]);
+  useEffect(() => { load(); }, [load]);
 
   async function addNote() {
     const note = await createWhiteboardNote(boardId, {
@@ -41,6 +43,42 @@ export function WhiteboardPage() {
     const updated = await updateWhiteboardNote(note.id, { content: draft });
     setNotes((prev) => prev.map((n) => (n.id === note.id ? updated.note : n)));
     setEditing(null);
+  }
+
+  async function persistPosition(note: WhiteboardNote, pos_x: number, pos_y: number) {
+    const updated = await updateWhiteboardNote(note.id, { pos_x, pos_y });
+    setNotes((prev) => prev.map((n) => (n.id === note.id ? updated.note : n)));
+  }
+
+  function onDragStart(note: WhiteboardNote, e: React.PointerEvent) {
+    if (editing === note.id) return;
+    dragRef.current = {
+      id: note.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: note.pos_x,
+      origY: note.pos_y,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function onDragMove(note: WhiteboardNote, e: React.PointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== note.id) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    setNotes((prev) => prev.map((n) => (
+      n.id === note.id ? { ...n, pos_x: Math.max(0, drag.origX + dx), pos_y: Math.max(0, drag.origY + dy) } : n
+    )));
+  }
+
+  function onDragEnd(note: WhiteboardNote, e: React.PointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== note.id) return;
+    dragRef.current = null;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    persistPosition(note, Math.max(0, drag.origX + dx), Math.max(0, drag.origY + dy));
   }
 
   async function setSchedule(note: WhiteboardNote, date: string) {
@@ -59,7 +97,15 @@ export function WhiteboardPage() {
     setNotes((prev) => prev.filter((n) => n.id !== noteId));
   }
 
+  async function saveDiagram(sceneJson: string) {
+    if (!boardId) return;
+    const r = await updateWhiteboard(boardId, { scene_json: sceneJson });
+    setWhiteboard(r.whiteboard);
+  }
+
   if (!boardId) return null;
+
+  const isDiagram = whiteboard?.board_type === 'diagram';
 
   return (
     <>
@@ -67,66 +113,83 @@ export function WhiteboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Link to="/whiteboards" className="btn btn-ghost">← Boards</Link>
           <h1 style={{ margin: 0, fontSize: '1.125rem' }}>{whiteboard?.title || 'Whiteboard'}</h1>
+          {isDiagram && <span className="badge-muted">Flow diagram</span>}
         </div>
-        <button type="button" className="btn btn-primary" onClick={addNote}>Add note</button>
+        {!isDiagram && (
+          <button type="button" className="btn btn-primary" onClick={addNote}>Add note</button>
+        )}
       </header>
-      <div className="whiteboard-canvas">
-        {notes.map((note) => (
-          <div
-            key={note.id}
-            className="sticky-note"
-            style={{
-              left: note.pos_x,
-              top: note.pos_y,
-              width: note.width,
-              minHeight: note.height,
-              background: note.color,
-            }}
-          >
-            {editing === note.id ? (
-              <form onSubmit={(e: FormEvent) => { e.preventDefault(); saveNote(note); }}>
-                <textarea
-                  autoFocus
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  rows={4}
-                  style={{ width: '100%', border: 'none', background: 'transparent', resize: 'vertical' }}
-                />
-                <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
-                  <button type="submit" className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>Save</button>
-                  <button type="button" className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => setEditing(null)}>Cancel</button>
-                </div>
-              </form>
-            ) : (
-              <>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => { setEditing(note.id); setDraft(note.content); }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { setEditing(note.id); setDraft(note.content); } }}
-                  style={{ whiteSpace: 'pre-wrap', cursor: 'text' }}
-                >
-                  {note.content}
-                </div>
-                <div className="note-schedule" onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="date"
-                    value={note.scheduled_date || ''}
-                    onChange={(e) => setSchedule(note, e.target.value)}
-                    title="Schedule on calendar"
+      {isDiagram ? (
+        <DiagramBoard sceneJson={whiteboard?.scene_json || null} onSave={saveDiagram} />
+      ) : (
+        <div className="whiteboard-canvas">
+          {notes.map((note) => (
+            <div
+              key={note.id}
+              className="sticky-note"
+              style={{
+                left: note.pos_x,
+                top: note.pos_y,
+                width: note.width,
+                minHeight: note.height,
+                background: note.color,
+              }}
+            >
+              <div
+                className="sticky-note-drag-handle"
+                onPointerDown={(e) => onDragStart(note, e)}
+                onPointerMove={(e) => onDragMove(note, e)}
+                onPointerUp={(e) => onDragEnd(note, e)}
+                onPointerCancel={(e) => onDragEnd(note, e)}
+                title="Drag to move"
+              >
+                ⋮⋮
+              </div>
+              {editing === note.id ? (
+                <form onSubmit={(e: FormEvent) => { e.preventDefault(); saveNote(note); }}>
+                  <textarea
+                    autoFocus
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    rows={4}
+                    style={{ width: '100%', border: 'none', background: 'transparent', resize: 'vertical' }}
                   />
-                  {note.scheduled_date && (
-                    <Link to={`/plan?date=${note.scheduled_date}`} className="note-plan-link">Plan</Link>
-                  )}
-                  <button type="button" className="btn btn-ghost" style={{ padding: '0.125rem 0.375rem', fontSize: '0.6875rem' }} onClick={() => promote(note)}>→ Task</button>
-                </div>
-                <button type="button" className="note-delete" onClick={() => removeNote(note.id)}>×</button>
-              </>
-            )}
-          </div>
-        ))}
-        {!notes.length && <p className="muted" style={{ padding: '1.5rem' }}>Click “Add note” to start brainstorming.</p>}
-      </div>
+                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.25rem' }}>
+                    <button type="submit" className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>Save</button>
+                    <button type="button" className="btn btn-ghost" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }} onClick={() => setEditing(null)}>Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { setEditing(note.id); setDraft(note.content); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { setEditing(note.id); setDraft(note.content); } }}
+                    style={{ whiteSpace: 'pre-wrap', cursor: 'text' }}
+                  >
+                    {note.content}
+                  </div>
+                  <div className="note-schedule" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="date"
+                      value={note.scheduled_date || ''}
+                      onChange={(e) => setSchedule(note, e.target.value)}
+                      title="Schedule on calendar"
+                    />
+                    {note.scheduled_date && (
+                      <Link to={`/plan?date=${note.scheduled_date}`} className="note-plan-link">Plan</Link>
+                    )}
+                    <button type="button" className="btn btn-ghost" style={{ padding: '0.125rem 0.375rem', fontSize: '0.6875rem' }} onClick={() => promote(note)}>→ Task</button>
+                  </div>
+                  <button type="button" className="note-delete" onClick={() => removeNote(note.id)}>×</button>
+                </>
+              )}
+            </div>
+          ))}
+          {!notes.length && <p className="muted" style={{ padding: '1.5rem' }}>Click “Add note” to start brainstorming. Drag notes by the handle.</p>}
+        </div>
+      )}
     </>
   );
 }

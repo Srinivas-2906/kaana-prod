@@ -1,6 +1,6 @@
 import { getPool } from '../db/index.js';
 import { NOTE_COLORS } from '../constants.js';
-import { ensurePlanSchema } from './schemaService.js';
+import { ensurePlanSchema, ensureProSchema } from './schemaService.js';
 
 export async function listWhiteboards() {
   const pool = getPool();
@@ -24,12 +24,31 @@ export async function getWhiteboardById(id) {
 }
 
 export async function createWhiteboard(data, userId) {
+  await ensureProSchema();
   const pool = getPool();
+  const boardType = data.board_type === 'diagram' ? 'diagram' : 'sticky';
   const [result] = await pool.query(
-    'INSERT INTO whiteboards (title, description, created_by) VALUES (?, ?, ?)',
-    [data.title, data.description || null, userId],
+    'INSERT INTO whiteboards (title, description, board_type, created_by) VALUES (?, ?, ?, ?)',
+    [data.title, data.description || null, boardType, userId],
   );
   return getWhiteboardById(result.insertId);
+}
+
+export async function updateWhiteboard(id, data) {
+  await ensureProSchema();
+  const pool = getPool();
+  const board = await getWhiteboardById(id);
+  if (!board) return null;
+
+  const title = data.title !== undefined ? String(data.title).trim() : board.title;
+  const description = data.description !== undefined ? (data.description || null) : board.description;
+  const sceneJson = data.scene_json !== undefined ? data.scene_json : board.scene_json;
+
+  await pool.query(
+    'UPDATE whiteboards SET title = ?, description = ?, scene_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [title, description, sceneJson, id],
+  );
+  return getWhiteboardById(id);
 }
 
 export async function getNotes(whiteboardId) {

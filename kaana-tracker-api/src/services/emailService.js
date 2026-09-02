@@ -30,7 +30,7 @@ function buildInviteHtml({ inviterName, projectName, inviteUrl, roleText }) {
         Or copy this link: ${inviteUrl}
       </p>
       <p style="color: #94a3b8; font-size: 0.8125rem; margin-top: 2rem;">
-        Kaana Tracker · <a href="https://tracker.kaana.in" style="color: #64748b;">tracker.kaana.in</a><br />
+        Kaana Tracker · <a href="https://kaanatracker.xyz" style="color: #64748b;">kaanatracker.xyz</a><br />
         If you weren't expecting this, you can ignore this email.
       </p>
     </div>

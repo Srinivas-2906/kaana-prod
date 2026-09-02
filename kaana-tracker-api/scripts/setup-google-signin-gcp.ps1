@@ -1,11 +1,10 @@
-# Configure Google Sign-In for Kaana Tracker on GCP (kaana-prod).
+# Configure Google Sign-In for Kaana Tracker on GCP.
 # Usage:
 #   .\setup-google-signin-gcp.ps1 -ClientId "123456789-abc.apps.googleusercontent.com"
-# Or create the OAuth client in Console first, then run with the Client ID.
 param(
   [Parameter(Mandatory = $true)]
   [string]$ClientId,
-  [string]$Project = "kaana-prod",
+  [string]$Project = "crucial-accord-505607-g9",
   [string]$Region = "asia-south1"
 )
 
@@ -24,31 +23,38 @@ if ($LASTEXITCODE -ne 0) {
 } else {
   Write-Host "Updating secret $secretName ..."
 }
-$ClientId | gcloud secrets versions add $secretName --project=$Project --data-file=-
+$cleanId = $ClientId.Trim()
+$tmpClientId = Join-Path $PSScriptRoot "tmp-google-client-id.txt"
+[System.IO.File]::WriteAllText($tmpClientId, $cleanId, (New-Object System.Text.UTF8Encoding $false))
+gcloud secrets versions add $secretName --project=$Project --data-file=$tmpClientId
+Remove-Item $tmpClientId -Force
 
 # 2. Grant secret access to Cloud Build + Cloud Run
 $projectNumber = gcloud projects describe $Project --format="value(projectNumber)"
 $runSa = "$projectNumber-compute@developer.gserviceaccount.com"
 $cloudBuildSa = "kaana-cloudbuild-deployer@$Project.iam.gserviceaccount.com"
 foreach ($sa in @($runSa, $cloudBuildSa)) {
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
   gcloud secrets add-iam-policy-binding $secretName `
     --project=$Project `
     --member="serviceAccount:$sa" `
     --role="roles/secretmanager.secretAccessor" `
-    --quiet 2>$null | Out-Null
+    --quiet 2>&1 | Out-Null
+  $ErrorActionPreference = $prevEap
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to grant secret access to $sa"
+  }
 }
 
-# 3. Patch Identity Platform authorized domains (tracker.kaana.in)
-Write-Host "Ensuring tracker.kaana.in is an authorized domain in Identity Platform ..."
+# 3. Patch Identity Platform authorized domains (kaanatracker.xyz)
+Write-Host "Ensuring kaanatracker.xyz is an authorized domain in Identity Platform ..."
 $domainsJson = @"
 {
   "authorizedDomains": [
     "localhost",
-    "kaana-prod.firebaseapp.com",
-    "kaana-prod.web.app",
-    "reminders-bills-pwa-wtba53dhka-el.a.run.app",
-    "reminders-bills-pwa-851239127958.asia-south1.run.app",
-    "tracker.kaana.in"
+    "kaanatracker.xyz",
+    "www.kaanatracker.xyz"
   ]
 }
 "@
@@ -68,6 +74,11 @@ gcloud run services update kaana-tracker-api `
   --project=$Project `
   --region=$Region `
   --update-secrets="GOOGLE_CLIENT_ID=${secretName}:latest" `
+  --quiet
+gcloud run services update-traffic kaana-tracker-api `
+  --project=$Project `
+  --region=$Region `
+  --to-latest `
   --quiet
 
 Write-Host ""

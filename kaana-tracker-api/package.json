@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "dev:check": "bash scripts/dev-with-check.sh",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "node --test src/**/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "decimal.js": "^10.6.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "google-auth-library": "^9.15.1",

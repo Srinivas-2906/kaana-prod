@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import {
-  listWhiteboards, getWhiteboardById, createWhiteboard,
+  listWhiteboards, getWhiteboardById, createWhiteboard, updateWhiteboard,
   getNotes, createNote, updateNote, deleteNote,
 } from '../services/whiteboardService.js';
 
@@ -32,11 +32,22 @@ router.get('/:id', async (req, res) => {
   try {
     const whiteboard = await getWhiteboardById(Number(req.params.id));
     if (!whiteboard) return res.status(404).json({ error: 'Not found' });
-    const notes = await getNotes(whiteboard.id);
+    const notes = whiteboard.board_type === 'diagram' ? [] : await getNotes(whiteboard.id);
     res.json({ whiteboard, notes });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Failed to load whiteboard' });
+  }
+});
+
+router.patch('/:id', async (req, res) => {
+  try {
+    const whiteboard = await updateWhiteboard(Number(req.params.id), req.body || {});
+    if (!whiteboard) return res.status(404).json({ error: 'Not found' });
+    res.json({ whiteboard });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to update whiteboard' });
   }
 });
 

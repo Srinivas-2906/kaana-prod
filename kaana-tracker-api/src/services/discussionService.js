@@ -2,6 +2,7 @@ import { getPool } from '../db/index.js';
 import { DISCUSSION_ENTITY_TYPES } from '../constants.js';
 import { logActivity } from './activityService.js';
 import { assertProjectAccess } from './authorizationService.js';
+import { notifyMentions } from './mentionService.js';
 
 async function resolveProjectId(entityType, entityId) {
   if (entityType === 'cluster' && entityId) return Number(entityId);
@@ -96,6 +97,17 @@ export async function addDiscussion(entityType, entityId, content, userId) {
     projectId,
     actorId: userId,
     summary: `Comment: ${text.slice(0, 80)}`,
+  });
+
+  let link = '/';
+  if (entityType === 'work_item' && entityId) link = `/work/${entityId}`;
+  else if (entityType === 'cluster' && entityId) link = `/projects/${entityId}/updates`;
+  await notifyMentions({
+    content: text,
+    actorId: userId,
+    link,
+    title: 'You were mentioned in a comment',
+    excludeUserIds: [userId],
   });
 
   return { discussion };

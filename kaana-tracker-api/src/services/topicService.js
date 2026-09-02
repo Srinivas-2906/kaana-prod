@@ -4,6 +4,7 @@ import { assertProjectAccess, canEdit } from './authorizationService.js';
 import { sendTopicReplyEmail } from './emailService.js';
 import { getReactionsForDiscussions } from './reactionService.js';
 import { listAttachmentsByDiscussionIds } from './attachmentService.js';
+import { createNotification } from './notificationService.js';
 
 const TOPIC_STATUSES = ['open', 'answered', 'closed'];
 
@@ -62,12 +63,20 @@ async function notifyTopicReply({
     WHERE u.id != ?
   `, [topicId, topicId, actorId]);
 
-  const base = process.env.TRACKER_PUBLIC_URL || 'https://tracker.kaana.in';
+  const base = process.env.TRACKER_PUBLIC_URL || 'https://kaanatracker.xyz';
   const topicUrl = `${base}/projects/${projectId}/updates?topic=${topicId}`;
   const replierName = actors[0]?.name || 'Someone';
   const projectName = projects[0]?.name || 'Project';
 
   for (const p of participants) {
+    createNotification({
+      userId: p.id,
+      type: 'topic_reply',
+      title: `${replierName} replied in ${projectName}`,
+      body: topicTitle,
+      link: `/projects/${projectId}/updates?topic=${topicId}`,
+    }).catch(() => {});
+
     if (!p.email || p.email.includes('@tracker.kaana.local')) continue;
     sendTopicReplyEmail({
       to: p.email,

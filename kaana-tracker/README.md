@@ -2,7 +2,7 @@
 
 Idea-to-outcome workspace for Kaana — projects, work, finance, and (in progress) timeline/daybook.
 
-- **Production:** https://tracker.kaana.in
+- **Production:** https://kaanatracker.xyz
 - **API:** `kaana-tracker-api` (proxied at `/api` in production)
 
 ## Local dev

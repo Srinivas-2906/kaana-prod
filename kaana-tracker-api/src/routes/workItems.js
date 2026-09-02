@@ -10,6 +10,7 @@ import {
   getWorkStats,
   promoteIdeaToStory,
 } from '../services/workItemService.js';
+import { setWorkItemLabels } from '../services/labelService.js';
 import { getLinksForEntity } from '../services/entityLinkService.js';
 import { assertProjectAccess, listAccessibleProjectIds } from '../services/authorizationService.js';
 
@@ -62,6 +63,9 @@ router.get('/', async (req, res) => {
       dateFrom: req.query.from || undefined,
       dateTo: req.query.to || undefined,
       date: req.query.date || undefined,
+      sprintId: req.query.sprintId !== undefined ? req.query.sprintId : undefined,
+      labelId: req.query.labelId ? Number(req.query.labelId) : undefined,
+      q: req.query.q || undefined,
     });
     res.json({ items });
   } catch (e) {
@@ -147,6 +151,19 @@ router.patch('/:id/status', async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Failed to update status' });
+  }
+});
+
+router.patch('/:id/labels', async (req, res) => {
+  try {
+    const access = await accessForWorkItem(Number(req.params.id), req.user.sub, 'edit');
+    if (access.error) return res.status(access.status).json({ error: access.error });
+    const result = await setWorkItemLabels(Number(req.params.id), req.body?.labelIds || req.body?.label_ids || [], req.user.sub);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.json(result);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to update labels' });
   }
 });
 

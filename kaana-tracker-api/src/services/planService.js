@@ -188,7 +188,7 @@ export async function getDayMetaMap(from, to, projectId = null) {
   const [txRows] = await pool.query(`
     SELECT transaction_date AS date, COUNT(*) AS count
     FROM transactions
-    WHERE transaction_date BETWEEN ? AND ?
+    WHERE transaction_date BETWEEN ? AND ? AND (status = 'active' OR status IS NULL)
     GROUP BY transaction_date
   `, [from, to]);
   for (const row of txRows) {
@@ -285,7 +285,7 @@ export async function getCalendarGlimpses(from, to, projectId = null, itemType =
   const [txRows] = await pool.query(`
     SELECT type, amount, category, transaction_date
     FROM transactions
-    WHERE transaction_date BETWEEN ? AND ?
+    WHERE transaction_date BETWEEN ? AND ? AND (status = 'active' OR status IS NULL)
     ORDER BY transaction_date ASC, amount DESC
   `, [from, to]);
   for (const tx of txRows) {

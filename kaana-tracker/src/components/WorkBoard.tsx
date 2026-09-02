@@ -10,10 +10,16 @@ export function WorkBoard({
   items: initial,
   onChange,
   readOnly = false,
+  projectLabels = [],
+  sprints = [],
+  onLabelCreated,
 }: {
   items: WorkItem[];
   onChange?: () => void;
   readOnly?: boolean;
+  projectLabels?: import('../types').Label[];
+  sprints?: import('../types').Sprint[];
+  onLabelCreated?: () => void;
 }) {
   const [items, setItems] = useState(initial);
   const [dragId, setDragId] = useState<number | null>(null);
@@ -99,6 +105,9 @@ export function WorkBoard({
           onClose={() => setSelectedId(null)}
           onUpdate={onChange}
           readOnly={readOnly}
+          projectLabels={projectLabels}
+          sprints={sprints}
+          onLabelCreated={onLabelCreated}
         />
       )}
     </>

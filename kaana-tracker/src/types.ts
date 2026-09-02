@@ -2,6 +2,10 @@ export type User = {
   id: number;
   name: string;
   email: string;
+  authProvider?: string;
+  onboardingCompletedAt?: string | null;
+  onboardingProjectId?: number | null;
+  needsOnboarding?: boolean;
 };
 
 export type Project = {
@@ -9,6 +13,7 @@ export type Project = {
   name: string;
   description: string | null;
   color: string;
+  project_key?: string | null;
   created_by: number;
   created_by_name: string;
   item_count: number;
@@ -29,6 +34,25 @@ export type WorkItemContentSection = {
   builtin?: 'description' | 'implementation_notes';
 };
 
+export type Label = {
+  id: number;
+  project_id: number;
+  name: string;
+  color: string;
+};
+
+export type Sprint = {
+  id: number;
+  project_id: number;
+  name: string;
+  goal: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  status: 'planning' | 'active' | 'closed';
+  item_count?: number;
+  done_count?: number;
+};
+
 export type WorkItem = {
   id: number;
   cluster_id: number | null;
@@ -45,6 +69,10 @@ export type WorkItem = {
   story_points?: number | null;
   due_date: string | null;
   start_date?: string | null;
+  sprint_id?: number | null;
+  sprint_name?: string | null;
+  issue_key?: string;
+  labels?: Label[];
   cluster_name: string | null;
   cluster_color: string | null;
   created_by_name: string;
@@ -261,6 +289,7 @@ export const IDEA_STAGES = ['captured', 'refining', 'needs_input', 'approved', '
 export type Transaction = {
   id: number;
   type: 'income' | 'expense';
+  ledger_type?: LedgerType;
   amount: number;
   category: string;
   description: string | null;
@@ -269,7 +298,24 @@ export type Transaction = {
   paid_by: string;
   project_id?: number | null;
   created_by_name: string;
+  partner_user_id?: number | null;
+  partner_name?: string | null;
+  funding_source?: FundingSource;
+  linked_transaction_id?: number | null;
+  status?: 'active' | 'void';
+  currency?: string;
+  reimbursable?: boolean;
 };
+
+export type LedgerType =
+  | 'expense'
+  | 'income'
+  | 'capital_contribution'
+  | 'reimbursement'
+  | 'withdrawal'
+  | 'distribution';
+
+export type FundingSource = 'company_account' | 'partner_personal' | 'legacy_unknown';
 
 export type FinanceSummary = {
   total_income: number;
@@ -282,6 +328,88 @@ export type TransactionMeta = {
   categories: string[];
   paymentMethods: string[];
   paidByOptions: string[];
+  ledgerTypes?: LedgerType[];
+  fundingSources?: FundingSource[];
+};
+
+export type ProjectFinancialSettings = {
+  projectId: number;
+  name: string;
+  currency: string;
+  financialStartDate: string;
+  economicBreakEvenEnabled: boolean;
+  capitalAdjustmentRate: number | null;
+  revenueTarget: number | null;
+};
+
+export type PartnerFunding = {
+  partnerUserId: number | null;
+  partnerName: string;
+  personalExpensesPaid: number;
+  capitalContributed: number;
+  reimbursementsReceived: number;
+  withdrawalsAndDistributions: number;
+  netCapitalExposure: number;
+};
+
+export type FinancialTrajectoryPoint = {
+  date: string;
+  dayOffset: number;
+  nominalExpenses: number;
+  nominalIncome: number;
+  adjustedExpenses: number;
+  adjustedIncome: number;
+  remainingEconomicBreakEven: number;
+};
+
+export type ProjectFinancialSummary = {
+  currency: string;
+  actual: { expenses: number; income: number; profitLoss: number };
+  accountingBreakEven: {
+    reached: boolean;
+    breakEvenDate: string | null;
+    remaining: number;
+    accountingNet: number;
+  };
+  economicBreakEven: {
+    enabled: boolean;
+    targetDate: string;
+    annualAdjustmentRate: number;
+    nominalExpensesUntilTarget: number;
+    nominalIncomeUntilTarget: number;
+    adjustedExpenses: number;
+    adjustedIncome: number;
+    economicNetPosition: number;
+    remaining: number;
+    reached: boolean;
+  };
+  day365: {
+    targetDate: string;
+    nominalExpensesUntilTarget: number;
+    nominalIncomeUntilTarget: number;
+    adjustedExpenses: number;
+    adjustedIncome: number;
+    remaining: number;
+    reached: boolean;
+  };
+  funding: {
+    totalCapitalContributions: number;
+    partners: PartnerFunding[];
+  };
+  trajectory: FinancialTrajectoryPoint[];
+  revenueTarget: number | null;
+  projectStartDate: string;
+  targetDate: string;
+  annualCapitalAdjustmentRate: number;
+};
+
+export type SimulateCashFlow = {
+  amount: number;
+  date: string;
+  ledger_type: LedgerType;
+  type?: LedgerType;
+  funding_source?: FundingSource;
+  partner_user_id?: number | null;
 };
 
 export type Discussion = {
@@ -348,10 +476,30 @@ export type Whiteboard = {
   id: number;
   title: string;
   description: string | null;
+  board_type?: 'sticky' | 'diagram';
+  scene_json?: string | null;
   created_by: number;
   created_by_name: string;
   note_count?: number;
   updated_at?: string;
+};
+
+export type SearchResult = {
+  kind: 'work_item' | 'project' | 'topic' | 'attachment' | 'whiteboard';
+  id: number;
+  title: string;
+  subtitle?: string;
+  link: string;
+};
+
+export type NotificationItem = {
+  id: number;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
 };
 
 export type WhiteboardNote = {

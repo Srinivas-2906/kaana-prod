@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { GoogleSignInSection } from '../components/GoogleSignInSection';
+import { PublicShell } from '../components/PublicShell';
 import { authUrlWithRedirect, isAuthenticated, login, safeRedirectUrl } from '../lib/auth';
 
 export function LoginPage() {
@@ -30,40 +31,45 @@ export function LoginPage() {
   const signUpUrl = authUrlWithRedirect('/sign-up', redirectUrl);
 
   return (
-    <div className="login-page">
-      <form className="card login-card" onSubmit={onSubmit}>
-        <h1 style={{ margin: '0 0 0.5rem' }}>Kaana Tracker</h1>
-        <p className="muted" style={{ marginBottom: '1.5rem' }}>Sign in to your workspace</p>
-        {error && <p style={{ color: '#dc2626', fontSize: '0.875rem' }}>{error}</p>}
-        <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Email</label>
-        <input
-          type="email"
-          name="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@company.com"
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', marginBottom: '1rem' }}
-        />
-        <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Password</label>
-        <input
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', marginBottom: '1.25rem' }}
-        />
-        <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-          {loading ? 'Signing in…' : 'Sign in'}
-        </button>
-        <GoogleSignInSection redirectUrl={redirectUrl} onError={setError} disabled={loading} />
-        <p className="auth-mode-switch muted">
-          Don&apos;t have an account?{' '}
-          <Link to={signUpUrl}>Sign up</Link>
-        </p>
-      </form>
-    </div>
+    <PublicShell minimal>
+      <div className="auth-page">
+        <form className="card login-card" onSubmit={onSubmit}>
+          <p className="auth-back-link">
+            <Link to="/">← Back to home</Link>
+          </p>
+          <h1 style={{ margin: '0 0 0.5rem' }}>Sign in</h1>
+          <p className="muted" style={{ marginBottom: '1.5rem' }}>Welcome back to Kaana Tracker</p>
+          {error && <p style={{ color: '#dc2626', fontSize: '0.875rem' }}>{error}</p>}
+          <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Email</label>
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@company.com"
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', marginBottom: '1rem' }}
+          />
+          <label className="muted" style={{ display: 'block', marginBottom: '0.375rem' }}>Password</label>
+          <input
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border)', marginBottom: '1.25rem' }}
+          />
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+          <GoogleSignInSection redirectUrl={redirectUrl} onError={setError} disabled={loading} />
+          <p className="auth-mode-switch muted">
+            Don&apos;t have an account?{' '}
+            <Link to={signUpUrl}>Sign up</Link>
+          </p>
+        </form>
+      </div>
+    </PublicShell>
   );
 }

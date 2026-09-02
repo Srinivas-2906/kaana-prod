@@ -17,7 +17,7 @@ const STATUS_LABELS: Record<string, string> = {
   active: 'Active link',
 };
 
-function ShareProjectContent({
+export function ShareProjectContent({
   projectId,
   projectName,
   onDone,

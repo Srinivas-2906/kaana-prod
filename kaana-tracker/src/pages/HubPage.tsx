@@ -24,13 +24,7 @@ export function HubPage() {
       fetchFinanceSummary(month),
     ])
       .then(([s, p, act, fin]) => {
-        // Landing behavior:
-        // - If user has no projects, send them straight to Projects to create one
-        // - If user has exactly one project (common for shared/guest accounts), open it directly
-        if (p.projects.length === 0) {
-          navigate('/projects', { replace: true });
-          return;
-        }
+        // If user has exactly one project (common for shared/guest accounts), open it directly
         if (p.projects.length === 1) {
           const proj = p.projects[0];
           navigate(`/projects/${proj.id}/${projectDefaultTab(proj.my_role)}`, { replace: true });

@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { getPool } from '../db/index.js';
 import { signToken } from '../middleware/auth.js';
 import { verifyGoogleIdToken } from './googleAuthService.js';
+import { ensureOnboardingSchema } from './schemaService.js';
 
 /** Users created via Clerk before migration have no real password hash. */
 const CLERK_PASSWORD_PLACEHOLDER = '$2a$10$clerk.nopassword.kaana.tracker.placeholder';
@@ -52,7 +53,7 @@ export async function registerUser(email, password, name) {
 }
 
 export async function loginWithGoogle(idToken) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientId = String(process.env.GOOGLE_CLIENT_ID || '').trim();
   if (!clientId) {
     return { error: 'Google sign-in is not configured' };
   }
@@ -120,12 +121,67 @@ export async function loginUser(email, password) {
 }
 
 export async function getUserById(id) {
+  await ensureOnboardingSchema();
   const pool = getPool();
   const [rows] = await pool.query(
-    'SELECT id, name, email, clerk_user_id, name_customized, created_at FROM users WHERE id = ? LIMIT 1',
+    `SELECT id, name, email, clerk_user_id, name_customized, created_at,
+      onboarding_completed_at, onboarding_project_id
+     FROM users WHERE id = ? LIMIT 1`,
     [id],
   );
   return rows[0] || null;
+}
+
+export function needsOnboarding(user) {
+  return Boolean(user && !user.onboarding_completed_at);
+}
+
+export function formatUserForApi(user, authProvider = 'jwt') {
+  if (!user) return null;
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    authProvider,
+    onboardingCompletedAt: user.onboarding_completed_at
+      ? new Date(user.onboarding_completed_at).toISOString()
+      : null,
+    onboardingProjectId: user.onboarding_project_id ? Number(user.onboarding_project_id) : null,
+    needsOnboarding: needsOnboarding(user),
+  };
+}
+
+export async function completeOnboarding(userId) {
+  await ensureOnboardingSchema();
+  const pool = getPool();
+  await pool.query(
+    `UPDATE users SET onboarding_completed_at = COALESCE(onboarding_completed_at, CURRENT_TIMESTAMP)
+     WHERE id = ?`,
+    [userId],
+  );
+  return getUserById(userId);
+}
+
+export async function updateOnboardingProgress(userId, data = {}) {
+  await ensureOnboardingSchema();
+  const pool = getPool();
+  const updates = [];
+  const params = [];
+
+  if (data.onboarding_project_id !== undefined) {
+    const pid = data.onboarding_project_id ? Number(data.onboarding_project_id) : null;
+    if (pid !== null && (!Number.isFinite(pid) || pid <= 0)) {
+      return { error: 'Invalid project id', status: 400 };
+    }
+    updates.push('onboarding_project_id = ?');
+    params.push(pid);
+  }
+
+  if (!updates.length) return { error: 'No fields to update', status: 400 };
+
+  params.push(userId);
+  await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
+  return getUserById(userId);
 }
 
 export async function updateUserProfile(userId, data) {
