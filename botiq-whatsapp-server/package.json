@@ -8,7 +8,9 @@
     "dev": "node --watch src/index.js",
     "test:clinic": "bash ../scripts/test-clinic-local.sh",
     "test-token": "node scripts/test-meta-token.js",
-    "verify-webhook": "bash scripts/verify-webhook.sh"
+    "verify-webhook": "bash scripts/verify-webhook.sh",
+    "meta-precheck": "node scripts/meta-api-precheck.mjs",
+    "test": "node --test test/**/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

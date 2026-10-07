@@ -20,6 +20,8 @@ declare global {
   }
 }
 
+const hideDemoViews = import.meta.env.VITE_HIDE_DEMO_VIEWS === 'true';
+
 export default function App() {
   const [view, setView] = useState<ViewId>('conversations');
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -48,12 +50,12 @@ export default function App() {
   return (
     <LoginGate>
     <div className="app">
-      <Sidebar active={view} onNavigate={navigate} onAbout={() => setAboutOpen(true)} />
+      <Sidebar active={view} onNavigate={navigate} onAbout={() => setAboutOpen(true)} hideDemoViews={hideDemoViews} />
 
       <main className="main-panel">
         {view !== 'conversations' && <MainTopbar view={view} />}
         <div className={`main-content view-${view}`}>
-          {view === 'overview' && <OverviewView onNavigate={() => setView('conversations')} />}
+          {!hideDemoViews && view === 'overview' && <OverviewView onNavigate={() => setView('conversations')} />}
           {view === 'conversations' && (
             <ConversationsView
               onTakeOver={handleTakeOver}
@@ -61,13 +63,13 @@ export default function App() {
               onNotify={showToast}
             />
           )}
-          {view === 'builder' && <BotBuilderView />}
-          {view === 'analytics' && <AnalyticsView />}
+          {!hideDemoViews && view === 'builder' && <BotBuilderView />}
+          {!hideDemoViews && view === 'analytics' && <AnalyticsView />}
           {view === 'settings' && <SettingsView />}
         </div>
       </main>
 
-      <LivePreview />
+      {!hideDemoViews && <LivePreview />}
 
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <Toast message={toast.message} visible={toast.visible} />

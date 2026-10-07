@@ -12,6 +12,7 @@ import { PricingPage } from './pages/PricingPage';
 import { SignupPage } from './pages/SignupPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { TemplatesPage } from './pages/TemplatesPage';
 import { IndustriesPage } from './pages/IndustriesPage';
 import { PlatformPage } from './pages/PlatformPage';
 import { TermsPage } from './pages/TermsPage';
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/templates" element={<TemplatesPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/tenants/:id" element={<AdminTenantPage />} />
             <Route path="/platform" element={<PlatformPage />} />

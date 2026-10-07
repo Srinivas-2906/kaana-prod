@@ -24,7 +24,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [waForm, setWaForm] = useState({ phoneNumberId: '', accessToken: '', whatsappNumber: '' });
+  const [waForm, setWaForm] = useState({ phoneNumberId: '', accessToken: '', whatsappNumber: '', wabaId: '' });
   const [waSaving, setWaSaving] = useState(false);
   const [waMsg, setWaMsg] = useState('');
   const [billingPlan, setBillingPlan] = useState('');
@@ -170,9 +170,23 @@ export function DashboardPage() {
         <div className="dash-grid">
           <article className={`dash-card ${locked ? 'is-locked' : ''}`}>
             <span className="dash-icon">💬</span>
-            <h2>Kaana Inbox</h2>
+            <h2>Bot IQ Inbox</h2>
             <p>Live WhatsApp conversations, agent handoff, outbound replies.</p>
             <button type="button" className="btn btn-accent" disabled={locked} onClick={() => openAppWithSSO('botiq')}>Open Inbox →</button>
+          </article>
+
+          <article className={`dash-card ${locked || !profile?.tenant?.whatsappConnected ? 'is-locked' : ''}`}>
+            <span className="dash-icon">📋</span>
+            <h2>WhatsApp templates</h2>
+            <p>Create and submit message templates on your connected WABA for Meta review.</p>
+            <Link
+              to="/templates"
+              className={`btn btn-accent ${locked || !profile?.tenant?.whatsappConnected ? 'is-locked' : ''}`}
+              aria-disabled={locked || !profile?.tenant?.whatsappConnected}
+              onClick={locked || !profile?.tenant?.whatsappConnected ? (e) => e.preventDefault() : undefined}
+            >
+              Open templates →
+            </Link>
           </article>
 
           <article className={`dash-card ${locked ? 'is-locked' : ''}`}>
@@ -215,6 +229,7 @@ export function DashboardPage() {
                 <p>Paste Meta Business API credentials — or we configure this for you during onboarding.</p>
                 <form className="dash-wa-form" onSubmit={saveWhatsApp}>
                   <input placeholder="Phone Number ID" value={waForm.phoneNumberId} onChange={(e) => setWaForm({ ...waForm, phoneNumberId: e.target.value })} required />
+                  <input placeholder="WABA ID (for templates)" value={waForm.wabaId} onChange={(e) => setWaForm({ ...waForm, wabaId: e.target.value })} />
                   <input placeholder="Access Token" type="password" value={waForm.accessToken} onChange={(e) => setWaForm({ ...waForm, accessToken: e.target.value })} required />
                   <input placeholder="WhatsApp number (919876543210)" value={waForm.whatsappNumber} onChange={(e) => setWaForm({ ...waForm, whatsappNumber: e.target.value })} />
                   <button type="submit" className="btn btn-accent" disabled={waSaving}>{waSaving ? 'Saving…' : 'Save & connect'}</button>
