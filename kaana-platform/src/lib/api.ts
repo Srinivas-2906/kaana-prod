@@ -142,8 +142,36 @@ export async function connectWhatsApp(payload: {
   phoneNumberId: string;
   accessToken: string;
   whatsappNumber?: string;
+  wabaId?: string;
 }) {
   return apiPatch<Tenant>('/tenant/whatsapp', payload);
+}
+
+export type WhatsAppTemplate = {
+  id?: string | null;
+  name: string;
+  status: string;
+  category: string;
+  language: string;
+  body: string;
+};
+
+export async function fetchWhatsAppTemplates() {
+  return apiGet<{ data: WhatsAppTemplate[] }>('/tenant/whatsapp/templates');
+}
+
+export async function createWhatsAppTemplate(payload: {
+  name: string;
+  language: string;
+  category: string;
+  body: string;
+}) {
+  return apiPost<{ template: WhatsAppTemplate }>('/tenant/whatsapp/templates', payload);
+}
+
+export async function refreshWhatsAppTemplateStatus(name: string) {
+  const encoded = encodeURIComponent(name);
+  return apiGet<{ template: WhatsAppTemplate }>(`/tenant/whatsapp/templates/${encoded}/status`);
 }
 
 declare global {
