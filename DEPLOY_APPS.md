@@ -50,7 +50,8 @@ This repo hosts multiple products under **one domain** (`kaana.in`) and deploys 
 - **Domain**: `inbox.kaana.in`
 - **Path**: `botiq/`
 - **Cloud Run service**: `kaana-inbox`
-- **Cloud Build**: `cloudbuild.yaml` (inbox step) or dedicated inbox config when split
+- **Cloud Build**: `cloudbuild.inbox.yaml` (inbox-only; triggered by `deploy-botiq-inbox.yml`)
+- **Load balancer**: `kaana-inbox-neg` must target Cloud Run **`kaana-inbox`** (not `kaana-web`). After first deploy, run `scripts/fix-inbox-neg.ps1` if the host still serves marketing.
 - **Review build**: `VITE_HIDE_DEMO_VIEWS=true` (see root `cloudbuild.yaml` inbox step)
 
 ### Clinic (clinic.kaana.in + clinic-api.kaana.in)
