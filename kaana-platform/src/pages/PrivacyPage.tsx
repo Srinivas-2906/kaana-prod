@@ -8,13 +8,18 @@ export function PrivacyPage() {
         <div className="legal-head">
           <p className="section-label">Legal</p>
           <h1>Privacy Policy</h1>
-          <p className="legal-meta">Last updated: June 2026 · Questions? <a href="mailto:hello@kaana.in">hello@kaana.in</a></p>
+          <p className="legal-meta">Last updated: October 2026 · Questions? <a href="mailto:hello@kaana.in">hello@kaana.in</a></p>
+          <p className="legal-scope">
+            <strong>Bot IQ</strong> is a product operated by <strong>Kaana AI Technologies</strong>.
+            This Privacy Policy applies to the Bot IQ platform (WhatsApp inbox, templates, and
+            automation at app.kaana.in) and related Kaana services accessed through your account.
+          </p>
         </div>
 
         <div className="legal-body">
           <section>
             <h2>1. What we collect</h2>
-            <p>We collect: (a) account information you provide at signup (name, email, phone, business name); (b) usage data (bot reply counts, inbox activity, CRM records you create); (c) WhatsApp message content to the extent required to deliver the Service; (d) technical data (IP address, browser type, session logs) for security and analytics.</p>
+            <p>When you use Bot IQ we collect: (a) account information you provide at signup (name, email, phone, business name); (b) usage data (bot reply counts, inbox activity, CRM records you create); (c) WhatsApp message content and metadata (phone numbers, delivery/read status) to the extent required to deliver the Service; (d) Meta WhatsApp Business connection data (WABA IDs, phone number IDs, and tokens you authorize via Embedded Signup); (e) technical data (IP address, browser type, session logs) for security and analytics.</p>
           </section>
 
           <section>
@@ -24,7 +29,7 @@ export function PrivacyPage() {
 
           <section>
             <h2>3. WhatsApp message data</h2>
-            <p>Messages processed through Kaana are stored to power the team inbox, CRM, and bot features. Message data is encrypted at rest. You retain ownership of all customer data created in your workspace.</p>
+            <p>Messages processed through Bot IQ are stored to power the team inbox, CRM, and bot features. We process this data on your behalf as a WhatsApp Tech Provider using Meta&apos;s WhatsApp Business Platform. Message data is encrypted at rest. You retain ownership of all customer data created in your workspace.</p>
           </section>
 
           <section>
@@ -39,7 +44,16 @@ export function PrivacyPage() {
 
           <section>
             <h2>6. Your rights</h2>
-            <p>You may request access to, correction of, or deletion of your personal data at any time by emailing hello@kaana.in. Account deletion removes your data from our systems within 30 days, except data we are legally required to retain.</p>
+            <p>
+              You may request access to, correction of, or deletion of your personal data at any
+              time by emailing{' '}
+              <a href="mailto:hello@kaana.in">hello@kaana.in</a> or following the steps at{' '}
+              <a href="https://kaana.in/data-deletion" rel="noopener noreferrer">
+                kaana.in/data-deletion
+              </a>
+              . Account deletion removes your Bot IQ workspace data from our systems within 30 days,
+              except data we are legally required to retain.
+            </p>
           </section>
 
           <section>

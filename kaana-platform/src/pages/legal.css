@@ -30,6 +30,17 @@
   font-weight: 600;
 }
 
+.legal-scope {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  padding: 16px 18px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--accent-bright);
+  background: color-mix(in srgb, var(--accent-bright) 6%, transparent);
+  border-radius: 0 8px 8px 0;
+}
+
 .legal-body {
   display: flex;
   flex-direction: column;
