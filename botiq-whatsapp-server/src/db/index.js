@@ -292,10 +292,22 @@ export function initDatabase() {
   migrateUserAuthColumns();
   migrateSiteLeadsColumns();
   migrateClinicExtensions();
+  migrateMetaWhatsAppColumns();
   syncDentaCareDemo();
   seedDefaults();
   migrateCatalogs();
   return db;
+}
+
+function migrateMetaWhatsAppColumns() {
+  const cols = db.prepare('PRAGMA table_info(tenants)').all().map((c) => c.name);
+  if (!cols.includes('whatsapp_waba_id')) {
+    try {
+      db.exec(`ALTER TABLE tenants ADD COLUMN whatsapp_waba_id TEXT`);
+    } catch (e) {
+      if (!String(e?.message || '').includes('duplicate column')) throw e;
+    }
+  }
 }
 
 function migrateTenantProductsColumn() {
@@ -610,6 +622,7 @@ export function tenantToClient(row) {
     plan: row.plan,
     status: row.status,
     whatsappConnected: !!(row.whatsapp_phone_id && row.whatsapp_token),
+    whatsappWabaId: row.whatsapp_waba_id || null,
     isLive: row.status === 'active',
     onboardingPending: row.status === 'pending_onboarding',
     intakeStatus: intake?.status ?? 'draft',

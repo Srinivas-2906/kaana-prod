@@ -4,17 +4,19 @@ interface SidebarProps {
   active: string;
   onNavigate: (view: string) => void;
   onAbout: () => void;
+  hideDemoViews?: boolean;
 }
 
-const navItems = [
-  { id: 'overview', icon: 'ti-layout-dashboard', label: 'Overview' },
-  { id: 'conversations', icon: 'ti-message-chatbot', label: 'Inbox', badge: 3 },
-  { id: 'builder', icon: 'ti-robot', label: 'Builder' },
-  { id: 'analytics', icon: 'ti-chart-dots', label: 'Analytics' },
+const allNavItems = [
+  { id: 'overview', icon: 'ti-layout-dashboard', label: 'Overview', demo: true },
+  { id: 'conversations', icon: 'ti-message-chatbot', label: 'Inbox' },
+  { id: 'builder', icon: 'ti-robot', label: 'Builder', demo: true },
+  { id: 'analytics', icon: 'ti-chart-dots', label: 'Analytics', demo: true },
   { id: 'settings', icon: 'ti-settings-2', label: 'Settings' },
 ];
 
-export function Sidebar({ active, onNavigate, onAbout }: SidebarProps) {
+export function Sidebar({ active, onNavigate, onAbout, hideDemoViews }: SidebarProps) {
+  const navItems = hideDemoViews ? allNavItems.filter((item) => !item.demo) : allNavItems;
   return (
     <aside className="icon-rail">
       <div className="rail-brand" title="BotIQ by Kaana AI">
@@ -32,7 +34,6 @@ export function Sidebar({ active, onNavigate, onAbout }: SidebarProps) {
             data-label={item.label}
           >
             <i className={`ti ${item.icon}`} />
-            {'badge' in item && item.badge ? <span className="rail-badge">{item.badge}</span> : null}
           </button>
         ))}
       </nav>

@@ -36,14 +36,22 @@ This repo hosts multiple products under **one domain** (`kaana.in`) and deploys 
 - **Cloud Build**: `cloudbuild.crm.yaml`
 - **Workflow**: `.github/workflows/deploy-crm.yml`
 
-### BotIQ / API (api.kaana.in + inbox.kaana.in)
+### BotIQ / API (api.kaana.in)
 
-- **Domains**: `api.kaana.in`, `inbox.kaana.in`
-- **Path**: `botiq-app/`
-- **Cloud Run service**: `kaana-api`
-- **Cloud Build**: `botiq-app/cloudbuild.yaml`
+- **Domain**: `api.kaana.in` (LB → `kaana-api-backend` → Cloud Run `kaana-api`)
+- **Path**: `botiq-whatsapp-server/`
+- **Cloud Run service**: `kaana-api` (`crucial-accord-505607-g9`, `asia-south1`)
+- **Cloud Build**: `cloudbuild.api.yaml` (repo root submit)
 - **Workflow**: `.github/workflows/deploy-botiq.yml`
 - **Health**: `GET /health`
+
+### BotIQ Inbox (inbox.kaana.in)
+
+- **Domain**: `inbox.kaana.in`
+- **Path**: `botiq/`
+- **Cloud Run service**: `kaana-inbox`
+- **Cloud Build**: `cloudbuild.yaml` (inbox step) or dedicated inbox config when split
+- **Review build**: `VITE_HIDE_DEMO_VIEWS=true` (see root `cloudbuild.yaml` inbox step)
 
 ### Clinic (clinic.kaana.in + clinic-api.kaana.in)
 

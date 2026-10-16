@@ -24,6 +24,13 @@ import { saveSiteLead, listSiteLeadsForAdmin, updateSiteLead } from '../services
 import { getSetupQueue, getTenantAdminDetail, listTenantsWithStage } from '../services/adminOps.js';
 import { notifyIntakeSubmitted, notifySiteLead } from '../services/notify.js';
 import { notifyCustomerIntakeSubmitted, notifyCustomerActivated } from '../services/customerNotify.js';
+import {
+  listMessageTemplates,
+  createMessageTemplate,
+  getMessageTemplateStatus,
+  graphErrorToClient,
+} from '../services/metaWhatsApp.js';
+import { getTenantWhatsAppCredentials } from '../services/tenantWhatsAppCreds.js';
 
 const router = Router();
 
@@ -157,13 +164,16 @@ router.patch('/tenant', authMiddleware, (req, res) => {
 router.patch('/tenant/whatsapp', authMiddleware, requireLiveTenant, (req, res) => {
   const tenantId = req.user.tenantId;
   if (!tenantId) return res.status(403).json({ error: 'No tenant associated with account' });
-  const { phoneNumberId, accessToken, whatsappNumber } = req.body ?? {};
+  const { phoneNumberId, accessToken, whatsappNumber, wabaId } = req.body ?? {};
   const db = getDb();
   if (phoneNumberId) {
     db.prepare('UPDATE tenants SET whatsapp_phone_id = ? WHERE id = ?').run(phoneNumberId, tenantId);
   }
   if (accessToken) {
     db.prepare('UPDATE tenants SET whatsapp_token = ? WHERE id = ?').run(accessToken, tenantId);
+  }
+  if (wabaId) {
+    db.prepare('UPDATE tenants SET whatsapp_waba_id = ? WHERE id = ?').run(wabaId, tenantId);
   }
   if (whatsappNumber) {
     const row = db.prepare('SELECT settings FROM tenants WHERE id = ?').get(tenantId);
@@ -174,6 +184,90 @@ router.patch('/tenant/whatsapp', authMiddleware, requireLiveTenant, (req, res) =
   const tenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId);
   res.json(tenantToClient(tenant));
 });
+
+function requireTenantWhatsApp(req, res, next) {
+  const tenantId = req.user?.tenantId;
+  if (!tenantId) return res.status(403).json({ error: 'No tenant associated with account' });
+  const creds = getTenantWhatsAppCredentials(tenantId);
+  if (!creds) {
+    return res.status(400).json({
+      error: 'WhatsApp is not fully connected. Complete Embedded Signup or save WABA ID and access token.',
+    });
+  }
+  req.whatsappCreds = creds;
+  next();
+}
+
+function normalizeTemplateName(raw) {
+  return String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '');
+}
+
+router.get('/tenant/whatsapp/templates', authMiddleware, requireLiveTenant, requireTenantWhatsApp, async (req, res) => {
+  try {
+    const { wabaId, accessToken } = req.whatsappCreds;
+    const result = await listMessageTemplates(wabaId, accessToken);
+    res.json(result);
+  } catch (err) {
+    const status = err.status && err.status >= 400 && err.status < 600 ? err.status : 502;
+    res.status(status).json(graphErrorToClient(err));
+  }
+});
+
+router.post('/tenant/whatsapp/templates', authMiddleware, requireLiveTenant, requireTenantWhatsApp, async (req, res) => {
+  const { name, language, category, body } = req.body ?? {};
+  const templateName = normalizeTemplateName(name);
+  const bodyText = String(body || '').trim();
+  const lang = String(language || 'en').trim() || 'en';
+  const cat = String(category || 'UTILITY').trim().toUpperCase();
+
+  if (!templateName || templateName.length < 1) {
+    return res.status(400).json({ error: 'Template name is required (letters, numbers, underscores).' });
+  }
+  if (!bodyText || bodyText.length < 1) {
+    return res.status(400).json({ error: 'Template body text is required.' });
+  }
+  if (!['UTILITY', 'MARKETING', 'AUTHENTICATION'].includes(cat)) {
+    return res.status(400).json({ error: 'Category must be UTILITY, MARKETING, or AUTHENTICATION.' });
+  }
+
+  try {
+    const { wabaId, accessToken } = req.whatsappCreds;
+    const template = await createMessageTemplate(wabaId, accessToken, {
+      name: templateName,
+      language: lang,
+      category: cat,
+      bodyText,
+    });
+    res.status(201).json({ template });
+  } catch (err) {
+    const status = err.status && err.status >= 400 && err.status < 600 ? err.status : 502;
+    res.status(status).json(graphErrorToClient(err));
+  }
+});
+
+router.get(
+  '/tenant/whatsapp/templates/:name/status',
+  authMiddleware,
+  requireLiveTenant,
+  requireTenantWhatsApp,
+  async (req, res) => {
+    const templateName = normalizeTemplateName(req.params.name);
+    if (!templateName) return res.status(400).json({ error: 'Template name required' });
+
+    try {
+      const { wabaId, accessToken } = req.whatsappCreds;
+      const template = await getMessageTemplateStatus(wabaId, accessToken, templateName);
+      res.json({ template });
+    } catch (err) {
+      const status = err.status === 404 ? 404 : err.status && err.status >= 400 && err.status < 600 ? err.status : 502;
+      res.status(status).json(graphErrorToClient(err));
+    }
+  },
+);
 
 router.get('/analytics', authMiddleware, requireLiveTenant, (req, res) => {
   if (!req.user.tenantId) return res.status(403).json({ error: 'Tenant required' });
