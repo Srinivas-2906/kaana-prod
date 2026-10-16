@@ -68,11 +68,11 @@ export function AnalyticsView() {
           <h3>Daily conversations</h3>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={dailyConversations}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#EDE9FE" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
-              <Area type="monotone" dataKey="total" stroke="#7C3AED" fill="#EDE9FE" strokeWidth={2} />
+              <Area type="monotone" dataKey="total" stroke="#00E676" fill="rgba(0,230,118,0.15)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -81,17 +81,17 @@ export function AnalyticsView() {
           <h3>Bot vs agent handled</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={botAgentData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#EDE9FE" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} />
-              <Bar dataKey="bot" stackId="a" fill="#7C3AED" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="agent" stackId="a" fill="#1E0A3C" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="bot" stackId="a" fill="#00E676" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="agent" stackId="a" fill="#111111" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
           <div className="pie-legend">
-            <span><i style={{ background: '#7C3AED' }} /> Bot handled</span>
-            <span><i style={{ background: '#1E0A3C' }} /> Agent handled</span>
+            <span><i style={{ background: '#00E676' }} /> Bot handled</span>
+            <span><i style={{ background: '#111111' }} /> Agent handled</span>
           </div>
         </div>
 

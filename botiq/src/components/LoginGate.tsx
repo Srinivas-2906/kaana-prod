@@ -12,10 +12,23 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="login-gate">
         <div className="login-gate-card">
-          <h1>BotIQ</h1>
-          <p>Sign in with your Kaana account to access your WhatsApp inbox.</p>
-          <a href={`${PLATFORM}/login`} className="login-gate-btn">Log in to Kaana</a>
-          <a href={`${PLATFORM}/signup`} className="login-gate-link">Start setup</a>
+          <img
+            src="/botiq-wordmark.png"
+            alt="Bot IQ — A product of Kaana AI Technologies"
+            className="login-gate-wordmark"
+            width={280}
+            height={80}
+          />
+          <p className="login-gate-tagline">
+            Sign in with your Kaana account to access your WhatsApp inbox, templates, and automation.
+          </p>
+          <p className="login-gate-sub">Kaana AI Technologies</p>
+          <a href={`${PLATFORM}/login`} className="login-gate-btn">
+            Log in to continue
+          </a>
+          <a href={`${PLATFORM}/signup`} className="login-gate-link">
+            New here? Start setup on Kaana
+          </a>
         </div>
       </div>
     );

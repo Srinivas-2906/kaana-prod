@@ -12,16 +12,15 @@ export function AboutModal({ open, onClose }: AboutModalProps) {
         <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
           <i className="ti ti-x" />
         </button>
-        <div className="modal-icon"><i className="ti ti-robot" /></div>
-        <h2 id="about-title">About BotIQ</h2>
+        <img src="/botiq-icon.png" alt="" className="modal-brand-icon" width={56} height={56} />
+        <h2 id="about-title">Bot IQ</h2>
+        <p className="modal-eyebrow">A product of Kaana AI Technologies</p>
         <p>
-          BotIQ is a demo product by <strong>Kaana AI Technologies</strong>.
-          We build custom AI chatbots for WhatsApp, web, and SMS for real estate,
-          retail, restaurants, and more.
+          WhatsApp inbox, templates, and automation for businesses on the Meta WhatsApp Business Platform.
         </p>
         <p className="modal-cta">
-          Contact us to build your own:{' '}
-          <a href="https://kaanaai.com" target="_blank" rel="noreferrer">kaanaai.com</a>
+          Support:{' '}
+          <a href="mailto:hello@kaana.in">hello@kaana.in</a>
         </p>
       </div>
     </div>

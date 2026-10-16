@@ -253,7 +253,7 @@ export function ConversationsView({ onTakeOver, onViewCRM, onNotify }: Conversat
                     <div className="chat-props">
                       {msg.propertyCards.map((p) => (
                         <div key={p.id} className="chat-prop">
-                          <div className="chat-prop-img" style={{ background: p.image ?? '#7C3AED' }} />
+                          <div className="chat-prop-img" style={{ background: p.image ?? '#00E676' }} />
                           <div>
                             <strong>{p.title}</strong>
                             <span>{p.price} · {p.sqft}</span>

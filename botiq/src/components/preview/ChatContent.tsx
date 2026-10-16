@@ -31,7 +31,7 @@ function PropertyCards({
     <div className={`prop-cards prop-${variant} msg-enter`}>
       {cards.map((c, i) => (
         <div key={c.id} className="prop-card" style={{ animationDelay: `${i * 80}ms` }}>
-          <div className="prop-image" style={{ background: c.image ?? 'linear-gradient(135deg, #7C3AED, #1E0A3C)' }}>
+          <div className="prop-image" style={{ background: c.image ?? 'linear-gradient(135deg, #00E676, #030303)' }}>
             <span className="prop-badge">{c.status}</span>
           </div>
           <div className="prop-body">

@@ -19,8 +19,10 @@ export function Sidebar({ active, onNavigate, onAbout, hideDemoViews }: SidebarP
   const navItems = hideDemoViews ? allNavItems.filter((item) => !item.demo) : allNavItems;
   return (
     <aside className="icon-rail">
-      <div className="rail-brand" title="BotIQ by Kaana AI">
-        <div className="rail-logo"><i className="ti ti-robot" /></div>
+      <div className="rail-brand" title="Bot IQ by Kaana AI Technologies">
+        <div className="rail-logo">
+          <img src="/botiq-icon.png" alt="" className="rail-logo-img" width={44} height={44} />
+        </div>
       </div>
 
       <nav className="rail-nav">
@@ -39,15 +41,14 @@ export function Sidebar({ active, onNavigate, onAbout, hideDemoViews }: SidebarP
       </nav>
 
       <div className="rail-bottom">
-        <button type="button" className="rail-bot active" title="PropBot · Live">
-          🏠
-          <span className="rail-live" />
-        </button>
-        <button type="button" className="rail-btn" onClick={onAbout} title="About">
-          <i className="ti ti-help" />
-        </button>
-        <button type="button" className="rail-avatar" title="Arun Kaana">
-          AK
+        {!hideDemoViews && (
+          <button type="button" className="rail-bot active" title="Workspace">
+            <i className="ti ti-building-store" />
+            <span className="rail-live" />
+          </button>
+        )}
+        <button type="button" className="rail-btn" onClick={onAbout} title="About Bot IQ">
+          <i className="ti ti-info-circle" />
         </button>
       </div>
     </aside>

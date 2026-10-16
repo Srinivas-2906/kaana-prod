@@ -2,7 +2,7 @@ export function getInitials(name: string) {
   return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
-const AVATAR_COLORS = ['#7C3AED', '#2563EB', '#25D366', '#F59E0B', '#EC4899', '#0EA5E9', '#10B981', '#EF4444'];
+const AVATAR_COLORS = ['#00E676', '#25D366', '#69F0AE', '#38BDF8', '#A3E635', '#FBBF24', '#F472B6', '#94A3B8'];
 
 export function avatarColor(name: string) {
   let hash = 0;

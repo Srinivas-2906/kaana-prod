@@ -20,7 +20,7 @@ const edges = [
 ];
 
 const typeColor: Record<string, string> = {
-  trigger: '#7C3AED',
+  trigger: '#00E676',
   message: '#2563EB',
   condition: '#F59E0B',
   action: '#10B981',

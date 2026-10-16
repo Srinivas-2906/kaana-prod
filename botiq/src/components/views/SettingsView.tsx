@@ -54,7 +54,7 @@ export function SettingsView() {
           <div className="color-row">
             <span>Theme color</span>
             <div className="color-swatch" style={{ background: '#1E0A3C' }} />
-            <div className="color-swatch" style={{ background: '#7C3AED' }} />
+            <div className="color-swatch" style={{ background: '#00E676' }} />
             <div className="color-swatch" style={{ background: '#25D366' }} />
           </div>
           <button type="button" className="btn-outline">Customize widget</button>

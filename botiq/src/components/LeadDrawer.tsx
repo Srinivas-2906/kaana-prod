@@ -31,7 +31,7 @@ export function LeadDrawer({
           <div className="conf-ring-lg">
             <svg viewBox="0 0 36 36">
               <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(124,58,237,0.15)" strokeWidth="2.5" />
-                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#6D28D9" strokeWidth="2.5" strokeDasharray={`${active.lead.confidence}, 100`} />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#00E676" strokeWidth="2.5" strokeDasharray={`${active.lead.confidence}, 100`} />
             </svg>
             <div className="conf-ring-text">
               <strong>{active.lead.confidence}%</strong>
