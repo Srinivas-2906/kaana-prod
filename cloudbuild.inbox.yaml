@@ -1,0 +1,62 @@
+steps:
+  - id: build-inbox
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:latest
+      - --build-arg
+      - VITE_WHATSAPP_API=${_VITE_WHATSAPP_API}
+      - --build-arg
+      - VITE_PLATFORM_URL=${_VITE_PLATFORM_URL}
+      - --build-arg
+      - VITE_HIDE_DEMO_VIEWS=true
+      - ./botiq
+
+  - id: push-inbox
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox
+
+  - id: deploy-inbox
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:$BUILD_ID"
+        gcloud run deploy "${_INBOX_SERVICE}" \
+          --project "$PROJECT_ID" \
+          --image "$$IMAGE" \
+          --region "${_REGION}" \
+          --platform managed \
+          --allow-unauthenticated \
+          --port 8080 \
+          --min-instances 0 \
+          --max-instances 3 \
+          --memory 256Mi \
+          --cpu 1
+        gcloud run services update "${_INBOX_SERVICE}" \
+          --project "$PROJECT_ID" \
+          --region "${_REGION}" \
+          --no-invoker-iam-check \
+          --quiet
+
+substitutions:
+  _REGION: asia-south1
+  _ARTIFACT_REPO: kaana
+  _INBOX_SERVICE: kaana-inbox
+  _VITE_WHATSAPP_API: https://api.kaana.in/api
+  _VITE_PLATFORM_URL: https://app.kaana.in
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/inbox:latest
