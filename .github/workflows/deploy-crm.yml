@@ -1,4 +1,4 @@
-name: Deploy CRM (crm.kaana.in)
+name: Deploy CRM (crm.botiq.kaana.in)
 
 on:
   push:
@@ -54,5 +54,5 @@ jobs:
             --format='value(status.url)')"
           echo "Checking ${URL}/"
           curl -fsS "${URL}/" -o /dev/null
-          echo "Deploy OK: ${URL} (prod: https://crm.kaana.in)"
+          echo "Deploy OK: ${URL} (prod: https://crm.botiq.kaana.in)"
 

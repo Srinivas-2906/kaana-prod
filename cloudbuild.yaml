@@ -271,21 +271,21 @@ substitutions:
   _API_SERVICE: kaana-api
 
   # Public URLs
-  _PUBLIC_URL: https://api.kaana.in
-  _LISTINGS_BASE_URL: https://api.kaana.in/listings
-  _KAANA_PLATFORM_URL: https://app.kaana.in
-  _KAANA_BOTIQ_URL: https://inbox.kaana.in
+  _PUBLIC_URL: https://api.botiq.kaana.in
+  _LISTINGS_BASE_URL: https://api.botiq.kaana.in/listings
+  _KAANA_PLATFORM_URL: https://app.botiq.kaana.in
+  _KAANA_BOTIQ_URL: https://inbox.botiq.kaana.in
 
   # Frontend build-time envs
-  _VITE_API_URL: https://api.kaana.in/api/platform
-  _VITE_BILLING_URL: https://api.kaana.in/api/billing
-  _VITE_BOTIQ_URL: https://inbox.kaana.in
-  _VITE_CRM_URL: https://crm.kaana.in
+  _VITE_API_URL: https://api.botiq.kaana.in/api/platform
+  _VITE_BILLING_URL: https://api.botiq.kaana.in/api/billing
+  _VITE_BOTIQ_URL: https://inbox.botiq.kaana.in
+  _VITE_CRM_URL: https://crm.botiq.kaana.in
   _VITE_CLINIC_URL: https://clinic.kaana.in
-  _VITE_LISTINGS_URL: https://api.kaana.in/listings
+  _VITE_LISTINGS_URL: https://api.botiq.kaana.in/listings
   _VITE_WHATSAPP_LINK: https://wa.me/91XXXXXXXXXX
   _VITE_CLINIC_API: /api
-  _VITE_PLATFORM_URL: https://app.kaana.in
+  _VITE_PLATFORM_URL: https://app.botiq.kaana.in
 
   # API runtime
   _DB_BUCKET: kaana-prod-db

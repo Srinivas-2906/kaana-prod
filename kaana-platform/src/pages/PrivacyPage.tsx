@@ -12,7 +12,7 @@ export function PrivacyPage() {
           <p className="legal-scope">
             <strong>Bot IQ</strong> is a product operated by <strong>Kaana AI Technologies</strong>.
             This Privacy Policy applies to the Bot IQ platform (WhatsApp inbox, templates, and
-            automation at app.kaana.in) and related Kaana services accessed through your account.
+            automation at app.botiq.kaana.in) and related Kaana services accessed through your account.
           </p>
         </div>
 

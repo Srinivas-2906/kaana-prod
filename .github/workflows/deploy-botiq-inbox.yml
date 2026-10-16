@@ -1,4 +1,4 @@
-name: Deploy BotIQ Inbox (inbox.kaana.in)
+name: Deploy BotIQ Inbox (inbox.botiq.kaana.in)
 
 on:
   push:
@@ -48,13 +48,18 @@ jobs:
 
       - name: Verify live inbox host
         run: |
-          HTML="$(curl -fsS "https://inbox.kaana.in/")"
-          echo "$HTML" | grep -q 'BotIQ\|Log in to Kaana' || {
-            echo "Expected Bot IQ inbox shell on inbox.kaana.in"
+          INBOX="https://inbox.botiq.kaana.in"
+          if ! curl -fsS "$INBOX/" -o /tmp/inbox.html 2>/dev/null; then
+            INBOX="https://inbox.kaana.in"
+            curl -fsS "$INBOX/" -o /tmp/inbox.html
+          fi
+          HTML="$(cat /tmp/inbox.html)"
+          echo "$HTML" | grep -qiE 'BotIQ|Bot IQ|Log in' || {
+            echo "Expected Bot IQ inbox shell on $INBOX"
             exit 1
           }
           if echo "$HTML" | grep -q 'Try our AI in action'; then
-            echo "Marketing homepage still served on inbox.kaana.in"
+            echo "Marketing homepage still served on $INBOX"
             exit 1
           fi
-          echo "Deploy OK: https://inbox.kaana.in (Bot IQ Inbox SPA)"
+          echo "Deploy OK: $INBOX (Bot IQ Inbox SPA)"

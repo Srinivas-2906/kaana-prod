@@ -12,10 +12,15 @@ const ALLOWED_ORIGINS = new Set([
   'https://crm.kaana.in',
   'https://clinic.kaana.in',
   'https://api.kaana.in',
+  'https://botiq.kaana.in',
+  'https://app.botiq.kaana.in',
+  'https://inbox.botiq.kaana.in',
+  'https://crm.botiq.kaana.in',
+  'https://api.botiq.kaana.in',
 ]);
 
 const RESERVED_SUBDOMAINS = new Set([
-  'www', 'app', 'api', 'inbox', 'crm', 'clinic', 'admin', 'mail', 'kaana',
+  'www', 'app', 'api', 'inbox', 'crm', 'clinic', 'admin', 'mail', 'kaana', 'botiq',
 ]);
 
 const PRODUCT_PREFIXES = new Set(['inbox', 'crm', 'clinic', 'app', 'chat']);

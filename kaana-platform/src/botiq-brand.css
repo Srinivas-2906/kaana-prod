@@ -1,0 +1,59 @@
+/**
+ * Bot IQ product skin for app.kaana.in — black base + logo emerald (#00E676).
+ */
+
+html[data-product='botiq'] {
+  --green-400: #69f0ae;
+  --green-500: #00e676;
+  --green-600: #00c853;
+  --green-700: #00a844;
+
+  --ink-950: #030303;
+  --ink-900: #060606;
+  --ink-850: #0a0a0a;
+  --ink-800: #0d0d0d;
+  --ink-750: #111111;
+
+  --wa: #25d366;
+}
+
+html[data-product='botiq'][data-theme='dark'] {
+  --accent: var(--green-500);
+  --accent-bright: #69f0ae;
+  --accent-dark: var(--green-500);
+  --accent-darker: var(--green-600);
+  --accent-light: rgba(0, 230, 118, 0.12);
+  --accent-soft: rgba(0, 230, 118, 0.14);
+  --accent-fill: rgba(0, 230, 118, 0.1);
+  --accent-border: rgba(0, 230, 118, 0.38);
+  --accent-glow: rgba(0, 230, 118, 0.28);
+
+  --cta-gradient: linear-gradient(180deg, #69f0ae 0%, var(--green-500) 48%, var(--green-600) 100%);
+  --text-gradient: linear-gradient(120deg, #69f0ae 0%, var(--green-500) 46%, var(--green-600) 100%);
+
+  --focus-ring: 0 0 0 3px rgba(0, 230, 118, 0.38);
+  --ambient-1: rgba(0, 230, 118, 0.16);
+  --mesh-3: radial-gradient(circle, rgba(0, 230, 118, 0.14) 0%, transparent 70%);
+  --mesh-4: radial-gradient(circle, rgba(0, 230, 118, 0.08) 0%, transparent 70%);
+}
+
+html[data-product='botiq'] .btn-accent {
+  box-shadow: 0 0 24px rgba(0, 230, 118, 0.22);
+}
+
+html[data-product='botiq'] .site--product .form-card {
+  border-color: rgba(0, 230, 118, 0.12);
+  box-shadow: var(--elev-md), 0 0 60px rgba(0, 230, 118, 0.06);
+}
+
+html[data-product='botiq'] .auth-copy .section-label {
+  color: var(--accent-bright);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.site--product .ultimate-bg {
+  opacity: 0.72;
+}

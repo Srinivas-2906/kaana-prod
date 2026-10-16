@@ -1,6 +1,6 @@
 # Bot IQ — Meta App Review reviewer tenant setup
 
-**Product identity:** Bot IQ by Kaana (platform login at `app.kaana.in`, Meta app name: Kaana Platform).
+**Product identity:** Bot IQ by Kaana (platform login at `app.botiq.kaana.in`, Meta app name: Kaana Platform).
 
 No reviewer passwords or tokens belong in this repository. Provision credentials out of band.
 
@@ -19,7 +19,7 @@ Use one dedicated tenant for all review sessions (recommended slug: `meta-review
 
 ### Option A — Admin provision (production)
 
-1. Sign in as **platform admin** on `https://app.kaana.in/admin`.
+1. Sign in as **platform admin** on `https://app.botiq.kaana.in/admin`.
 2. Create or select a tenant with:
    - `status` / live flags set so the tenant is **live** (`isLive` — same as existing admin provisioning).
    - Industry and bot name suitable for demo (e.g. “Bot IQ Review Demo”).
@@ -30,7 +30,7 @@ Use one dedicated tenant for all review sessions (recommended slug: `meta-review
 
 ### Option B — Self-serve signup (staging)
 
-1. Reviewer signs up at `https://app.kaana.in/signup`.
+1. Reviewer signs up at `https://app.botiq.kaana.in/signup`.
 2. Platform admin approves intake and sets tenant **live** in admin console.
 
 ---
@@ -56,7 +56,7 @@ Backend stores credentials only on the server (`tenants.whatsapp_*`); the browse
 Inbound messages route **only** by `phone_number_id` → `tenants.whatsapp_phone_id`.
 
 1. Ensure the connected **Phone Number ID** is saved on the reviewer tenant (Embedded Signup does this).
-2. Confirm Meta app webhook callback: `https://api.kaana.in/webhook/whatsapp` (or your environment URL).
+2. Confirm Meta app webhook callback: `https://api.botiq.kaana.in/webhook/whatsapp` (or your environment URL).
 3. Production must set **`META_APP_SECRET`** on the API service (signature verification). Do **not** set `ALLOW_DEFAULT_TENANT_WEBHOOK` in production.
 
 Local dev only (optional):
@@ -71,7 +71,7 @@ META_WEBHOOK_SKIP_SIGNATURE=1   # only if testing without signature locally
 
 ## 5. Inbox (Bot IQ)
 
-1. Set **`VITE_HIDE_DEMO_VIEWS=true`** on the Inbox build (`inbox.kaana.in`) to hide mock Builder/Analytics/Live Preview during review.
+1. Set **`VITE_HIDE_DEMO_VIEWS=true`** on the Inbox build (`inbox.botiq.kaana.in`) to hide mock Builder/Analytics/Live Preview during review.
 2. From dashboard, **Open Inbox** (SSO).
 3. Send a WhatsApp message **to** the connected business number from a personal test phone.
 4. Confirm the thread appears in Inbox; reply from Inbox and confirm delivery on WhatsApp.
@@ -91,7 +91,7 @@ META_WEBHOOK_SKIP_SIGNATURE=1   # only if testing without signature locally
 
 | Step | Action |
 |------|--------|
-| A | Log in at `https://app.kaana.in/login` with provisioned user |
+| A | Log in at `https://app.botiq.kaana.in/login` with provisioned user |
 | B | Dashboard shows WhatsApp connected |
 | C | Open Inbox via SSO |
 | D | Send message from phone to business number |

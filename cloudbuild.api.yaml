@@ -43,10 +43,10 @@ substitutions:
   _REGION: asia-south1
   _ARTIFACT_REPO: kaana
   _API_SERVICE: kaana-api
-  _PUBLIC_URL: https://api.kaana.in
-  _LISTINGS_BASE_URL: https://api.kaana.in/listings
-  _KAANA_PLATFORM_URL: https://app.kaana.in
-  _KAANA_BOTIQ_URL: https://inbox.kaana.in
+  _PUBLIC_URL: https://api.botiq.kaana.in
+  _LISTINGS_BASE_URL: https://api.botiq.kaana.in/listings
+  _KAANA_PLATFORM_URL: https://app.botiq.kaana.in
+  _KAANA_BOTIQ_URL: https://inbox.botiq.kaana.in
   _DB_BUCKET: crucial-accord-505607-g9-db
   _API_SERVICE_ACCOUNT: kaana-api-runner@crucial-accord-505607-g9.iam.gserviceaccount.com
   _SECRET_JWT: kaana-jwt-secret

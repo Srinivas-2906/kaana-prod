@@ -48,8 +48,8 @@ export function LoginPage() {
       <div className="container auth-layout">
         <div className="auth-copy">
           <p className="section-label">Welcome back</p>
-          <h1>Log in to Kaana</h1>
-          <p>Access your WhatsApp dashboard, CRM, and settings.</p>
+          <h1>Log in to Bot IQ</h1>
+          <p>WhatsApp inbox, templates, and team dashboard — one place for your business.</p>
         </div>
         <form className="form-card" onSubmit={submit}>
           <h2>Log in</h2>

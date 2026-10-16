@@ -1,4 +1,4 @@
-name: Deploy BotIQ API (api.kaana.in)
+name: Deploy BotIQ API (api.botiq.kaana.in)
 
 on:
   push:
@@ -54,4 +54,4 @@ jobs:
             --format='value(status.url)')"
           echo "Checking ${URL}/health"
           curl -fsS "${URL}/health" -o /dev/null
-          echo "Deploy OK: ${URL} (prod hostname: https://api.kaana.in)"
+          echo "Deploy OK: ${URL} (prod hostname: https://api.botiq.kaana.in)"

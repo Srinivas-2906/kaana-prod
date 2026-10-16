@@ -27,7 +27,7 @@ function getStoredPreference(): ThemePreference {
   } catch {
     /* ignore */
   }
-  return 'light'; // Default light — Indian SMB market is WhatsApp-familiar, light-first
+  return 'dark'; // Bot IQ product default — black + emerald brand on app.kaana.in
 }
 
 function resolveTheme(pref: ThemePreference): ResolvedTheme {
@@ -69,7 +69,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       applyToDocument(next, preference);
       document.querySelector('meta[name="theme-color"]')?.setAttribute(
         'content',
-        next === 'dark' ? '#0b0f19' : '#ffffff',
+        next === 'dark' ? '#030303' : '#ffffff',
       );
     };
     sync();

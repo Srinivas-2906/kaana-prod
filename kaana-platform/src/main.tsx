@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './tokens.css';
+import './botiq-brand.css';
 import './index.css';
 import './ultimate.css';
 import './light-contrast.css';

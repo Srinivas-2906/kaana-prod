@@ -1,4 +1,4 @@
-name: Deploy Platform (app.kaana.in)
+name: Deploy Platform (app.botiq.kaana.in)
 
 on:
   push:
@@ -54,5 +54,5 @@ jobs:
             --format='value(status.url)')"
           echo "Checking ${URL}/"
           curl -fsS "${URL}/" -o /dev/null
-          echo "Deploy OK: ${URL} (prod: https://app.kaana.in)"
+          echo "Deploy OK: ${URL} (prod: https://app.botiq.kaana.in)"
 

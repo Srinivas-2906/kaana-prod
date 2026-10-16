@@ -11,10 +11,10 @@ Provisioning details (no credentials in repo): see **`BOTIQ_META_REVIEWER_SETUP.
 
 ## Reviewer instructions
 
-1. Log in to **Bot IQ** at `https://app.kaana.in/login` with the provisioned review account (Meta app role: Admin/Developer/Tester on `27724398370520714`).
-2. Open `https://app.kaana.in/dashboard` — confirm WhatsApp is connected.
-3. **Inbox:** Open Bot IQ Inbox, send/receive a real WhatsApp message on the connected number.
-4. **Templates:** Open `https://app.kaana.in/templates`, create and submit a template, refresh Meta status.
+1. Log in to **Bot IQ** at `https://app.botiq.kaana.in/login` with the provisioned review account (Meta app role: Admin/Developer/Tester on `27724398370520714`).
+2. Open `https://app.botiq.kaana.in/dashboard` — confirm WhatsApp is connected.
+3. **Inbox:** Open `https://inbox.botiq.kaana.in`, send/receive a real WhatsApp message on the connected number.
+4. **Templates:** Open `https://app.botiq.kaana.in/templates`, create and submit a template, refresh Meta status.
 5. Each permission has its **own screencast** — do not combine into one video.
 
 **Test credentials:** Contact `kaana.srinivas@gmail.com` for a reviewer test account if needed.
@@ -96,7 +96,7 @@ Authorization: Bearer {token-with-whatsapp_business_management}
 - **Data collected:** Business account info, WhatsApp message content, phone numbers, conversation metadata, template definitions.
 - **Purpose:** Provide WhatsApp automation, inbox, and CRM services to business customers.
 - **Sharing:** Meta (WhatsApp Cloud API), cloud hosting provider, payment processor (Razorpay) where applicable.
-- **Deletion:** `https://kaana.in/data-deletion` and automated callback at `https://api.kaana.in/meta/data-deletion`
+- **Deletion:** `https://kaana.in/data-deletion` (instructions; dedicated Bot IQ domain later) and automated callback at `https://api.botiq.kaana.in/meta/data-deletion` when deployed
 - **Retention:** While account is active + legal/compliance period after deletion request.
 
 ---
@@ -117,16 +117,16 @@ Both permissions appear on the authorization screen only after **Advanced Access
 | Surface | Label today | Reviewer guidance |
 |---------|-------------|-------------------|
 | Customer product | **Bot IQ** | Use in screencasts and written use cases |
-| Legal / company | **Kaana AI Technologies** | Bot IQ privacy/terms on `app.kaana.in`; data deletion instructions on `kaana.in` |
+| Legal / company | **Kaana AI Technologies** | Interim privacy/terms on `app.botiq.kaana.in`; data deletion instructions on `kaana.in` until a dedicated Bot IQ domain |
 | Meta Developer app | **Kaana Platform** | App ID `27724398370520714`; do not rename without Meta dashboard approval |
-| Login / dashboard host | `app.kaana.in` | OK — state “Bot IQ by Kaana” in App Review notes |
+| Login / dashboard host | `app.botiq.kaana.in` | Product URLs live under `*.botiq.kaana.in` (legacy `app.kaana.in` kept during migration) |
 
 **Meta App Dashboard → Settings → Basic (paste before submit):**
 
 | Field | URL |
 |--------|-----|
-| Privacy Policy URL | `https://app.kaana.in/privacy` |
-| Terms of Service URL | `https://app.kaana.in/terms` |
+| Privacy Policy URL | `https://app.botiq.kaana.in/privacy` |
+| Terms of Service URL | `https://app.botiq.kaana.in/terms` |
 | User data deletion | **Data deletion instructions URL:** `https://kaana.in/data-deletion` |
 
-Use **instructions URL** (not the API callback) unless you deploy `https://api.kaana.in/meta/data-deletion`.
+Webhook callback (production): `https://api.botiq.kaana.in/webhook/whatsapp`. Use **instructions URL** for data deletion (not the API callback) until Meta Basic Settings require the callback.

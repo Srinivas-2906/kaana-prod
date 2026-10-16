@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { getToken } from '../lib/api';
 import { CTA } from '../lib/onboarding';
 import { ThemeToggle } from './ThemeToggle';
+import { BotIqLogo } from './BotIqLogo';
 import './nav.css';
 
 const NAV_LINKS = [
@@ -34,24 +35,7 @@ export function Navbar() {
       <header className="site-header">
         <div className="nav" data-open={open || undefined}>
           <div className="nav-inner">
-            <Link to="/" className="nav-brand">
-              <span className="nav-logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect width="24" height="24" rx="8" fill="currentColor" />
-                  <path
-                    d="M7 8.5c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v5.5c0 2.5-2 4.5-4.5 4.5h-1L8 20v-2.5C7.4 17.2 7 16.4 7 15.5V8.5z"
-                    fill="var(--bg)"
-                  />
-                  <path
-                    d="M9.5 11h5M9.5 13.5h3"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
-              Kaana
-            </Link>
+            <BotIqLogo to="/" className="nav-brand-logo" />
 
             <nav className="nav-links" aria-label="Main navigation">
               {NAV_LINKS.map(({ to, label, hash }) =>

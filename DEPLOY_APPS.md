@@ -1,6 +1,6 @@
 # Kaana — Product deploy map
 
-This repo hosts multiple products under **one domain** (`kaana.in`) and deploys them as **independent Cloud Run services** behind a shared HTTPS load balancer URL map (`scripts/url-map-multi.yaml`).
+This repo hosts multiple products under **`kaana.in`** (and the Bot IQ namespace **`*.botiq.kaana.in`**) and deploys them as **independent Cloud Run services** behind a shared HTTPS load balancer URL map (`scripts/url-map-multi.yaml`). See [`config/BOTIQ_DOMAINS.md`](config/BOTIQ_DOMAINS.md).
 
 ## Deploy rule
 
@@ -20,34 +20,34 @@ This repo hosts multiple products under **one domain** (`kaana.in`) and deploys 
 - **Cloud Build**: `cloudbuild.marketing.yaml`
 - **Workflow**: `.github/workflows/deploy-marketing.yml`
 
-### Platform (app.kaana.in)
+### Platform (Bot IQ — app.botiq.kaana.in)
 
-- **Domain**: `app.kaana.in`
+- **Domain**: `app.botiq.kaana.in`, `botiq.kaana.in` (legacy: `app.kaana.in`)
 - **Path**: `kaana-platform/`
 - **Cloud Run service**: `kaana-platform`
 - **Cloud Build**: `cloudbuild.platform.yaml`
 - **Workflow**: `.github/workflows/deploy-platform.yml`
 
-### CRM (crm.kaana.in)
+### CRM (crm.botiq.kaana.in)
 
-- **Domain**: `crm.kaana.in`
+- **Domain**: `crm.botiq.kaana.in` (legacy: `crm.kaana.in`)
 - **Path**: `propcrm/`
 - **Cloud Run service**: `kaana-crm`
 - **Cloud Build**: `cloudbuild.crm.yaml`
 - **Workflow**: `.github/workflows/deploy-crm.yml`
 
-### BotIQ / API (api.kaana.in)
+### BotIQ / API (api.botiq.kaana.in)
 
-- **Domain**: `api.kaana.in` (LB → `kaana-api-backend` → Cloud Run `kaana-api`)
+- **Domain**: `api.botiq.kaana.in` (legacy: `api.kaana.in`; LB → `kaana-api-backend` → Cloud Run `kaana-api`)
 - **Path**: `botiq-whatsapp-server/`
 - **Cloud Run service**: `kaana-api` (`crucial-accord-505607-g9`, `asia-south1`)
 - **Cloud Build**: `cloudbuild.api.yaml` (repo root submit)
 - **Workflow**: `.github/workflows/deploy-botiq.yml`
 - **Health**: `GET /health`
 
-### BotIQ Inbox (inbox.kaana.in)
+### BotIQ Inbox (inbox.botiq.kaana.in)
 
-- **Domain**: `inbox.kaana.in`
+- **Domain**: `inbox.botiq.kaana.in` (legacy: `inbox.kaana.in`)
 - **Path**: `botiq/`
 - **Cloud Run service**: `kaana-inbox`
 - **Cloud Build**: `cloudbuild.inbox.yaml` (inbox-only; triggered by `deploy-botiq-inbox.yml`)

@@ -55,34 +55,34 @@ export default function DataDeletionPage() {
           <p className="text-neutral-300 text-sm md:text-base leading-relaxed mb-10 pl-4 border-l-2 border-accent/80">
             Bot IQ is the WhatsApp inbox, templates, and automation product at{" "}
             <a
-              href="https://app.kaana.in"
+              href="https://app.botiq.kaana.in"
               className="text-accent hover:underline"
               rel="noopener noreferrer"
             >
-              app.kaana.in
+              app.botiq.kaana.in
             </a>
             . Privacy and terms for the product are at{" "}
             <a
-              href="https://app.kaana.in/privacy"
+              href="https://app.botiq.kaana.in/privacy"
               className="text-accent hover:underline"
               rel="noopener noreferrer"
             >
-              app.kaana.in/privacy
+              app.botiq.kaana.in/privacy
             </a>{" "}
             and{" "}
             <a
-              href="https://app.kaana.in/terms"
+              href="https://app.botiq.kaana.in/terms"
               className="text-accent hover:underline"
               rel="noopener noreferrer"
             >
-              app.kaana.in/terms
+              app.botiq.kaana.in/terms
             </a>
             .
           </p>
 
           <section className="space-y-4 mb-10">
             <h2 className="text-xl md:text-2xl text-neutral-100 font-display font-medium">
-              Bot IQ business customers (app.kaana.in accounts)
+              Bot IQ business customers (app.botiq.kaana.in accounts)
             </h2>
             <p className="text-neutral-300">
               If you use Bot IQ and want your business account, WhatsApp
@@ -174,7 +174,7 @@ export default function DataDeletionPage() {
             <p className="text-neutral-400 text-sm">
               See also{" "}
               <a
-                href="https://app.kaana.in/privacy"
+                href="https://app.botiq.kaana.in/privacy"
                 className="text-accent hover:underline"
                 rel="noopener noreferrer"
               >
@@ -182,7 +182,7 @@ export default function DataDeletionPage() {
               </a>{" "}
               and{" "}
               <a
-                href="https://app.kaana.in/terms"
+                href="https://app.botiq.kaana.in/terms"
                 className="text-accent hover:underline"
                 rel="noopener noreferrer"
               >

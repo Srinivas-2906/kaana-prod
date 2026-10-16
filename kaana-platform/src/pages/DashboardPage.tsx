@@ -191,7 +191,7 @@ export function DashboardPage() {
 
           <article className={`dash-card ${locked ? 'is-locked' : ''}`}>
             <span className="dash-icon">{isClinic ? '🦷' : '🎯'}</span>
-            <h2>{isClinic ? 'Clinic front desk' : 'Kaana CRM'}</h2>
+            <h2>{isClinic ? 'Clinic front desk' : 'Bot IQ CRM'}</h2>
             <p>{isClinic ? 'Today\'s appointments, patient cards, walk-in booking.' : 'Pipeline, leads from WhatsApp, bookings, follow-ups.'}</p>
             <button type="button" className="btn btn-accent" disabled={locked} onClick={() => openAppWithSSO(isClinic ? 'clinic' : 'crm')}>
               {isClinic ? 'Open clinic desk →' : 'Open CRM →'}

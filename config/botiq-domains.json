@@ -1,0 +1,33 @@
+{
+  "$comment": "Canonical Bot IQ hostnames (under kaana.in until a dedicated product domain). Keep cloudbuild _VITE_* / _KAANA_* substitutions in sync.",
+  "hosts": {
+    "platform": "app.botiq.kaana.in",
+    "inbox": "inbox.botiq.kaana.in",
+    "api": "api.botiq.kaana.in",
+    "crm": "crm.botiq.kaana.in",
+    "marketing": "botiq.kaana.in"
+  },
+  "urls": {
+    "platform": "https://app.botiq.kaana.in",
+    "inbox": "https://inbox.botiq.kaana.in",
+    "api": "https://api.botiq.kaana.in",
+    "apiPlatform": "https://api.botiq.kaana.in/api/platform",
+    "apiBilling": "https://api.botiq.kaana.in/api/billing",
+    "apiWhatsApp": "https://api.botiq.kaana.in/api",
+    "listings": "https://api.botiq.kaana.in/listings",
+    "crm": "https://crm.botiq.kaana.in",
+    "marketingRedirect": "https://app.botiq.kaana.in",
+    "kaanaMarketing": "https://kaana.in"
+  },
+  "legalInterim": {
+    "privacy": "https://app.botiq.kaana.in/privacy",
+    "terms": "https://app.botiq.kaana.in/terms",
+    "dataDeletionInstructions": "https://kaana.in/data-deletion"
+  },
+  "legacy": {
+    "platform": "https://app.kaana.in",
+    "inbox": "https://inbox.kaana.in",
+    "api": "https://api.kaana.in",
+    "crm": "https://crm.kaana.in"
+  }
+}

@@ -5,6 +5,21 @@ hostRules:
       - kaana.in
       - www.kaana.in
     pathMatcher: marketing
+  # Bot IQ product zone (canonical for Meta review / customer-facing URLs)
+  - hosts:
+      - botiq.kaana.in
+      - app.botiq.kaana.in
+    pathMatcher: platform
+  - hosts:
+      - inbox.botiq.kaana.in
+    pathMatcher: inbox
+  - hosts:
+      - crm.botiq.kaana.in
+    pathMatcher: crm
+  - hosts:
+      - api.botiq.kaana.in
+    pathMatcher: api
+  # Legacy Bot IQ hostnames (keep until redirects + Meta settings updated)
   - hosts:
       - app.kaana.in
     pathMatcher: platform

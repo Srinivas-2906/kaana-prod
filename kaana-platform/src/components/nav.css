@@ -40,6 +40,10 @@
   width: 100%;
 }
 
+.nav-brand-logo.botiq-logo {
+  max-height: 26px;
+}
+
 .nav-brand {
   display: flex;
   align-items: center;
