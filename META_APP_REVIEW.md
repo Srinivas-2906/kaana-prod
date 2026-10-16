@@ -117,8 +117,16 @@ Both permissions appear on the authorization screen only after **Advanced Access
 | Surface | Label today | Reviewer guidance |
 |---------|-------------|-------------------|
 | Customer product | **Bot IQ** | Use in screencasts and written use cases |
-| Legal / company | **Kaana** | Privacy, terms, data deletion on `kaana.in` |
+| Legal / company | **Kaana AI Technologies** | Bot IQ privacy/terms on `app.kaana.in`; data deletion instructions on `kaana.in` |
 | Meta Developer app | **Kaana Platform** | App ID `27724398370520714`; do not rename without Meta dashboard approval |
 | Login / dashboard host | `app.kaana.in` | OK — state “Bot IQ by Kaana” in App Review notes |
 
-**Confusing gaps to fix before submission (dashboard URLs, not code):** Meta **basic settings** currently show null `privacy_policy_url`, `terms_of_service_url`, and `data_deletion_url` — point these to `https://kaana.in/privacy-policy`, terms page, and `https://kaana.in/data-deletion` in App Dashboard → Settings → Basic.
+**Meta App Dashboard → Settings → Basic (paste before submit):**
+
+| Field | URL |
+|--------|-----|
+| Privacy Policy URL | `https://app.kaana.in/privacy` |
+| Terms of Service URL | `https://app.kaana.in/terms` |
+| User data deletion | **Data deletion instructions URL:** `https://kaana.in/data-deletion` |
+
+Use **instructions URL** (not the API callback) unless you deploy `https://api.kaana.in/meta/data-deletion`.

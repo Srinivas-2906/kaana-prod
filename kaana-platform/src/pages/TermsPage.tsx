@@ -8,18 +8,23 @@ export function TermsPage() {
         <div className="legal-head">
           <p className="section-label">Legal</p>
           <h1>Terms of Service</h1>
-          <p className="legal-meta">Last updated: June 2026 · Questions? <a href="mailto:hello@kaana.in">hello@kaana.in</a></p>
+          <p className="legal-meta">Last updated: October 2026 · Questions? <a href="mailto:hello@kaana.in">hello@kaana.in</a></p>
+          <p className="legal-scope">
+            <strong>Bot IQ</strong> is a product operated by <strong>Kaana AI Technologies</strong>{' '}
+            (&quot;Kaana&quot;, &quot;we&quot;, &quot;us&quot;). These Terms of Service apply to the
+            Bot IQ platform and related Kaana services you access with your account.
+          </p>
         </div>
 
         <div className="legal-body">
           <section>
             <h2>1. Acceptance of terms</h2>
-            <p>By creating an account or using Kaana ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+            <p>By creating an account or using Bot IQ (&quot;the Service&quot;), you agree to be bound by these Terms of Service on behalf of yourself and your business. If you do not agree, do not use the Service.</p>
           </section>
 
           <section>
             <h2>2. Description of service</h2>
-            <p>Kaana provides WhatsApp automation tools including a bot builder, team inbox, CRM pipeline, and shareable mini-site, accessed through a multi-tenant SaaS platform. The Service connects to the Meta WhatsApp Business API on your behalf using credentials you provide.</p>
+            <p>Bot IQ provides WhatsApp automation tools including a bot builder, team inbox, message templates, CRM pipeline, and related features, accessed through Kaana&apos;s multi-tenant SaaS platform. The Service connects to the Meta WhatsApp Business Platform on your behalf using credentials you authorize (including Embedded Signup).</p>
           </section>
 
           <section>
@@ -34,7 +39,7 @@ export function TermsPage() {
 
           <section>
             <h2>5. WhatsApp Business API compliance</h2>
-            <p>Your use of WhatsApp features through Kaana is subject to Meta's Acceptable Use Policy and WhatsApp Business Policy. You are solely responsible for obtaining required opt-ins from your customers and for all messages sent from your number.</p>
+            <p>Your use of WhatsApp features through Bot IQ is subject to Meta&apos;s Acceptable Use Policy and WhatsApp Business Policy. You are solely responsible for obtaining required opt-ins from your customers and for all messages sent from your number.</p>
           </section>
 
           <section>
@@ -59,7 +64,7 @@ export function TermsPage() {
 
           <section>
             <h2>10. Limitation of liability</h2>
-            <p>To the maximum extent permitted by law, Kaana's liability is limited to the amount paid by you in the 30 days preceding the claim. We are not liable for indirect, incidental, or consequential damages.</p>
+            <p>To the maximum extent permitted by law, Kaana AI Technologies&apos; liability is limited to the amount paid by you in the 30 days preceding the claim. We are not liable for indirect, incidental, or consequential damages.</p>
           </section>
 
           <section>
