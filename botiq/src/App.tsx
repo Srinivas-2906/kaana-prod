@@ -49,7 +49,7 @@ export default function App() {
 
   return (
     <LoginGate>
-    <div className="app">
+    <div className="app" data-review={hideDemoViews ? '1' : undefined}>
       <Sidebar active={view} onNavigate={navigate} onAbout={() => setAboutOpen(true)} hideDemoViews={hideDemoViews} />
 
       <main className="main-panel">
