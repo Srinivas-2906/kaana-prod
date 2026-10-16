@@ -60,7 +60,7 @@ Write-Host "==> Managed SSL certificate"
 Write-Host "Add these domains to cert '$CertName' (GCP max ~100 domains per cert):"
 foreach ($d in $newCertDomains) { Write-Host "  - $d" }
 Write-Host ""
-Write-Host "Example (creates NEW cert if you hit update limits — then attach to HTTPS proxy):"
+Write-Host "Example (creates NEW cert if you hit update limits, then attach to HTTPS proxy):"
 Write-Host "  gcloud compute ssl-certificates create kaana-botiq-cert --domains=$($newCertDomains -join ',') --global"
 Write-Host ""
 Write-Host "After DNS + cert ACTIVE, redeploy platform/inbox/api with config/botiq-domains.json URLs."
